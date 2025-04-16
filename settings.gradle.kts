@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "jvm-library-template"
 include(":library")
+include(":kabinet")
+project(":kabinet").projectDir = file("../kabinet/library")

@@ -8,4 +8,8 @@ dependencies {
     testImplementation(kotlin("test"))
 
     implementation(libs.exposed.core)
+
+    implementation(libs.ktor.server.core.jvm)
+
+    implementation(project(":kabinet"))
 }
