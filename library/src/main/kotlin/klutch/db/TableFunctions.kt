@@ -58,6 +58,8 @@ fun <Id : Comparable<Id>, T : IdTable<Id>> T.readIdOrNull(
     .where { block(this@readIdOrNull) }
     .firstOrNull()?.let { it[this.id].value }
 
+fun <Id : Comparable<Id>, T : IdTable<Id>> T.readAll() = this.select(this.columns)
+
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.updateById(
     id: Id,
     block: T.(UpdateStatement) -> Unit

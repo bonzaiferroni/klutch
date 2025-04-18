@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
+import klutch.db.services.UserDtoService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 
@@ -18,6 +19,10 @@ fun ApplicationCall.testRole(role: String): Boolean {
 
 fun ApplicationCall.getUsername(): String {
     return this.getClaim(CLAIM_USERNAME)
+}
+
+suspend fun ApplicationCall.getUserId() = this.getClaim(CLAIM_USERNAME).let {
+    UserDtoService().readIdByUsername(it)
 }
 
 suspend inline fun <reified T: Any> ApplicationCall.okData(data: T) {
