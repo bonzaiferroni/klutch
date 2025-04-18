@@ -60,7 +60,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation"}
+androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
 jetbrains-compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
@@ -85,15 +85,15 @@ ktor-network-tls = { module = "io.ktor:ktor-network-tls", version.ref = "ktorNet
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 composeIcons-tablerIcons = { module = "br.com.devsrsouza.compose.icons:tabler-icons", version.ref = "composeIcons" }
-ktor-serialization-kotlinx-json-jvm = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
-ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
-ktor-server-auth-jwt-jvm = { module = "io.ktor:ktor-server-auth-jwt-jvm", version.ref = "ktor" }
+ktor-serialization-kotlinx-json-jvm = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor"  }
+ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor"  }
+ktor-server-auth-jwt-jvm = { module = "io.ktor:ktor-server-auth-jwt-jvm", version.ref = "ktor"  }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktorServerConfigYaml" }
-ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm" }
+ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor"  }
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktorServerCors" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktorServerHtmlBuilder" }
-ktor-server-netty-jvm = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-netty-jvm = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor"  }
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktorServerWebsockets" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logbackClassic" }
 ktor_client_js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }

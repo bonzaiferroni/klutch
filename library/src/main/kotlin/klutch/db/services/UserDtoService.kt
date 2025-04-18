@@ -1,4 +1,4 @@
-package klutch.server
+package klutch.db.services
 
 import kabinet.model.EditUserRequest
 import klutch.db.tables.UserTable
@@ -14,6 +14,9 @@ import kabinet.utils.validPassword
 import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
 import klutch.db.tables.UserAspect
+import klutch.server.generateUniqueSalt
+import klutch.server.hashPassword
+import klutch.server.toBase64
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
 import klutch.utils.toLocalDateTimeUtc

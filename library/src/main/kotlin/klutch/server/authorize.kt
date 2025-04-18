@@ -9,6 +9,8 @@ import kabinet.model.LoginRequest
 import klutch.db.tables.UserTable
 import kabinet.model.Auth
 import kabinet.utils.deobfuscate
+import klutch.db.services.RefreshTokenService
+import klutch.db.services.UserDtoService
 import klutch.utils.serverLog
 import java.security.SecureRandom
 import java.util.*

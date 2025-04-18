@@ -9,6 +9,7 @@ import kabinet.model.EditUserRequest
 import kabinet.model.SignUpRequest
 import klutch.utils.getClaim
 import kabinet.model.SignUpResult
+import klutch.db.services.UserDtoService
 
 fun Routing.serveUsers(service: UserDtoService = UserDtoService()) {
 

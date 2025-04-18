@@ -1,4 +1,4 @@
-package klutch.server
+package klutch.db.services
 
 import kotlinx.datetime.Clock
 import klutch.db.DbService
