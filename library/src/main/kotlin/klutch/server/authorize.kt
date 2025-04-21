@@ -10,45 +10,41 @@ import klutch.db.tables.UserTable
 import kabinet.model.Auth
 import kabinet.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
-import klutch.db.services.UserDtoService
+import klutch.db.services.UserApiService
 import klutch.utils.serverLog
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-suspend fun ApplicationCall.authorize(service: UserDtoService = UserDtoService()) {
+suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserApiService = UserApiService()): Auth? {
 
-    val loginRequest = this.receiveNullable<LoginRequest>() ?: return
     val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
     if (claimedUser == null) {
         serverLog.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
-        this.respond(HttpStatusCode.Unauthorized, "Invalid username")
-        return
+        throw InvalidLoginException("Invalid username")
     }
     loginRequest.password?.let {
         val givenPassword = it.deobfuscate()
         val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn)
         if (authInfo == null) {
             serverLog.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
-            return
+            throw InvalidLoginException("Invalid password")
         }
         serverLog.logInfo("authorize: password login by ${loginRequest.usernameOrEmail}")
-        this.respond(HttpStatusCode.OK, authInfo)
-        return
+        return authInfo
     }
     loginRequest.refreshToken?.let {
         val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn)
         if (authInfo == null) {
             serverLog.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
-            this.respond(HttpStatusCode.Unauthorized, "Invalid token")
-            return
+            throw InvalidLoginException("Invalid token")
         }
         serverLog.logInfo("authorize: session login by ${loginRequest.usernameOrEmail}")
         this.respond(HttpStatusCode.OK, authInfo)
-        return
+        return authInfo
     }
-    this.respond(HttpStatusCode.Unauthorized, "Missing password or token")
+    throw InvalidLoginException("Missing password and token")
 }
 
 suspend fun testPassword(claimedUser: User, givenPassword: String, stayLoggedIn: Boolean): Auth? {
@@ -127,3 +123,5 @@ fun ByteArray.toBase64(): String {
 fun String.base64ToByteArray(): ByteArray {
     return Base64.getDecoder().decode(this)
 }
+
+class InvalidLoginException(reason: String) : Exception(reason)

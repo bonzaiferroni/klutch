@@ -1,5 +1,6 @@
 package klutch.server
 
+import io.ktor.client.request.request
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -9,39 +10,45 @@ import kabinet.model.EditUserRequest
 import kabinet.model.SignUpRequest
 import klutch.utils.getClaim
 import kabinet.model.SignUpResult
-import klutch.db.services.UserDtoService
+import klutch.db.services.UserApiService
 
-fun Routing.serveUsers(service: UserDtoService = UserDtoService()) {
+fun Routing.serveUsers(service: UserApiService = UserApiService()) {
 
-    post(UserApi.Users.GetUser.path) {
-        val info = call.receive<SignUpRequest>()
+    post(UserApi.Create) { request, endpoint ->
         try {
-            service.createUser(info)
+            service.createUser(request)
+            SignUpResult(true, "User created.")
         } catch (e: IllegalArgumentException) {
-            println("serveUsers.createUser: ${e.message}")
-            call.respond(HttpStatusCode.OK, SignUpResult(false, e.message.toString()))
-            return@post
+            println("serveUsers.createUser fail: ${e.message}")
+            SignUpResult(false, e.message.toString())
         }
-        call.respond(status = HttpStatusCode.OK, SignUpResult(true, "User created."))
+    }
+
+    post(UserApi.Login) { request, endpoint ->
+        try {
+            call.authorize(request)
+        } catch (e: InvalidLoginException) {
+            call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
+            null
+        }
     }
 
     authenticateJwt {
-        get(UserApi.Users.GetUser.path) {
+        get(UserApi.ReadInfo) {
             val username = call.getClaim(CLAIM_USERNAME)
-            val userInfo = service.readUserDto(username)
-            call.respond(userInfo)
+            service.readUserDto(username)
         }
 
-        get(UserApi.Users.GetPrivateInfo) {
+        get(UserApi.PrivateInfo) {
             val username = call.getClaim(CLAIM_USERNAME)
             service.getPrivateInfo(username)
         }
 
-        put(UserApi.Users.GetUser.path) {
-            val username = call.getClaim(CLAIM_USERNAME)
-            val info = call.receive<EditUserRequest>()
-            service.updateUser(username, info)
-            call.respond(HttpStatusCode.OK, true)
-        }
+//        put(UserApi.Users.Update) {
+//            val username = call.getClaim(CLAIM_USERNAME)
+//            val info = call.receive<EditUserRequest>()
+//            service.updateUser(username, info)
+//            call.respond(HttpStatusCode.OK, true)
+//        }
     }
 }

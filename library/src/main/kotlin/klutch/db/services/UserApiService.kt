@@ -22,7 +22,7 @@ import klutch.utils.serverLog
 import klutch.utils.toLocalDateTimeUtc
 import org.jetbrains.exposed.sql.*
 
-class UserDtoService : DbService() {
+class UserApiService : DbService() {
 
     private fun readByUsername(username: String): DbUser? =
         UserAspect.readFirst { UserTable.username.lowerCase() eq username.lowercase() }
@@ -43,6 +43,7 @@ class UserDtoService : DbService() {
     suspend fun readUserDto(username: String): User {
         val user = readByUsernameOrEmail(username) ?: throw IllegalArgumentException("User not found")
         return User(
+            id = user.id,
             username = user.username,
             roles = user.roles,
             avatarUrl = user.avatarUrl,
@@ -52,6 +53,7 @@ class UserDtoService : DbService() {
     }
 
     suspend fun createUser(info: SignUpRequest) = dbQuery {
+        serverLog.logInfo("Creating user: ${info.username}")
         validateUsername(info)
         validateEmail(info)
         validatePassword(info)
@@ -60,7 +62,7 @@ class UserDtoService : DbService() {
         val passwordHashed = hashPassword(info.password, uniqueSalt)
         val now = Clock.System.now()
 
-        UserTable.insert {
+        UserTable.insertAndGetId {
             it[name] = info.name
             it[username] = info.username
             it[hashedPassword] = passwordHashed
@@ -69,7 +71,7 @@ class UserDtoService : DbService() {
             it[roles] = listOf(UserRole.USER.name)
             it[createdAt] = now.toLocalDateTimeUtc()
             it[updatedAt] = now.toLocalDateTimeUtc()
-        }
+        }.value
     }
 
     private fun validateUsername(info: SignUpRequest) {

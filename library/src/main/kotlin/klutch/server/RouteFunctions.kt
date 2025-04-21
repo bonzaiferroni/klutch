@@ -30,17 +30,20 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(sentValue, endpoint) }
 }
 
-suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?): Unit =
+suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
     try {
         val value = block()
         if (value != null) {
             call.respond(HttpStatusCode.OK, value)
-        } else {
+        } else if (!call.response.isCommitted) {
             call.respond(HttpStatusCode.NotFound)
         }
     } catch (e: MissingParameterException) {
         call.respond(HttpStatusCode.BadRequest, "Missing required parameter: ${e.param}")
+    } catch (e: UnauthorizedUserException) {
+        call.respond(HttpStatusCode.Forbidden, e.message ?: "Request unauthorized for this user")
     }
+}
 
 fun <T> EndpointParam<T>.readFromCallOrNull(call: RoutingCall): T? {
     val str = call.request.queryParameters[this.key] ?: return null
@@ -57,3 +60,5 @@ fun ApplicationCall.getIdOrThrow() = getIdOrThrow { it.toIntOrNull() }
 fun <T: Any> ApplicationCall.getIdOrThrow(convertId: (String) -> T?): T {
     return this.parameters["id"]?.let { convertId(it) } ?: throw IllegalArgumentException("Id not found")
 }
+
+class UnauthorizedUserException(override val message: String? = null) : Exception()
