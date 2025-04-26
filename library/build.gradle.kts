@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.logback.classic)
 
     implementation("org.postgresql:postgresql:42.7.3")
+    implementation("com.pgvector:pgvector:0.1.6")
 
     implementation(project(":kabinet"))
 }
