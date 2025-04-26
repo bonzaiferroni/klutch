@@ -1,0 +1,33 @@
+package klutch.db
+
+import klutch.environment.Environment
+import klutch.utils.dbLog
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.transaction
+
+fun initDb(env: Environment, tables: List<Table>) {
+    dbLog.logInfo("initializing db")
+    val db = connectDb(env)
+
+    transaction(db) {
+        SchemaUtils.create(*tables.toTypedArray())
+    }
+
+    runBlocking {
+        initUsers()
+    }
+}
+
+fun connectDb(env: Environment) = Database.connect(
+    url = "jdbc:postgresql://localhost:5432/${env.read(DB_NAME_KEY)}",
+    driver = "org.postgresql.Driver",
+    user = env.read(DB_USER_KEY),
+    password = env.read(DB_PASSWORD_KEY)
+)
+
+const val DB_USER_KEY = "DB_USER"
+const val DB_NAME_KEY = "DB_NAME"
+const val DB_PASSWORD_KEY = "DB_PW"

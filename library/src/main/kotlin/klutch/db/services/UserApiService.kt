@@ -52,7 +52,10 @@ class UserApiService : DbService() {
         )
     }
 
-    suspend fun createUser(info: SignUpRequest) = dbQuery {
+    suspend fun createUser(
+        info: SignUpRequest,
+        userRoles: List<String> = listOf(UserRole.USER.name),
+    ) = dbQuery {
         serverLog.logInfo("Creating user: ${info.username}")
         validateUsername(info)
         validateEmail(info)
@@ -68,7 +71,7 @@ class UserApiService : DbService() {
             it[hashedPassword] = passwordHashed
             it[salt] = uniqueSalt.toBase64()
             it[email] = info.email
-            it[roles] = listOf(UserRole.USER.name)
+            it[roles] = userRoles
             it[createdAt] = now.toLocalDateTimeUtc()
             it[updatedAt] = now.toLocalDateTimeUtc()
         }.value
@@ -106,7 +109,7 @@ class UserApiService : DbService() {
             UserTable.deleteWhere { UserTable.username.eqLowercase(username) }
         } else {
             serverLog.logInfo("UserService: Updating user $username")
-            UserTable.update({ UserTable.username.eqLowercase(username)}) {
+            UserTable.update({ UserTable.username.eqLowercase(username) }) {
                 it[name] = info.name
                 if (info.deleteName) it[name] = null
                 it[email] = info.email

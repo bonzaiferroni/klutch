@@ -30,6 +30,22 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(sentValue, endpoint) }
 }
 
+inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.update(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
+) = put(endpoint.path) {
+    val sentValue = call.receive<Sent>()
+    standardResponse { block(sentValue, endpoint) }
+}
+
+inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.delete(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
+) = delete(endpoint.path) {
+    val sentValue = call.receive<Sent>()
+    standardResponse { block(sentValue, endpoint) }
+}
+
 suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
     try {
         val value = block()

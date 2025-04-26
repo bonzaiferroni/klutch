@@ -23,7 +23,7 @@ class UserInitService: DbService() {
 				it[this.hashedPassword] = user.hashedPassword
 				it[this.salt] = user.salt
 				it[this.email] = user.email
-				it[this.roles] = user.roles.map { it.name }
+				it[this.roles] = user.roles.map { role -> role.name }
 				it[this.avatarUrl] = user.avatarUrl
 				it[this.createdAt] = user.createdAt.toLocalDateTime(TimeZone.Companion.UTC)
 				it[this.updatedAt] = Clock.System.now().toLocalDateTimeUtc()
