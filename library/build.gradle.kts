@@ -6,13 +6,20 @@ plugins {
 dependencies {
     implementation(kotlin("stdlib"))
     testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("io.ktor:ktor-client-mock:3.1.0")
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.cbor)
 
     implementation(libs.ktor.server.core.jvm)
     implementation(libs.ktor.serialization.kotlinx.json.jvm)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation.jvm)
+    implementation(libs.ktor.client.content.negotiation)
+
+    implementation(libs.ktor.client.cio)
 
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
