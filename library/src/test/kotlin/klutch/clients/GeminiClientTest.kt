@@ -12,7 +12,7 @@ import kotlin.test.*
 
 /**
  * Arr, this be a test class for the GeminiClient extension functions.
- * We be testin' the generateEmbeddings and requestJson functions to make sure
+ * We be testin' the generateEmbeddings and generateJson functions to make sure
  * they be returnin' proper treasure when the response be successful.
  */
 class GeminiClientTest {
@@ -137,7 +137,7 @@ class GeminiClientTest {
 
         // Execute the function
         runTest {
-            val result = geminiClient.requestJson<TestResponse>(maxAttempts = 1, "Give me a test response")
+            val result = geminiClient.generateJson<TestResponse>(maxAttempts = 1, "Give me a test response")
 
             // Verify result
             assertNotNull(result, "JSON result should not be null")

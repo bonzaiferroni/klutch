@@ -4,31 +4,51 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.request.url
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import klutch.log.LogLevel
-import kotlinx.coroutines.delay
-import kotlinx.datetime.*
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.StructureKind
-import kotlinx.serialization.descriptors.elementDescriptors
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.seconds
 
 class GeminiClient(
-    val limitedToken: String,
-    val unlimitedToken: String? = null,
+    val token: String,
     val model: String = "gemini-1.5-flash",
     val client: HttpClient = ktorClient,
-    val logMessage: (String, LogLevel, String) -> Unit
+    val logMessage: (LogLevel, String) -> Unit
 ) {
-    var unlimitedUntil: Instant = Instant.DISTANT_PAST
-    var restingUntil: Instant = Instant.DISTANT_PAST
+    suspend inline fun <reified T> tryRequest(requestBlock: suspend () -> GeminiApiRequest<T>): HttpResponse? {
+        try {
+            val request = requestBlock()
+            val model = request.model ?: model
+            val url = "https://generativelanguage.googleapis.com/v1beta/models/$model:${request.method}?key=$token"
+            val ktorRequest = HttpRequestBuilder().apply {
+                method = HttpMethod.Post
+                url(url)
+                contentType(ContentType.Application.Json)
+                setBody(request.body)
+            }
+            return client.request(ktorRequest)
+        } catch (e: HttpRequestTimeoutException) {
+            logMessage(LogLevel.ERROR, "Request timed out")
+        } catch (e: NoTransformationFoundException) {
+            logMessage(LogLevel.ERROR, "no transformation? 😕\n${e.message}")
+        } catch (e: Exception) {
+            logMessage(LogLevel.ERROR, "generateJson exception:\n${e.message}")
+        }
+        return null
+    }
 }
+
+data class GeminiApiResponse<T>(
+    val status: HttpStatusCode?,
+    val data: T?
+)
+
+data class GeminiApiRequest<T>(
+    val method: String,
+    val body: T,
+    val model: String? = null
+)
 
 @Serializable
 data class GeminiRequest(

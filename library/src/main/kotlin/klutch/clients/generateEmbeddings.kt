@@ -11,25 +11,18 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 suspend fun GeminiClient.generateEmbeddings(text: String): FloatArray? {
-    val url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent" +
-            "?key=$limitedToken"
-    val request = GeminiEmbeddingRequest(
-        content = GeminiContent(parts = listOf(GeminiRequestText(text))),
-        taskType = EmbeddingTaskType.SEMANTIC_SIMILARITY
-    )
-    val response = client.post(url) {
-        contentType(ContentType.Application.Json)
-        setBody(request)
+    val response = tryRequest {
+        val request = GeminiEmbeddingRequest(
+            content = GeminiContent(parts = listOf(GeminiRequestText(text))),
+            taskType = EmbeddingTaskType.SEMANTIC_SIMILARITY
+        )
+        GeminiApiRequest("text-embedding-004:embedContent", request)
     }
-    if (response.status == HttpStatusCode.OK) {
+    if (response?.status == HttpStatusCode.OK) {
         return response.body<GeminiEmbeddingResponse>()
             .embedding.values
     } else {
-        logMessage(
-            "GeminiClient",
-            LogLevel.ERROR,
-            "failed:\n${response.body<JsonObject>()}"
-        )
+        logMessage(LogLevel.ERROR, "failed:\n${response?.body<JsonObject>()}")
     }
     return null
 }
