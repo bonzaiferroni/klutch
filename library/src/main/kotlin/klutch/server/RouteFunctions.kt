@@ -14,11 +14,12 @@ fun <Returned, E : Endpoint<Returned>> Route.get(
     standardResponse { block(endpoint) }
 }
 
-fun <Returned, E : GetByIdEndpoint<Returned>> Route.getById(
+fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.getById(
     endpoint: E,
-    block: suspend RoutingContext.(Long, E) -> Returned?
+    convertId: (String) -> IdType,
+    block: suspend RoutingContext.(IdType, E) -> Returned?
 ) = get(endpoint.serverIdTemplate) {
-    val id = call.getIdOrThrow { it.toLongOrNull() }
+    val id = call.getIdOrThrow(convertId)
     standardResponse { block(id, endpoint) }
 }
 
