@@ -20,7 +20,7 @@ suspend inline fun <reified Received> GeminiClient.generateJson(
 ): Received? {
     val response = tryRequest {
         val request = GeminiRequest(
-            contents = parts.map { GeminiContent("user", listOf(GeminiRequestText(it))) },
+            contents = parts.map { GeminiContent("user", listOf(GeminiPart(it))) },
             generationConfig = GenerationConfig(
                 responseMimeType = "application/json",
                 responseSchema = generateJsonSchema<Received>()

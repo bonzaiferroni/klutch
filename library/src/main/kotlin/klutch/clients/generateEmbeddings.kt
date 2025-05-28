@@ -1,11 +1,7 @@
 package klutch.clients
 
 import io.ktor.client.call.body
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
 import klutch.log.LogLevel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -13,7 +9,7 @@ import kotlinx.serialization.json.JsonObject
 suspend fun GeminiClient.generateEmbeddings(text: String): FloatArray? {
     val response = tryRequest {
         val request = GeminiEmbeddingRequest(
-            content = GeminiContent(parts = listOf(GeminiRequestText(text))),
+            content = GeminiContent(parts = listOf(GeminiPart(text))),
             taskType = EmbeddingTaskType.SEMANTIC_SIMILARITY
         )
         GeminiApiRequest("text-embedding-004:embedContent", request)

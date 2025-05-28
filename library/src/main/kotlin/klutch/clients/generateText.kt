@@ -4,7 +4,6 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kabinet.clients.GeminiMessage
 import kabinet.clients.GeminiRole
-import kotlinx.serialization.json.Json
 
 suspend fun GeminiClient.generateText(
     contents: List<GeminiContent>
@@ -27,12 +26,12 @@ suspend fun GeminiClient.generateTextFromMessages(
 
 suspend fun GeminiClient.generateTextFromParts(
     vararg parts: String
-) = generateText(parts.map { GeminiContent("user", listOf(GeminiRequestText(it))) })
+) = generateText(parts.map { GeminiContent("user", listOf(GeminiPart(it))) })
 
 fun GeminiMessage.toGeminiContent() = GeminiContent(
     role = when (role) {
         GeminiRole.User -> "user"
         GeminiRole.Assistant -> "model"
     },
-    parts = listOf(GeminiRequestText(message))
+    parts = listOf(GeminiPart(message))
 )

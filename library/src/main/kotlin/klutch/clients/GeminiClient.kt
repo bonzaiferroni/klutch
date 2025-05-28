@@ -59,11 +59,18 @@ data class GeminiRequest(
 @Serializable
 data class GeminiContent(
     val role: String? = null,
-    val parts: List<GeminiRequestText>,
+    val parts: List<GeminiPart>,
 )
 
 @Serializable
-data class GeminiRequestText(
-    val text: String
+data class GeminiPart(
+    val text: String? = null,
+    val inlineData: GeminiBlob? = null,
+)
+
+@Serializable
+data class GeminiBlob(
+    val mimeType: String? = null,
+    val data: String, //  (bytes format) Raw bytes for media formats. A base64-encoded string.
 )
 

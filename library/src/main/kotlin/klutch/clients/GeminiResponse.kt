@@ -37,10 +37,10 @@ data class PromptTokenDetails(
 data class GenerationConfig(
     val stopSequences: List<String>? = null,
     @SerialName("response_mime_type")
-    val responseMimeType: String,
+    val responseMimeType: String? = null,
     @SerialName("response_schema")
     val responseSchema: JsonElement? = null,
-    val responseModalities: List<Modality>? = null,
+    val responseModalities: List<String>? = null,
     val candidateCount: Int? = null,
     val maxOutputTokens: Int? = null,
     val temperature: Double? = null,
