@@ -7,14 +7,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import kabinet.api.*
 
-fun <Returned, E : Endpoint<Returned>> Route.get(
+fun <Returned, E : GetEndpoint<Returned>> Route.get(
     endpoint: E,
     block: suspend RoutingContext.(E) -> Returned?
 ) = get(endpoint.path) {
     standardResponse { block(endpoint) }
 }
 
-fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.getById(
+fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.get(
     endpoint: E,
     convertId: (String) -> IdType,
     block: suspend RoutingContext.(IdType, E) -> Returned?
