@@ -62,13 +62,13 @@ suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
     }
 }
 
-fun <T> EndpointParam<T>.readFromCallOrNull(call: RoutingCall): T? {
+fun <T> EndpointParam<T>.readParamOrNull(call: RoutingCall): T? {
     val str = call.request.queryParameters[this.key] ?: return null
     return this.read(str)
 }
 
-fun <T> EndpointParam<T>.readFromCall(call: RoutingCall): T =
-    this.readFromCallOrNull(call) ?: throw MissingParameterException(this.key)
+fun <T> EndpointParam<T>.readParam(call: RoutingCall): T =
+    this.readParamOrNull(call) ?: throw MissingParameterException(this.key)
 
 class MissingParameterException(val param: String) : Exception("Missing required parameter: $param")
 
