@@ -32,6 +32,13 @@ fun <T : Table> T.readFirst(
     .where { block(this@readFirst) }
     .first()
 
+fun <T : Table, C> T.readColumn(
+    column: Column<C>,
+    block: SqlExpressionBuilder.(T) -> Op<Boolean>
+) = this.select(column)
+    .where { block(this@readColumn) }
+    .map { it[column] }
+
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.readById(
     id: Id,
     columns: List<Column<*>> = this.columns,
