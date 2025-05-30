@@ -18,6 +18,20 @@ fun <T : Table> T.read(
 ) = this.select(columns)
     .where { block(this@read) }
 
+fun <T : Table> T.readSingleOrNull(
+    columns: List<Column<*>> = this.columns,
+    block: SqlExpressionBuilder.(T) -> Op<Boolean>
+) = this.select(columns)
+    .where { block(this@readSingleOrNull) }
+    .singleOrNull()
+
+fun <T : Table> T.readSingle(
+    columns: List<Column<*>> = this.columns,
+    block: SqlExpressionBuilder.(T) -> Op<Boolean>
+) = this.select(columns)
+    .where { block(this@readSingle) }
+    .single()
+
 fun <T : Table> T.readFirstOrNull(
     columns: List<Column<*>> = this.columns,
     block: SqlExpressionBuilder.(T) -> Op<Boolean>
@@ -38,6 +52,13 @@ fun <T : Table, C> T.readColumn(
 ) = this.select(column)
     .where { block(this@readColumn) }
     .map { it[column] }
+
+fun <T : Table, C> T.readCount(
+    column: Column<C>,
+    block: SqlExpressionBuilder.(T) -> Op<Boolean>
+) = this.select(column)
+    .where { block(this@readCount) }
+    .count().toInt()
 
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.readById(
     id: Id,
