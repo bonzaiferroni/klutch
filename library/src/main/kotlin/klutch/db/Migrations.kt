@@ -1,5 +1,6 @@
 package klutch.db
 
+import klutch.environment.Environment
 import klutch.environment.readEnvFromPath
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
@@ -9,13 +10,13 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 
-fun generateMigrationScript(tables: List<Table>) {
-	migrate("../test", false, tables)
-	migrate("", true, tables)
+fun generateMigrationScript(env: Environment, tables: List<Table>) {
+	migrate("../test", false, env, tables)
+	migrate("", true, env, tables)
 }
 
 @OptIn(ExperimentalDatabaseMigrationApi::class)
-private fun migrate(protocol: String, applyMigration: Boolean, tables: List<Table>) {
+private fun migrate(protocol: String, applyMigration: Boolean, env: Environment, tables: List<Table>) {
 	val folder = File("$MIGRATIONS_DIRECTORY/$protocol")
 	if (!folder.exists()) folder.mkdirs()
 	val file = folder.listFiles()?.firstNotNullOfOrNull {
@@ -25,7 +26,6 @@ private fun migrate(protocol: String, applyMigration: Boolean, tables: List<Tabl
 	} ?: return
 
 	val name = file.name
-	val env = readEnvFromPath()
 
 	val isBaseline = folder.listFiles()?.count { it.isFile && it.name.endsWith(".sql") } == 0
 	val db = Database.connect(

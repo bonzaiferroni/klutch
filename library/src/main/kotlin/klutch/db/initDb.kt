@@ -22,12 +22,12 @@ fun initDb(env: Environment, tables: List<Table>) {
 }
 
 fun connectDb(env: Environment) = Database.connect(
-    url = "jdbc:postgresql://localhost:5432/${env.read(DB_NAME_KEY)}",
+    url = env.read(DB_URL_KEY),
     driver = "org.postgresql.Driver",
     user = env.read(DB_USER_KEY),
     password = env.read(DB_PASSWORD_KEY)
 )
 
 const val DB_USER_KEY = "DB_USER"
-const val DB_NAME_KEY = "DB_NAME"
+const val DB_URL_KEY = "DB_URL"
 const val DB_PASSWORD_KEY = "DB_PW"

@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
@@ -53,10 +54,9 @@ fun <T : Table, C> T.readColumn(
     .where { block(this@readColumn) }
     .map { it[column] }
 
-fun <T : Table, C> T.readCount(
-    column: Column<C>,
+fun <T : Table> T.readCount(
     block: SqlExpressionBuilder.(T) -> Op<Boolean>
-) = this.select(column)
+) = this.selectAll()
     .where { block(this@readCount) }
     .count().toInt()
 
