@@ -54,6 +54,13 @@ fun <T : Table, C> T.readColumn(
     .where { block(this@readColumn) }
     .map { it[column] }
 
+fun <T : Table, C> T.readValue(
+    column: Column<C>,
+    block: SqlExpressionBuilder.(T) -> Op<Boolean>
+) = this.select(column)
+    .where { block(this@readValue) }
+    .single()[column]
+
 fun <T : Table> T.readCount(
     block: SqlExpressionBuilder.(T) -> Op<Boolean>
 ) = this.selectAll()
