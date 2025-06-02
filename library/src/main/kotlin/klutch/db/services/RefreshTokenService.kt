@@ -5,7 +5,7 @@ import klutch.db.DbService
 import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
-import klutch.utils.epochSecondsNow
+import kabinet.utils.epochSecondsNow
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 

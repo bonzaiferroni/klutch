@@ -1,9 +1,10 @@
 package klutch.db.tables
 
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
-object UserTable : LongIdTable("user") {
+object UserTable : UUIDTable("user") {
     val name = text("name").nullable()
     val username = text("username")
     val hashedPassword = text("hashed_password")

@@ -1,7 +1,7 @@
 package klutch.db.model
 
 import kotlinx.datetime.Clock
-import klutch.utils.epochSecondsNow
+import kabinet.utils.epochSecondsNow
 
 data class RefreshToken(
     val id: Long,
