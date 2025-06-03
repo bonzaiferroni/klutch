@@ -6,6 +6,7 @@ import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kabinet.utils.epochSecondsNow
+import klutch.utils.toUUID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -16,13 +17,13 @@ class RefreshTokenService : DbService() {
             .firstOrNull()?.toSessionToken()
     }
 
-    suspend fun createToken(userId: Long, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
+    suspend fun createToken(userId: String, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
         val requestedTTL = when(stayLoggedIn) {
             true -> REFRESH_TOKEN_LONG_TTL
             false -> REFRESH_TOKEN_TEMP_TTL
         }
         RefreshTokenTable.insert {
-            it[user] = userId
+            it[user] = userId.toUUID()
             it[token] = generatedToken
             it[createdAt] = Clock.epochSecondsNow()
             it[ttl] = requestedTTL

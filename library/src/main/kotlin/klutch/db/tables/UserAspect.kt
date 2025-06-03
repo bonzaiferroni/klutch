@@ -2,8 +2,8 @@ package klutch.db.tables
 
 import klutch.db.Aspect
 import kabinet.model.UserRole
+import kabinet.utils.toInstantUtc
 import klutch.db.model.User
-import klutch.utils.toInstantUtc
 import org.jetbrains.exposed.sql.ResultRow
 
 object UserAspect: Aspect<UserAspect, User>(
@@ -23,7 +23,7 @@ object UserAspect: Aspect<UserAspect, User>(
 }
 
 fun ResultRow.toUser() = User(
-    id = this[UserAspect.id].value,
+    id = this[UserAspect.id].value.toString(),
     name = this[UserAspect.name],
     username = this[UserAspect.username],
     hashedPassword = this[UserAspect.hashedPassword],

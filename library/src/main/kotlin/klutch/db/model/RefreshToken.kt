@@ -5,7 +5,7 @@ import kabinet.utils.epochSecondsNow
 
 data class RefreshToken(
     val id: Long,
-    val userId: Long,
+    val userId: String,
     val token: String,
     val createdAt: Long,
     val ttl: Int,

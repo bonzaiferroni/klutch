@@ -22,7 +22,7 @@ fun ApplicationCall.getUsername(): String {
 }
 
 suspend fun ApplicationCall.getUserId() = this.getClaim(CLAIM_USERNAME).let {
-    UserApiService().readIdByUsername(it)
+    UserApiService().readIdByUsername(it).toString()
 }
 
 suspend inline fun <reified T: Any> ApplicationCall.okData(data: T) {

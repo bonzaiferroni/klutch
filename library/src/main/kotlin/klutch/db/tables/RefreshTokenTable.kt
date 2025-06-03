@@ -24,7 +24,7 @@ object RefreshTokenTable : LongIdTable("refresh_token") {
 
 fun ResultRow.toSessionToken() = RefreshToken(
     id = this[RefreshTokenTable.id].value,
-    userId = this[RefreshTokenTable.user].value,
+    userId = this[RefreshTokenTable.user].value.toString(),
     token = this[RefreshTokenTable.token],
     createdAt = this[RefreshTokenTable.createdAt],
     ttl = this[RefreshTokenTable.ttl],

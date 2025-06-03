@@ -1,9 +1,9 @@
 package klutch.db.services
 
+import kabinet.utils.toLocalDateTimeUtc
 import klutch.db.DbService
 import klutch.db.model.User
 import klutch.db.tables.UserTable
-import klutch.utils.toLocalDateTimeUtc
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

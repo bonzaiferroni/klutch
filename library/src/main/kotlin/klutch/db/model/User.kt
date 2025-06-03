@@ -7,7 +7,7 @@ import kabinet.model.PrivateInfo
 
 @Serializable
 data class User(
-    val id: Long = 0,
+    val id: String = "",
     val name: String? = "",
     val username: String = "",
     val hashedPassword: String = "",
