@@ -9,10 +9,11 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import klutch.log.LogLevel
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 class GeminiClient(
     val token: String,
-    val model: String = "gemini-1.5-flash",
+    val model: String = "gemini-2.5-flash",
     val client: HttpClient = ktorClient,
     val logMessage: (LogLevel, String) -> Unit
 ) {
@@ -27,7 +28,11 @@ class GeminiClient(
                 contentType(ContentType.Application.Json)
                 setBody(request.body)
             }
-            return client.request(ktorRequest)
+            val response = client.request(ktorRequest)
+            if (response.status != HttpStatusCode.OK) {
+                logMessage(LogLevel.ERROR, "Error generating Json:\n${response.body<JsonObject>()}")
+            }
+            return response
         } catch (e: HttpRequestTimeoutException) {
             logMessage(LogLevel.ERROR, "Request timed out")
         } catch (e: NoTransformationFoundException) {

@@ -2,6 +2,7 @@ package klutch.clients
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
+import klutch.log.LogLevel
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -26,7 +27,7 @@ suspend inline fun <reified Received> GeminiClient.generateJson(
                 responseSchema = generateJsonSchema<Received>()
             )
         )
-        GeminiApiRequest("$model:generateContent", request)
+        GeminiApiRequest("generateContent", request, "gemini-1.5-flash")
     }
 
     if (response?.status == HttpStatusCode.OK) {
