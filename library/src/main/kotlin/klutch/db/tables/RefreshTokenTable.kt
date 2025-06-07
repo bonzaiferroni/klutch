@@ -2,6 +2,7 @@ package klutch.db.tables
 
 import klutch.db.tables.UserTable
 import klutch.db.model.RefreshToken
+import klutch.utils.toStringId
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.ResultRow
@@ -24,7 +25,7 @@ object RefreshTokenTable : LongIdTable("refresh_token") {
 
 fun ResultRow.toSessionToken() = RefreshToken(
     id = this[RefreshTokenTable.id].value,
-    userId = this[RefreshTokenTable.user].value.toString(),
+    userId = this[RefreshTokenTable.user].value.toStringId(),
     token = this[RefreshTokenTable.token],
     createdAt = this[RefreshTokenTable.createdAt],
     ttl = this[RefreshTokenTable.ttl],

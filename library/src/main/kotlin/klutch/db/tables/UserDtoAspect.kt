@@ -4,6 +4,7 @@ import klutch.db.Aspect
 import kabinet.model.UserRole
 import kabinet.model.User
 import kabinet.utils.toInstantUtc
+import klutch.utils.toStringId
 import org.jetbrains.exposed.sql.ResultRow
 
 object UserDtoAspect : Aspect<UserDtoAspect, User>(
@@ -19,7 +20,7 @@ object UserDtoAspect : Aspect<UserDtoAspect, User>(
 }
 
 fun ResultRow.toUserDto() = User(
-    id = this[UserDtoAspect.id].value.toString(),
+    id = this[UserDtoAspect.id].value.toStringId(),
     username = this[UserDtoAspect.username],
     roles = this[UserDtoAspect.roles].map { UserRole.valueOf(it) }.toSet(),
     avatarUrl = this[UserDtoAspect.avatarUrl],
