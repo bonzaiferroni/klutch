@@ -9,6 +9,7 @@ import kabinet.model.User
 import klutch.db.model.User as DbUser
 import kabinet.model.PrivateInfo
 import kabinet.model.SignUpRequest
+import kabinet.utils.randomUuidStringId
 import kabinet.utils.toLocalDateTimeUtc
 import kabinet.utils.validEmail
 import kabinet.utils.validPassword
@@ -19,6 +20,7 @@ import klutch.server.generateUniqueSalt
 import klutch.server.hashPassword
 import klutch.server.toBase64
 import klutch.utils.eqLowercase
+import klutch.utils.fromStringId
 import klutch.utils.serverLog
 import org.jetbrains.exposed.sql.*
 
@@ -66,6 +68,7 @@ class UserApiService : DbService() {
         val now = Clock.System.now()
 
         UserTable.insertAndGetId {
+            it[id] = randomUuidStringId().fromStringId()
             it[name] = info.name
             it[username] = info.username
             it[hashedPassword] = passwordHashed
