@@ -3,7 +3,7 @@ package klutch.db.tables
 import klutch.db.Aspect
 import kabinet.model.UserRole
 import kabinet.model.User
-import kabinet.utils.toInstantUtc
+import kabinet.utils.toInstantFromUtc
 import klutch.utils.toStringId
 import org.jetbrains.exposed.sql.ResultRow
 
@@ -24,7 +24,7 @@ fun ResultRow.toUserDto() = User(
     username = this[UserDtoAspect.username],
     roles = this[UserDtoAspect.roles].map { UserRole.valueOf(it) }.toSet(),
     avatarUrl = this[UserDtoAspect.avatarUrl],
-    createdAt = this[UserDtoAspect.createdAt].toInstantUtc(),
-    updatedAt = this[UserDtoAspect.updatedAt].toInstantUtc(),
+    createdAt = this[UserDtoAspect.createdAt].toInstantFromUtc(),
+    updatedAt = this[UserDtoAspect.updatedAt].toInstantFromUtc(),
 )
 
