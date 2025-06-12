@@ -15,16 +15,19 @@ import kotlin.time.Duration.Companion.seconds
 
 class GeminiClient(
     val token: String,
+    val backupToken: String? = null,
     val model: String = "gemini-2.5-flash",
     val client: HttpClient = ktorClient,
     val logMessage: (LogLevel, String) -> Unit
 ) {
     suspend inline fun <reified T> tryRequest(requestBlock: suspend () -> GeminiApiRequest<T>): HttpResponse? {
+        var usedToken = token
         repeat(3) {
             try {
                 val request = requestBlock()
                 val model = request.model ?: model
-                val url = "https://generativelanguage.googleapis.com/v1beta/models/$model:${request.method}?key=$token"
+                println(usedToken)
+                val url = generateUrl(model, request.method, usedToken)
                 val ktorRequest = HttpRequestBuilder().apply {
                     method = HttpMethod.Post
                     url(url)
@@ -32,6 +35,11 @@ class GeminiClient(
                     setBody(request.body)
                 }
                 val response = client.request(ktorRequest)
+                if (response.status == HttpStatusCode.TooManyRequests) {
+                    usedToken = backupToken ?: return null
+                    println("Too many request, trying backup token")
+                    return@repeat
+                }
                 if (response.status == HttpStatusCode.InternalServerError) {
                     println("Internal server error, delaying")
                     delay(10.seconds)
@@ -54,6 +62,9 @@ class GeminiClient(
         }
         return null
     }
+
+    fun generateUrl(model: String, method: String, token: String) =
+        "https://generativelanguage.googleapis.com/v1beta/models/$model:$method?key=$token"
 }
 
 data class GeminiApiResponse<T>(

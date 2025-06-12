@@ -9,7 +9,16 @@ suspend fun GeminiClient.generateImage(
 ): String? {
     val response = tryRequest {
         val request = GeminiRequest(
-            contents = listOf(GeminiContent("user", listOf(GeminiPart(text)))),
+            contents = listOf(
+                GeminiContent(
+                    role = "user",
+                    parts = listOf(
+                        GeminiPart(
+                            text = text
+                        )
+                    )
+                )
+            ),
             generationConfig = GenerationConfig(
                 responseModalities = listOf("TEXT", "IMAGE")
             )
@@ -19,7 +28,7 @@ suspend fun GeminiClient.generateImage(
 
     if (response?.status == HttpStatusCode.OK) {
         return response.body<GeminiResponse>().candidates.firstOrNull()?.content?.parts
-            ?.firstOrNull() { it.inlineData != null}?.inlineData?.data
+            ?.firstOrNull() { it.inlineData != null }?.inlineData?.data
     } else {
         return null
     }
