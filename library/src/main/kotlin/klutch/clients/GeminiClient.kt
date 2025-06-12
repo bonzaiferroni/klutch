@@ -26,7 +26,6 @@ class GeminiClient(
             try {
                 val request = requestBlock()
                 val model = request.model ?: model
-                println(usedToken)
                 val url = generateUrl(model, request.method, usedToken)
                 val ktorRequest = HttpRequestBuilder().apply {
                     method = HttpMethod.Post
@@ -36,8 +35,9 @@ class GeminiClient(
                 }
                 val response = client.request(ktorRequest)
                 if (response.status == HttpStatusCode.TooManyRequests) {
+                    println("Too many request")
                     usedToken = backupToken ?: return null
-                    println("Too many request, trying backup token")
+                    println("trying backup token")
                     return@repeat
                 }
                 if (response.status == HttpStatusCode.InternalServerError) {

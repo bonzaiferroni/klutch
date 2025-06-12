@@ -5,14 +5,16 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.JsonObject
 
 suspend fun GeminiClient.generateSpeech(
-    text: String
+    text: String,
+    theme: String?,
+    voice: String?,
 ): String? {
     val response = tryRequest {
         val request = GeminiRequest(
             contents = listOf(GeminiContent(
                 parts = listOf(
                     GeminiPart(
-                        text = "Say: $text"
+                        text = "${theme ?: "Say"}: $text"
                     ))
             )),
             generationConfig = GenerationConfig(
@@ -20,13 +22,13 @@ suspend fun GeminiClient.generateSpeech(
                 speechConfig = SpeechConfig(
                     voiceConfig = VoiceConfig(
                         prebuiltVoiceConfig = PrebuiltVoiceConfig(
-                            voiceName = "Kore"
+                            voiceName = voice ?: "Kore"
                         )
                     )
                 )
             )
         )
-        GeminiApiRequest("generateContent", request, "gemini-2.5-pro-preview-tts")
+        GeminiApiRequest("generateContent", request, "gemini-2.5-flash-preview-tts")
     }
 
     if (response?.status == HttpStatusCode.OK) {
