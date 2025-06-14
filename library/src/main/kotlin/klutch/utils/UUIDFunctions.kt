@@ -18,5 +18,8 @@ fun Pair<Long, Long>.toUuid(): UUID =
 fun UUID.toStringId() = toLongPair().let { "${it.first.toBase62()}-${it.second.toBase62()}" }
 
 fun String.fromStringId() = this.split("-")
-    .let { it[0].fromBase62() to it[1].fromBase62() }
+    .let {
+        if (it.size != 2) error("Not a UUID stringId: $this")
+        it[0].fromBase62() to it[1].fromBase62()
+    }
     .toUuid()

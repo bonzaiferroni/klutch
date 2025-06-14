@@ -6,14 +6,16 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun initDb(env: Environment, tables: List<Table>) {
+fun initDb(env: Environment, tables: List<Table>, execution: (Transaction.() -> Unit)? = null) {
     dbLog.logInfo("initializing db")
     val db = connectDb(env)
 
     transaction(db) {
         SchemaUtils.create(*tables.toTypedArray())
+        execution?.invoke(this)
     }
 
     runBlocking {

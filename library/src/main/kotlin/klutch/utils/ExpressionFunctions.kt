@@ -21,6 +21,9 @@ fun ExpressionWithColumnType<LocalDateTime>.greater(instant: Instant) =
 fun ExpressionWithColumnType<LocalDateTime>.less(instant: Instant) =
     Op.build { this@less.less(instant.toLocalDateTimeUtc()) }
 
+fun ExpressionWithColumnType<LocalDateTime>.lessEq(instant: Instant) =
+    Op.build { this@lessEq.lessEq(instant.toLocalDateTimeUtc()) }
+
 fun <T> ExpressionWithColumnType<T>.isNullOrEq(t: T) =
     Op.build { this@isNullOrEq.isNull() or this@isNullOrEq.eq(t) }
 

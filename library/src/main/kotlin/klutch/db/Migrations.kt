@@ -6,6 +6,7 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ExperimentalDatabaseMigrationApi
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
@@ -16,7 +17,12 @@ fun generateMigrationScript(env: Environment, tables: List<Table>) {
 }
 
 @OptIn(ExperimentalDatabaseMigrationApi::class)
-private fun migrate(protocol: String, applyMigration: Boolean, env: Environment, tables: List<Table>) {
+private fun migrate(
+	protocol: String,
+	applyMigration: Boolean,
+	env: Environment,
+	tables: List<Table>,
+) {
 	val folder = File("$MIGRATIONS_DIRECTORY/$protocol")
 	if (!folder.exists()) folder.mkdirs()
 	val file = folder.listFiles()?.firstNotNullOfOrNull {
