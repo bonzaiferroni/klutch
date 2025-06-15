@@ -9,17 +9,21 @@ import java.util.UUID
 
 fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
 
-fun UUID.toLongPair(): Pair<Long, Long> =
-    mostSignificantBits to leastSignificantBits
+fun UUID.toStringId() = this.toString()
 
-fun Pair<Long, Long>.toUuid(): UUID =
-    UUID(first, second)
+fun String.fromStringId(): UUID = UUID.fromString(this)
 
-fun UUID.toStringId() = toLongPair().let { "${it.first.toBase62()}-${it.second.toBase62()}" }
-
-fun String.fromStringId() = this.split("-")
-    .let {
-        if (it.size != 2) error("Not a UUID stringId: $this")
-        it[0].fromBase62() to it[1].fromBase62()
-    }
-    .toUuid()
+//fun UUID.toLongPair(): Pair<Long, Long> =
+//    mostSignificantBits to leastSignificantBits
+//
+//fun Pair<Long, Long>.toUuid(): UUID =
+//    UUID(first, second)
+//
+//fun UUID.toStringId() = toLongPair().let { "${it.first.toBase62()}-${it.second.toBase62()}" }
+//
+//fun String.fromStringId() = this.split("-")
+//    .let {
+//        if (it.size != 2) error("Not a UUID stringId: $this")
+//        it[0].fromBase62() to it[1].fromBase62()
+//    }
+//    .toUuid()
