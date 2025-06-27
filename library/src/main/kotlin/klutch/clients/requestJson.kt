@@ -2,6 +2,7 @@ package klutch.clients
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
+import kabinet.utils.toSnakeCase
 import klutch.log.LogLevel
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -75,5 +76,3 @@ fun mapTypeToJson(descriptor: SerialDescriptor): JsonObject = when (descriptor.k
     PrimitiveKind.BOOLEAN -> primitiveToJson("BOOLEAN")
     else -> error("unknown type: ${descriptor.kind}")
 }
-
-fun String.toSnakeCase(): String = this.replace(Regex("([a-z])([A-Z])"), "$1_$2").lowercase()
