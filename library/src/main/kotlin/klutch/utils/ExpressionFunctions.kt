@@ -15,14 +15,29 @@ import kotlin.time.Duration
 fun ExpressionWithColumnType<LocalDateTime>.since(duration: Duration) = duration.let { (Clock.System.now() - it).toLocalDateTimeUtc() }
     .let { Op.build { this@since.greater(it) } }
 
+fun ExpressionWithColumnType<LocalDateTime>.greaterEq(instant: Instant) =
+    Op.build { this@greaterEq.greaterEq(instant.toLocalDateTimeUtc()) }
+
+fun ExpressionWithColumnType<LocalDateTime?>.greaterEqNullable(instant: Instant) =
+    Op.build { this@greaterEqNullable.greaterEq(instant.toLocalDateTimeUtc()) }
+
 fun ExpressionWithColumnType<LocalDateTime>.greater(instant: Instant) =
     Op.build { this@greater.greater(instant.toLocalDateTimeUtc()) }
+
+fun ExpressionWithColumnType<LocalDateTime?>.greaterNullable(instant: Instant) =
+    Op.build { this@greaterNullable.greater(instant.toLocalDateTimeUtc()) }
 
 fun ExpressionWithColumnType<LocalDateTime>.less(instant: Instant) =
     Op.build { this@less.less(instant.toLocalDateTimeUtc()) }
 
+fun ExpressionWithColumnType<LocalDateTime?>.lessNullable(instant: Instant) =
+    Op.build { this@lessNullable.less(instant.toLocalDateTimeUtc()) }
+
 fun ExpressionWithColumnType<LocalDateTime>.lessEq(instant: Instant) =
     Op.build { this@lessEq.lessEq(instant.toLocalDateTimeUtc()) }
+
+fun ExpressionWithColumnType<LocalDateTime?>.lessEqNullable(instant: Instant) =
+    Op.build { this@lessEqNullable.lessEq(instant.toLocalDateTimeUtc()) }
 
 fun <T> ExpressionWithColumnType<T>.isNullOrEq(t: T) =
     Op.build { this@isNullOrEq.isNull() or this@isNullOrEq.eq(t) }
