@@ -40,7 +40,7 @@ suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserA
             serverLog.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid token")
         }
-        serverLog.logInfo("authorize: session login by ${loginRequest.usernameOrEmail}")
+        serverLog.logDebug("authorize: session login by ${loginRequest.usernameOrEmail}")
         this.respond(HttpStatusCode.OK, authInfo)
         return authInfo
     }
