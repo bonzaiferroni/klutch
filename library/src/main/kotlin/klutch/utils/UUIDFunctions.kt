@@ -14,6 +14,8 @@ import java.util.UUID
 
 fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
 
+fun ExpressionWithColumnType<EntityID<UUID>>.eq(tableId: TableId<String>) = this.eq(tableId.value.fromStringId())
+
 fun UUID.toStringId() = this.toString()
 
 fun String.fromStringId(): UUID = UUID.fromString(this)
