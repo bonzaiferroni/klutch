@@ -4,8 +4,12 @@ import kabinet.db.TableId
 import kabinet.utils.fromBase62
 import kabinet.utils.toBase62
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.IdTable
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ExpressionWithColumnType
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.UUID
 
 fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
@@ -14,7 +18,7 @@ fun UUID.toStringId() = this.toString()
 
 fun String.fromStringId(): UUID = UUID.fromString(this)
 
-fun TableId.toUUID() = this.value.fromStringId()
+fun TableId<String>.toUUID() = this.value.fromStringId()
 
 //fun UUID.toLongPair(): Pair<Long, Long> =
 //    mostSignificantBits to leastSignificantBits
