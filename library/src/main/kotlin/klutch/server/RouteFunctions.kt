@@ -6,6 +6,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import kabinet.api.*
+import kabinet.db.TableId
 
 fun <Returned, E : GetEndpoint<Returned>> Route.get(
     endpoint: E,
@@ -15,6 +16,15 @@ fun <Returned, E : GetEndpoint<Returned>> Route.get(
 }
 
 fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.get(
+    endpoint: E,
+    convertId: (String) -> IdType,
+    block: suspend RoutingContext.(IdType, E) -> Returned?
+) = get(endpoint.serverIdTemplate) {
+    val id = call.getIdOrThrow(convertId)
+    standardResponse { block(id, endpoint) }
+}
+
+fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.get(
     endpoint: E,
     convertId: (String) -> IdType,
     block: suspend RoutingContext.(IdType, E) -> Returned?
