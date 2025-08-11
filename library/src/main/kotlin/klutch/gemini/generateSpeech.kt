@@ -1,8 +1,7 @@
-package klutch.clients
+package klutch.gemini
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
-import kotlinx.serialization.json.JsonObject
 
 suspend fun GeminiClient.generateSpeech(
     text: String,

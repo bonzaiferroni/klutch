@@ -1,4 +1,4 @@
-package klutch.clients
+package klutch.gemini
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

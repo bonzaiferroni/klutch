@@ -1,4 +1,4 @@
-package klutch.clients
+package klutch.gemini
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode

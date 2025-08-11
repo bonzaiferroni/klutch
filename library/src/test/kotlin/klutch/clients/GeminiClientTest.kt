@@ -2,12 +2,10 @@ package klutch.clients
 
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import klutch.gemini.GeminiClient
+import klutch.gemini.generateEmbeddings
 import klutch.log.LogLevel
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.*
 import kotlin.test.*
 
 /**

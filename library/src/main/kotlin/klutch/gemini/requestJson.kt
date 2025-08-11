@@ -1,9 +1,8 @@
-package klutch.clients
+package klutch.gemini
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kabinet.utils.toSnakeCase
-import klutch.log.LogLevel
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor

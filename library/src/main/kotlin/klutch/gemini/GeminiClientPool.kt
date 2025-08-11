@@ -1,6 +1,5 @@
-package klutch.clients
+package klutch.gemini
 
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import klutch.log.LogLevel
 import kotlinx.coroutines.delay
