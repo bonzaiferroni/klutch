@@ -37,12 +37,11 @@ class GeminiClient(
                 val response = client.request(ktorRequest)
                 if (response.status == HttpStatusCode.TooManyRequests) {
                     if (usedToken == backupToken) {
-                        println("Too many requests received using backup token")
+                        println("GeminiClient: Too many requests received using backup token")
                         return null
                     }
-                    println("Too many request")
+                    println("GeminiClient: Too many requests, trying backup token")
                     usedToken = backupToken ?: return null
-                    println("trying backup token")
                     return@repeat
                 }
                 if (response.status == HttpStatusCode.InternalServerError) {
