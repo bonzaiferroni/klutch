@@ -36,7 +36,7 @@ class GeminiService(
         val bytes = Base64.getDecoder().decode(data)
         val timestamp = Clock.System.now().toEpochMilliseconds().toBase62()
         val folder = "img"
-        val filenameBase = requestToFilename(filename)
+        val filenameBase = toFilename(filename)
         val path = "$folder/$filenameBase-$timestamp.png"
         File(path).writeBytes(bytes)
         val thumbFilename = "$folder/$filenameBase-$timestamp-thumb.png"
@@ -44,15 +44,16 @@ class GeminiService(
         return ImageUrls(path, thumbFilename)
     }
 
-    suspend fun generateSpeech(request: SpeechRequest, filename: String = request.text): String {
+    suspend fun generateSpeech(request: SpeechRequest): String {
+        val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
+        val folder = "wav"
+        val path = "$folder/$filename.wav"
+        val file = File(path)
+        if (file.exists()) return path
         val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName)
             ?: error("Unable to generate speech")
         val bytes = pcmToWav(Base64.getDecoder().decode(data))
-        val timestamp = Clock.System.now().toEpochMilliseconds().toBase62()
-        val folder = "wav"
-        val filenameBase = requestToFilename(filename)
-        val path = "$folder/$filenameBase-$timestamp.wav"
-        File(path).writeBytes(bytes)
+        file.writeBytes(bytes)
         return path
     }
 }
@@ -67,7 +68,9 @@ fun Logger.message(level: LogLevel, msg: String) = when(level) {
     LogLevel.ERROR -> this.error(msg)
 }
 
-fun requestToFilename(input: String): String =
+fun toFilename(input: String): String =
     input
         .take(64).lowercase()
         .replace(Regex("[^A-Za-z0-9]"), "_")
+
+fun provideTimestamp() = Clock.System.now().toEpochMilliseconds().toBase62()
