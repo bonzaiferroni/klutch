@@ -26,15 +26,20 @@ class GeminiClient(
             try {
                 val request = requestBlock()
                 val model = request.model ?: model
-                val url = generateUrl(model, request.method, usedToken)
+                val url = generateUrl(model, request.method)
                 val ktorRequest = HttpRequestBuilder().apply {
                     method = HttpMethod.Post
                     url(url)
+                    header("x-goog-api-key", usedToken)
                     contentType(ContentType.Application.Json)
                     setBody(request.body)
                 }
                 val response = client.request(ktorRequest)
                 if (response.status == HttpStatusCode.TooManyRequests) {
+                    if (usedToken == backupToken) {
+                        println("Too many requests received using backup token")
+                        return null
+                    }
                     println("Too many request")
                     usedToken = backupToken ?: return null
                     println("trying backup token")
@@ -63,8 +68,8 @@ class GeminiClient(
         return null
     }
 
-    fun generateUrl(model: String, method: String, token: String) =
-        "https://generativelanguage.googleapis.com/v1beta/models/$model:$method?key=$token"
+    fun generateUrl(model: String, method: String) =
+        "https://generativelanguage.googleapis.com/v1beta/models/$model:$method"
 }
 
 data class GeminiApiResponse<T>(

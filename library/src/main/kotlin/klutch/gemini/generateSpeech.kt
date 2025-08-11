@@ -1,6 +1,7 @@
 package klutch.gemini
 
 import io.ktor.client.call.body
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 
 suspend fun GeminiClient.generateSpeech(
@@ -31,8 +32,13 @@ suspend fun GeminiClient.generateSpeech(
     }
 
     if (response?.status == HttpStatusCode.OK) {
-        return response.body<GeminiResponse>().candidates.firstOrNull()?.content?.parts
+        val geminiResponse = response.body<GeminiResponse>()
+        val data = geminiResponse.candidates.firstOrNull()?.content?.parts
             ?.firstOrNull() { it.inlineData != null}?.inlineData?.data
+        if (data == null) {
+            println("Missing data in speech generation:\n${geminiResponse}")
+        }
+        return data
     } else {
         return null
     }

@@ -14,7 +14,7 @@ data class GeminiResponse(
 
 @Serializable
 data class GeminiResponseCandidate(
-    val content: GeminiContent,
+    val content: GeminiContent?,
     val finishReason: String,
     val avgLogprobs: Float? = null,
 )
