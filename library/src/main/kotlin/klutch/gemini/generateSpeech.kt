@@ -15,7 +15,7 @@ suspend fun GeminiClient.generateSpeech(
             contents = listOf(GeminiContent(
                 parts = listOf(
                     GeminiPart(
-                        text = "${theme ?: "Say"}: $text"
+                        text = "${theme ?: "Say"}:\n$text"
                     ))
             )),
             generationConfig = GenerationConfig(
