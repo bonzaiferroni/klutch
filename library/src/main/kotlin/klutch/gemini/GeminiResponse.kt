@@ -14,7 +14,7 @@ data class GeminiResponse(
 
 @Serializable
 data class GeminiResponseCandidate(
-    val content: GeminiContent?,
+    val content: GeminiContent? = null,
     val finishReason: String,
     val avgLogprobs: Float? = null,
 )
@@ -22,7 +22,7 @@ data class GeminiResponseCandidate(
 @Serializable
 data class GeminiUsage(
     val promptTokenCount: Int,
-    val candidatesTokenCount: Int,
+    val candidatesTokenCount: Int? = null,
     val totalTokenCount: Int,
     val promptTokensDetails: List<PromptTokenDetails>
 )

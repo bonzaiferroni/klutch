@@ -4,8 +4,11 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 
 suspend fun GeminiClient.generateImage(
-    text: String
+    text: String,
+    theme: String? = null,
 ): String? {
+    val prompt = theme?.let { "Create an image in this style:\n$it\n\nHere is the image you should create:\n$text" }
+        ?: text
     val response = tryRequest {
         val request = GeminiRequest(
             contents = listOf(
@@ -13,7 +16,7 @@ suspend fun GeminiClient.generateImage(
                     role = "user",
                     parts = listOf(
                         GeminiPart(
-                            text = text
+                            text = prompt
                         )
                     )
                 )
