@@ -7,7 +7,7 @@ suspend fun GeminiClient.generateImage(
     text: String,
     theme: String? = null,
 ): String? {
-    val prompt = theme?.let { "Create an image in this style:\n$it\n\nHere is the image you should create:\n$text" }
+    val prompt = theme?.let { "$it\n\n$text" }
         ?: text
     val response = tryRequest {
         val request = GeminiRequest(

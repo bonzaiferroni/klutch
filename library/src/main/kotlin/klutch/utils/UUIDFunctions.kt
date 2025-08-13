@@ -1,20 +1,16 @@
 package klutch.utils
 
 import kabinet.db.TableId
-import kabinet.utils.fromBase62
-import kabinet.utils.toBase62
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IdTable
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ExpressionWithColumnType
-import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 import java.util.UUID
 
 fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
 
-fun ExpressionWithColumnType<EntityID<UUID>>.eq(tableId: TableId<String>) = this.eq(tableId.value.fromStringId())
+fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<String>?) =
+    tableId?.let { this.eq(it.value.fromStringId()) } ?: this.isNull()
 
 fun UUID.toStringId() = this.toString()
 
