@@ -1,5 +1,6 @@
 package klutch.db
 
+import klutch.utils.toUUID
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.Column
@@ -9,9 +10,11 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.statements.BatchUpdateStatement
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.update
 
 fun <T : ColumnSet> T.read(
@@ -133,3 +136,19 @@ fun <Id : Comparable<Id>, T : IdTable<Id>> T.readIdOrInsert(
     if (it.count() != 1L) return@let null
     it.first()[id].value
 } ?: this.insertAndGetId(block).value
+
+fun <Id: Comparable<Id>, T: IdTable<Id>, Item> T.batchUpdate(
+    items: List<Item>,
+    provideId: (Item) -> Id,
+    updateItem: UpdateBuilder<*>.(Item) -> Unit,
+) = {
+    var total = 0
+    BatchUpdateStatement(this).apply {
+        items.forEach { item ->
+            addBatch(EntityID(provideId(item), this@batchUpdate))
+            updateItem(item)
+        }
+        total = execute(TransactionManager.current()) ?: 0
+    }
+    total
+}
