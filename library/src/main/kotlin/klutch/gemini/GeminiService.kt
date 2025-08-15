@@ -49,14 +49,13 @@ class GeminiService(
         return ImageUrls(path, thumbPath)
     }
 
-    suspend fun generateSpeech(request: SpeechGenRequest): String {
+    suspend fun generateSpeech(request: SpeechGenRequest): String? {
         val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
         val folder = "wav"
         val path = "$folder/$filename.wav"
         val file = File(path)
         if (file.exists()) return path
-        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName)
-            ?: error("Unable to generate speech")
+        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
         val bytes = pcmToWav(Base64.getDecoder().decode(data))
         file.writeBytes(bytes)
         return path
