@@ -17,7 +17,7 @@ import klutch.utils.serverLog
 import java.util.*
 
 fun Application.configureSecurity() {
-    // Please read the jwt property from the config file if you are using EngineMain
+    // Please readHtml the jwt property from the config file if you are using EngineMain
     val audience = "http://localhost:8080/"
     val issuer = "http://localhost:8080/"
     val jwtRealm = "newsref api"
