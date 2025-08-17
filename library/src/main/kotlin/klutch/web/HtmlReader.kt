@@ -7,7 +7,6 @@ import kabinet.web.toUrl
 import kabinet.web.toUrlOrNull
 
 class HtmlReader {
-
     fun read(
         url: String,
         document: Document,
@@ -96,7 +95,7 @@ data class WebDocument(
 
 data class WebContent(
     val text: String,
-    val links: List<WebLink>,
+    val links: List<WebLink> = emptyList(),
 )
 
 data class WebLink(
