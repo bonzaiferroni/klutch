@@ -1,4 +1,4 @@
-package klutch.html
+package klutch.web
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document

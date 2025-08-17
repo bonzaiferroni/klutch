@@ -1,4 +1,4 @@
-package klutch.html
+package klutch.web
 
 import kotlinx.serialization.Serializable
 

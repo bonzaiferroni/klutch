@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalUuidApi::class)
+
 package klutch.utils
 
 import kabinet.db.TableId
@@ -6,17 +8,34 @@ import org.jetbrains.exposed.sql.ExpressionWithColumnType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
 
+@JvmName("eqStringId")
 fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<String>?) =
     tableId?.let { this.eq(it.value.fromStringId()) } ?: this.isNull()
+
+@JvmName("eqUuidId")
+fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<Uuid>?) =
+    tableId?.let { this.eq(it.value.toUUID()) } ?: this.isNull()
 
 fun UUID.toStringId() = this.toString()
 
 fun String.fromStringId(): UUID = UUID.fromString(this)
 
+@JvmName("toUUIDfromString")
 fun TableId<String>.toUUID() = this.value.fromStringId()
+
+@JvmName("toUUIDfromUuid")
+fun TableId<Uuid>.toUUID(): UUID = UUID.fromString(this.value.toString())
+
+fun UUID.toUuid(): Uuid = Uuid.parse(this.toString())
+
+fun Uuid.toUUID(): UUID = UUID.fromString(this.toString())
+
+
 
 //fun UUID.toLongPair(): Pair<Long, Long> =
 //    mostSignificantBits to leastSignificantBits

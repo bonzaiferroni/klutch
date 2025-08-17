@@ -1,15 +1,17 @@
-package klutch.html
+package klutch.web
 
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
+import kabinet.web.Url
+import kabinet.web.toUrl
+import kabinet.web.toUrlOrNull
 
 class HtmlReader {
 
-    suspend fun read(
+    fun read(
         url: String,
         document: Document,
-        isFresh: (suspend (String) -> Boolean)? = null,
-    ): DocumentContent {
+    ): WebDocument {
         val docUrl = url.toUrl()
         val newsArticle = document.parseNewsArticle()
 
@@ -18,8 +20,7 @@ class HtmlReader {
         val stack = mutableListOf<Element>()
         stack.addAll(document.children().reversed())
         val dropped = mutableListOf<Element>()
-        val contents = mutableListOf<String>()
-        val urls = mutableListOf<DocumentLink>()
+        val contents = mutableListOf<WebContent>()
 
         while (stack.isNotEmpty()) {
             val element = stack.removeLastOrNull() ?: break
@@ -43,15 +44,11 @@ class HtmlReader {
 
             if (tag !in contentTags) continue
 
-            val paragraphs = element.text().split('\n')
-            for (content in paragraphs) {
-                if (content.length > 2000) continue
-                if (isNotArticleParagraph(content)) continue
-                if (!(isFresh?.let { it(content) } ?: true)) continue
-                contents.add(content)
-                characterCount += content.length
-            }
+            val content = element.text().trim()
+            if (content.isEmpty() || content.length > 4000) continue
+            if (isNotArticleParagraph(content)) continue
 
+            val links = mutableListOf<WebLink>()
             for (anchorElement in element.getElementsByTag("a")) {
                 val href = anchorElement.attribute("href")?.value ?: continue
                 val text = anchorElement.text().takeIf { it.isNotBlank() } ?: continue
@@ -59,39 +56,53 @@ class HtmlReader {
                 if (isHrefOtherProtocol(href)) continue
                 if (isHrefRelative(href)) continue
                 val url = href.toUrlOrNull() ?: continue
-                if (urls.any { it.url.href == url.href }) continue
-                val link = DocumentLink(url, text)
-                urls.add(link)
+                if (contents.any { content -> content.links.any { it.url.href == url.href } }) continue
+                val startIndex = if (content.countMatches(text) == 1) content.indexOf(text).takeIf { it > 0 } else null
+                val link = WebLink(url, text, startIndex)
+                links.add(link)
             }
+
+            contents.add(WebContent(
+                text = content,
+                links = links
+            ))
+            characterCount += content.length
+            wordCount += content.split(" ").filter { it.isBlank() }.size
         }
 
         val title = document.readHeadline() ?: newsArticle?.headline ?: document.title()
 
-        return DocumentContent(
+        return WebDocument(
             title = title,
             url = docUrl,
-            paragraphs = contents,
-            links = urls
+            wordCount = wordCount,
+            contents = contents
         )
     }
 }
 
-data class DocumentContent(
+data class WebDocument(
     val title: String,
     val url: Url,
-    val paragraphs: List<String>,
-    val links: List<DocumentLink>,
+    val wordCount: Int,
+    val contents: List<WebContent>,
 ) {
-    fun toMarkdown() = "# $title\n\n" +
-            "${paragraphs.joinToString("\n\n")}\n\n" +
-            links.joinToString("\n") { "* $[${it.text}](${it.url.href})" }.let {
-
-            }
+//    fun toMarkdown() = "# $title\n\n" +
+//            "${paragraphs.joinToString("\n\n")}\n\n" +
+//            contents.joinToString("\n") { "* $[${it.text}](${it.url.href})" }.let {
+//
+//            }
 }
 
-data class DocumentLink(
+data class WebContent(
+    val text: String,
+    val links: List<WebLink>,
+)
+
+data class WebLink(
     val url: Url,
     val text: String,
+    val startIndex: Int?,
 )
 
 private val contentTags = setOf("p", "li", "span", "blockquote")
@@ -121,4 +132,6 @@ fun isNotArticleParagraph(text: String) = text.isBlank()
         || text.toCharArray().none { sentenceEnders.contains(it) }
 
 const val MAX_URL_CHARS = 400
+
+private fun String.countMatches(sub: String): Int = windowed(sub.length) { it == sub }.count { it }
 
