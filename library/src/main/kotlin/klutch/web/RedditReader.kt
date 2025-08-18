@@ -10,7 +10,7 @@ class RedditReader {
         var wordCount = 0
         fun addAndClearBuffer() {
             if (buffer.isNotEmpty()) {
-                val rawContent = buffer.toString().removeSuffix("\n")
+                val rawContent = buffer.toString().removeSuffix("\n").prefixWithinBytesLimit()
                 val (content, links) = extractLinks(rawContent)
                 contents.add(WebContent(content, links))
                 buffer.clear()
@@ -83,4 +83,19 @@ fun extractLinks(markdown: String): Pair<String, List<WebLink>> {
     return cleaned to links
 }
 
+fun String.prefixWithinBytesLimit(limitBytes: Int = MAX_BTREE_LIMIT): String {
+    val maxUnits = limitBytes / 3
+    if (length <= maxUnits) return this
+    var cut = maxUnits
+    // avoid cutting inside a surrogate pair
+    if (cut in 1 until length && this[cut].isLowSurrogate() && this[cut - 1].isHighSurrogate()) {
+        cut -= 1
+    }
+    return substring(0, cut)
+}
+
+private fun Char.isHighSurrogate() = this in '\uD800'..'\uDBFF'
+private fun Char.isLowSurrogate()  = this in '\uDC00'..'\uDFFF'
+
+const val MAX_BTREE_LIMIT = 2704
 const val CHUNK_SIZE = 500
