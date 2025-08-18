@@ -3,29 +3,33 @@ package klutch.web
 import kabinet.web.Url
 import kabinet.web.fromHrefOrNull
 
-class TextReader {
+class RedditReader {
     fun read(title: String, url: Url, text: String): WebDocument {
         val contents = mutableListOf<WebContent>()
-        val lines = text.split("\n")
         val buffer = StringBuilder()
         var wordCount = 0
         fun addAndClearBuffer() {
             if (buffer.isNotEmpty()) {
-                val rawContent = buffer.toString()
+                val rawContent = buffer.toString().removeSuffix("\n")
                 val (content, links) = extractLinks(rawContent)
                 contents.add(WebContent(content, links))
                 buffer.clear()
             }
         }
-        for (line in lines) {
-            val isPossibleNewChunk = line.isNotEmpty() && (line[0].isLetter() || line[0] == '#')
-            if (isPossibleNewChunk && buffer.length >= CHUNK_SIZE) {
-                addAndClearBuffer()
+        val paragraphs = text.split("\n\n")
+        for (paragraph in paragraphs) {
+            val lines = paragraph.split("\n")
+            for (line in lines) {
+                if (line.isBlank()) continue
+                val isPossibleNewChunk = line.isNotEmpty() && (line[0].isLetter() || line[0] == '#')
+                if (isPossibleNewChunk && buffer.length >= CHUNK_SIZE) {
+                    addAndClearBuffer()
+                }
+                buffer.appendLine(line)
+                wordCount += line.split(" ").filter { it.isNotEmpty() }.size
             }
-            buffer.appendLine(line)
-            wordCount += line.split(" ").filter { it.isNotEmpty() }.size
+            addAndClearBuffer()
         }
-        addAndClearBuffer()
         return WebDocument(
             title = title,
             url = url,
