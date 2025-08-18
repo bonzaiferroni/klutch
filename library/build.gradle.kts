@@ -7,7 +7,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    testImplementation("io.ktor:ktor-client-mock:3.1.0")
+    testImplementation(libs.ktor.client.mock)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
