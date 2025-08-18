@@ -11,11 +11,11 @@ import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.fromStringId())
+fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.toUUID())
 
 @JvmName("eqStringId")
 fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<String>?) =
-    tableId?.let { this.eq(it.value.fromStringId()) } ?: this.isNull()
+    tableId?.let { this.eq(it.value.toUUID()) } ?: this.isNull()
 
 @JvmName("eqUuidId")
 fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<Uuid>?) =
@@ -23,10 +23,10 @@ fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<Uuid>?
 
 fun UUID.toStringId() = this.toString()
 
-fun String.fromStringId(): UUID = UUID.fromString(this)
+fun String.toUUID(): UUID = UUID.fromString(this)
 
 @JvmName("toUUIDfromString")
-fun TableId<String>.toUUID() = this.value.fromStringId()
+fun TableId<String>.toUUID() = this.value.toUUID()
 
 @JvmName("toUUIDfromUuid")
 fun TableId<Uuid>.toUUID(): UUID = UUID.fromString(this.value.toString())
@@ -45,7 +45,7 @@ fun Uuid.toUUID(): UUID = UUID.fromString(this.toString())
 //
 //fun UUID.toStringId() = toLongPair().let { "${it.first.toBase62()}-${it.second.toBase62()}" }
 //
-//fun String.fromStringId() = this.split("-")
+//fun String.toUUID() = this.split("-")
 //    .let {
 //        if (it.size != 2) error("Not a UUID stringId: $this")
 //        it[0].fromBase62() to it[1].fromBase62()
