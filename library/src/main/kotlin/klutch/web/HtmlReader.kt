@@ -81,7 +81,7 @@ class HtmlReader {
 }
 
 data class WebDocument(
-    val title: String,
+    val title: String?,
     val url: Url,
     val wordCount: Int,
     val contents: List<WebContent>,

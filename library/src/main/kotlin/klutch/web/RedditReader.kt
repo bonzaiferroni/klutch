@@ -4,7 +4,7 @@ import kabinet.web.Url
 import kabinet.web.fromHrefOrNull
 
 class RedditReader {
-    fun read(title: String, url: Url, text: String): WebDocument {
+    fun read(title: String?, url: Url, text: String): WebDocument {
         val contents = mutableListOf<WebContent>()
         val buffer = StringBuilder()
         var wordCount = 0
