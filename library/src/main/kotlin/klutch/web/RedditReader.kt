@@ -34,7 +34,7 @@ class RedditReader {
             title = title,
             url = url,
             contents = contents,
-            wordCount = wordCount
+            wordCount = wordCount,
         )
     }
 }

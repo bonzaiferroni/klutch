@@ -70,21 +70,24 @@ class HtmlReader {
         }
 
         val title = document.readHeadline() ?: newsArticle?.headline ?: document.title()
+        val hostName = newsArticle?.publisher?.name ?: document.readHostName()
 
         return WebDocument(
             title = title,
             url = docUrl,
             wordCount = wordCount,
-            contents = contents
+            contents = contents,
+            publisherName = hostName
         )
     }
 }
 
 data class WebDocument(
-    val title: String?,
     val url: Url,
     val wordCount: Int,
     val contents: List<WebContent>,
+    val title: String? = null,
+    val publisherName: String? = null,
 ) {
 //    fun toMarkdown() = "# $title\n\n" +
 //            "${paragraphs.joinToString("\n\n")}\n\n" +
