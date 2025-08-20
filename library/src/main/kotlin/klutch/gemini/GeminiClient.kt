@@ -40,7 +40,7 @@ class GeminiClient(
                         println("GeminiClient: Too many requests received using backup token")
                         return null
                     }
-                    println("GeminiClient: Too many requests, trying backup token")
+                    // println("GeminiClient: Too many requests, trying backup token")
                     usedToken = backupToken ?: return null
                     return@repeat
                 }
