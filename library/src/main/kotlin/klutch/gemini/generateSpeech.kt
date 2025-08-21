@@ -3,6 +3,7 @@ package klutch.gemini
 import io.ktor.client.call.body
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import kabinet.model.GeminiVoice
 import kabinet.model.SpeechVoice
 
 suspend fun GeminiClient.generateSpeech(
@@ -23,7 +24,7 @@ suspend fun GeminiClient.generateSpeech(
                 speechConfig = SpeechConfig(
                     voiceConfig = VoiceConfig(
                         prebuiltVoiceConfig = PrebuiltVoiceConfig(
-                            voiceName = voice ?: SpeechVoice.Upbeat.apiName
+                            voiceName = voice ?: GeminiVoice.Upbeat.apiName
                         )
                     )
                 )
