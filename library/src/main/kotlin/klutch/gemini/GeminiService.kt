@@ -13,8 +13,14 @@ import klutch.utils.writePngThumbnail
 import kotlinx.datetime.Clock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Base64
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 class GeminiService(
     private val env: Environment = readEnvFromPath(),
@@ -26,7 +32,16 @@ class GeminiService(
 ) {
     suspend inline fun <reified T> requestJson(vararg parts: String) = client.generateJson<T>(*parts)
 
-    suspend fun generateEmbeddings(text: String): FloatArray? = client.generateEmbeddings(text)
+    suspend fun generateEmbedding(text: String): FloatArray? {
+        val filename = compressToFilenameSafe(text).take(200)
+        val folder = "emb"
+        val path = "$folder/$filename.vec"
+        val file = File(path)
+        if (file.exists()) file.readBytes().toFloatArray()
+        val array = client.generateEmbedding(text)?.normalize() ?: return null
+        file.writeBytes(array.toByteArray())
+        return array
+    }
 
     suspend fun generateText(vararg parts: String) = client.generateTextFromParts(*parts)
 
@@ -78,3 +93,36 @@ fun toFilename(input: String): String =
         .replace(Regex("[^A-Za-z0-9]"), "_")
 
 fun provideTimestamp() = Clock.System.now().toEpochMilliseconds().toBase62()
+
+fun FloatArray.normalize(): FloatArray {
+    val norm = kotlin.math.sqrt(this.sumOf { (it * it).toDouble() }).toFloat()
+    return if (norm == 0f) this else FloatArray(size) { this[it] / norm }
+}
+
+fun FloatArray.toByteArray(): ByteArray {
+    val buffer = ByteBuffer.allocate(size * 4).order(ByteOrder.BIG_ENDIAN)
+    for (f in this) buffer.putFloat(f)
+    return buffer.array()
+}
+
+fun ByteArray.toFloatArray(): FloatArray {
+    val buffer = ByteBuffer.wrap(this).order(ByteOrder.BIG_ENDIAN)
+    val floats = FloatArray(size / 4)
+    for (i in floats.indices) floats[i] = buffer.getFloat()
+    return floats
+}
+
+fun compressToFilenameSafe(text: String): String {
+    val raw = text.toByteArray(Charsets.UTF_8)
+    val bos = ByteArrayOutputStream()
+    GZIPOutputStream(bos).use { it.write(raw) }
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bos.toByteArray())
+}
+
+fun decompressFromFilenameSafe(namePart: String): String {
+    val compressed = Base64.getUrlDecoder().decode(namePart)
+    val gis = GZIPInputStream(ByteArrayInputStream(compressed))
+    val out = ByteArrayOutputStream()
+    gis.use { it.copyTo(out) }
+    return out.toString(Charsets.UTF_8)
+}

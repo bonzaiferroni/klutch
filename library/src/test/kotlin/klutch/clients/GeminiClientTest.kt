@@ -3,14 +3,14 @@ package klutch.clients
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import klutch.gemini.GeminiClient
-import klutch.gemini.generateEmbeddings
+import klutch.gemini.generateEmbedding
 import klutch.log.LogLevel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 /**
  * Arr, this be a test class for the GeminiClient extension functions.
- * We be testin' the generateEmbeddings and generateJson functions to make sure
+ * We be testin' the generateEmbedding and generateJson functions to make sure
  * they be returnin' proper treasure when the response be successful.
  */
 class GeminiClientTest {
@@ -25,7 +25,7 @@ class GeminiClientTest {
     fun `test generateEmbeddings returns data on successful response`() {
         // Execute the function
         runTest {
-            val result = geminiClient.generateEmbeddings("Test text")
+            val result = geminiClient.generateEmbedding("Test text")
 
             // Verify result
             assertNotNull(result, "Embeddings result should not be null")

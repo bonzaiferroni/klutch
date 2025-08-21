@@ -3,16 +3,25 @@ package klutch.gemini
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import klutch.log.LogLevel
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
-suspend fun GeminiClient.generateEmbeddings(text: String): FloatArray? {
+suspend fun GeminiClient.generateEmbedding(
+    text: String,
+    dimensions: Int = 768,
+    taskType: EmbeddingTaskType = EmbeddingTaskType.SEMANTIC_SIMILARITY,
+): FloatArray? {
     val response = tryRequest {
         val request = GeminiEmbeddingRequest(
             content = GeminiContent(parts = listOf(GeminiPart(text))),
-            taskType = EmbeddingTaskType.SEMANTIC_SIMILARITY
+//            embeddingConfig = GeminiEmbeddingConfig(
+//
+//            ),
+            taskType = taskType,
+            outputDimensionality = dimensions
         )
-        GeminiApiRequest("text-embedding-004:embedContent", request)
+        GeminiApiRequest("embedContent", request, "gemini-embedding-001")
     }
     if (response?.status == HttpStatusCode.OK) {
         return response.body<GeminiEmbeddingResponse>()
@@ -37,8 +46,19 @@ data class ContentEmbedding(
 @Serializable
 data class GeminiEmbeddingRequest(
     val content: GeminiContent,
+//    @SerialName("embedding_config")
+//    val embeddingConfig: GeminiEmbeddingConfig? = null,
+    @SerialName("task_type")
     val taskType: EmbeddingTaskType? = null,
-    val title: String? = null,
+    @SerialName("output_dimensionality")
+    val outputDimensionality: Int? = null
+)
+
+@Serializable
+data class GeminiEmbeddingConfig(
+    @SerialName("task_type")
+    val taskType: EmbeddingTaskType? = null,
+    @SerialName("output_dimensionality")
     val outputDimensionality: Int? = null
 )
 
