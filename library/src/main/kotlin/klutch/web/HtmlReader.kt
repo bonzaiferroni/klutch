@@ -5,6 +5,8 @@ import com.fleeksoft.ksoup.nodes.Element
 import kabinet.web.Url
 import kabinet.web.toUrl
 import kabinet.web.toUrlOrNull
+import kotlinx.datetime.Instant
+import java.io.File
 
 class HtmlReader {
     fun read(
@@ -13,6 +15,8 @@ class HtmlReader {
     ): WebDocument {
         val docUrl = url.toUrl()
         val newsArticle = document.parseNewsArticle()
+
+        File("html/${docUrl.core}.html").writeText(document.html())
 
         var wordCount = 0
         var characterCount = 0
@@ -66,11 +70,13 @@ class HtmlReader {
                 links = links
             ))
             characterCount += content.length
-            wordCount += content.split(" ").filter { it.isBlank() }.size
+            wordCount += content.split(" ").filter { it.isNotBlank() }.size
         }
 
         val title = document.readHeadline() ?: newsArticle?.headline ?: document.title()
         val hostName = newsArticle?.publisher?.name ?: document.readHostName()
+
+        println("${docUrl.core}: $wordCount")
 
         return WebDocument(
             title = title,
@@ -88,6 +94,7 @@ data class WebDocument(
     val contents: List<WebContent>,
     val title: String? = null,
     val publisherName: String? = null,
+    val publishedAt: Instant? = null,
 ) {
 //    fun toMarkdown() = "# $title\n\n" +
 //            "${paragraphs.joinToString("\n\n")}\n\n" +
