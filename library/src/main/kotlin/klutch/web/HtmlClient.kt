@@ -15,8 +15,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.netty.handler.codec.compression.StandardCompressionOptions.deflate
 import io.netty.handler.codec.compression.StandardCompressionOptions.gzip
+import kabinet.console.globalConsole
 
-// private val console = globalConsole.getHandle("HtmlClient")
+private val console = globalConsole.getHandle(HtmlClient::class)
 
 class HtmlClient(
     private val client: HttpClient = ktorHtmlClient,
@@ -36,7 +37,7 @@ class HtmlClient(
         return try {
             client.get(url)
         } catch (e: Exception) {
-            println(e.message)
+            console.logError(e.message.toString())
             null
         }
     }

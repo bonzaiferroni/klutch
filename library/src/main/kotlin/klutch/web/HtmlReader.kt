@@ -16,8 +16,6 @@ class HtmlReader {
         val docUrl = url.toUrl()
         val newsArticle = document.parseNewsArticle()
 
-        File("html/${docUrl.core}.html").writeText(document.html())
-
         var wordCount = 0
         var characterCount = 0
         val stack = mutableListOf<Element>()
@@ -75,8 +73,6 @@ class HtmlReader {
 
         val title = document.readHeadline() ?: newsArticle?.headline ?: document.title()
         val hostName = newsArticle?.publisher?.name ?: document.readHostName()
-
-        println("${docUrl.core}: $wordCount")
 
         return WebDocument(
             title = title,

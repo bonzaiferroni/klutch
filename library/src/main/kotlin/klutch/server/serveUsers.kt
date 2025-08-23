@@ -6,11 +6,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kabinet.api.UserApi
+import kabinet.console.globalConsole
 import kabinet.model.EditUserRequest
 import kabinet.model.SignUpRequest
 import klutch.utils.getClaim
 import kabinet.model.SignUpResult
 import klutch.db.services.UserApiService
+
+private val console = globalConsole.getHandle("serveUsers")
 
 fun Routing.serveUsers(service: UserApiService = UserApiService()) {
 
@@ -19,7 +22,7 @@ fun Routing.serveUsers(service: UserApiService = UserApiService()) {
             service.createUser(request)
             SignUpResult(true, "User created.")
         } catch (e: IllegalArgumentException) {
-            println("serveUsers.createUser fail: ${e.message}")
+            console.logError("serveUsers.createUser fail: ${e.message}")
             SignUpResult(false, e.message.toString())
         }
     }
