@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
@@ -27,7 +28,7 @@ class HtmlClient(
     suspend fun readUrl(url: String) = fetch(url)?.takeIf { it.status == HttpStatusCode.OK }?.bodyAsText()
         ?.let { readHtml(url, it) }
 
-    suspend fun readHtml(url: String, html: String) = parseHtml(html).let { reader.read(url, it) }
+    fun readHtml(url: String, html: String) = parseHtml(html).let { reader.read(url, it) }
 
     fun parseHtml(html: String): Document {
         return Ksoup.parse(html = html)
@@ -75,6 +76,13 @@ private val ktorHtmlClient = HttpClient(CIO) {
 //        }
     engine {
         requestTimeout = 30_000 // Timeout in milliseconds (30 seconds here)
+    }
+    HttpResponseValidator {
+        // intercept exceptions (timeouts, DNS, etc.) before Ktor logs 'em
+        handleResponseExceptionWithRequest { cause, _ ->
+            // do yer own logging here; avoid println to keep silence
+            console.logError(cause.message ?: "ktor error")
+        }
     }
 }
 
