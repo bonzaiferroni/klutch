@@ -6,7 +6,6 @@ import kabinet.web.Url
 import kabinet.web.toUrl
 import kabinet.web.toUrlOrNull
 import kotlinx.datetime.Instant
-import java.io.File
 
 class HtmlReader {
     fun read(
@@ -124,7 +123,7 @@ private val lassoTags = setOf("body", "main", "article")
 
 private val headingTags = setOf("h1", "h2", "h3", "h4", "h5", "h6")
 
-private val sentenceEnders = setOf('.', '?', '!')
+private val sentenceSignals = setOf('.', '?', '!', ':', '”', '“')
 
 fun Element.isHeading() = tag.tagName in headingTags
 
@@ -134,7 +133,7 @@ fun isHrefRelative(href: String) = !href.startsWith("http")
 
 fun isNotArticleParagraph(text: String) = text.isBlank()
         || text.first().isLowerCase()
-        || text.toCharArray().none { sentenceEnders.contains(it) }
+        || text.toCharArray().none { sentenceSignals.contains(it) }
 
 const val MAX_URL_CHARS = 400
 
