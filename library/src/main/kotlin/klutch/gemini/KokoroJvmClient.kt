@@ -2,13 +2,11 @@ package klutch.gemini
 
 import io.ktor.utils.io.charsets.Charset
 import kabinet.model.SpeechGenRequest
-import klutch.utils.pcmToWav
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.Base64
 import kotlin.concurrent.thread
 
-class KokoroClient {
+class KokoroJvmClient {
 
     fun getMessage(text: String) = runPyBytes("../../kokoro/speak.py", text)
 
