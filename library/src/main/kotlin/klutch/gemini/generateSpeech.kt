@@ -6,7 +6,7 @@ import io.ktor.http.HttpStatusCode
 import kabinet.model.GeminiVoice
 import kabinet.model.SpeechVoice
 
-suspend fun GeminiClient.generateSpeech(
+suspend fun GeminiClient.generateCacheSpeech(
     text: String,
     theme: String?,
     voice: String?,

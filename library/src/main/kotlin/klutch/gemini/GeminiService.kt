@@ -3,7 +3,7 @@ package klutch.gemini
 import kabinet.clients.GeminiMessage
 import kabinet.model.ImageGenRequest
 import kabinet.model.ImageUrls
-import kabinet.model.SpeechGenRequest
+import kabinet.model.SpeechRequest
 import kabinet.utils.toBase62
 import klutch.environment.Environment
 import klutch.environment.readEnvFromPath
@@ -64,13 +64,13 @@ class GeminiService(
         return ImageUrls(path, thumbPath)
     }
 
-    suspend fun generateSpeech(request: SpeechGenRequest): String? {
+    suspend fun generateSpeech(request: SpeechRequest): String? {
         val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
         val folder = "wav"
         val path = "$folder/$filename.wav"
         val file = File(path)
         if (file.exists()) return path
-        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
+        val data = client.generateCacheSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
         val bytes = pcmToWav(Base64.getDecoder().decode(data))
         file.writeBytes(bytes)
         return path

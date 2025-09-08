@@ -32,7 +32,6 @@ class HtmlFeedClient(
         val html = runCatching { client.get(feedUrl).bodyAsText() }.getOrNull() ?: return null
         val document = Ksoup.parse(html)
         val stories = document.select(storyQuery)
-        console.log("stories: ${stories.size}")
         return stories.mapNotNull { storyNode ->
             HtmlFeedItem(
                 author = provideAuthor(storyNode),
