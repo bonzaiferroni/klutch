@@ -1,5 +1,8 @@
 package klutch.web
 
+import kabinet.clients.WebContent
+import kabinet.clients.WebDocument
+import kabinet.clients.WebLink
 import kabinet.web.Url
 import kabinet.web.fromHrefOrNull
 

@@ -1,6 +1,8 @@
 package klutch.web
 
 import com.fleeksoft.ksoup.Ksoup
+import kabinet.clients.WebContent
+import kabinet.clients.WebDocument
 import kabinet.web.Url
 
 class HnReader {
