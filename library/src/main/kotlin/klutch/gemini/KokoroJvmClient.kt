@@ -1,29 +1,23 @@
 package klutch.gemini
 
 import io.ktor.utils.io.charsets.Charset
-import jep.Interpreter
-import jep.SharedInterpreter
-import kabinet.model.SpeechRequest
-import kabinet.model.SpeechVoice
+import kabinet.model.SpeechGenRequest
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.concurrent.thread
-import kotlin.use
 
-class KokoroClient {
+class KokoroJvmClient {
 
-    fun getMessageA(text: String) = runPyBytes("py/speak.py", text)
+    fun getMessage(text: String) = runPyBytes("../../kokoro/speak.py", text)
 
-    fun getMessageB(text: String) = runPyJep(text)
-
-    fun generateCacheSpeech(request: SpeechRequest): String {
+    fun generateSpeech(request: SpeechGenRequest): String {
         val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
         val folder = "wav"
         val path = "$folder/$filename.wav"
         val file = File(path)
         if (file.exists()) return path
         // val data = runPyBytes("../../kokoro/speak.py", request.text)
-        val data = runPyBytes("py/speak.py", request.text, request.voice?.apiName ?: SpeechVoice.Sky.apiName)
+        val data = runPyBytes("py/speak.py", request.text, request.voice?.apiName)
         // val bytes = pcmToWav(Base64.getDecoder().decode(data))
         file.writeBytes(data)
         return path
@@ -57,18 +51,5 @@ class KokoroClient {
             error("Python exited $code:\n$errText")
         }
         return out.toByteArray()
-    }
-
-    fun runPyJep(text: String): ByteArray {
-        SharedInterpreter().use { interp: Interpreter ->
-            // Import the script
-            val pyDir = File("py").absoluteFile.path   // folder that holds speak.py and the other script
-            interp.set("PY_DIR", pyDir)
-            interp.exec("import sys; sys.path.insert(0, PY_DIR)")  // make Python see yer modules
-            interp.exec("import speak") // just import, __name__ = 'speak', so guard won’t run
-
-            // Call the function
-            return interp.invoke("speak.tts_bytes", text) as ByteArray
-        }
     }
 }
