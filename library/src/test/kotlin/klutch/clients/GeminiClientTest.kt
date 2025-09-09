@@ -2,8 +2,8 @@ package klutch.clients
 
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
-import klutch.gemini.GeminiClient
-import klutch.gemini.generateEmbedding
+import kabinet.gemini.GeminiClient
+import kabinet.gemini.generateEmbedding
 import klutch.log.LogLevel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*

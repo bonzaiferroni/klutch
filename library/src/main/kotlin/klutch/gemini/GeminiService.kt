@@ -1,6 +1,12 @@
 package klutch.gemini
 
 import kabinet.clients.GeminiMessage
+import kabinet.gemini.GeminiClient
+import kabinet.gemini.generateCacheSpeech
+import kabinet.gemini.generateEmbedding
+import kabinet.gemini.generateImage
+import kabinet.gemini.generateTextFromMessages
+import kabinet.gemini.generateTextFromParts
 import kabinet.model.ImageGenRequest
 import kabinet.model.ImageUrls
 import kabinet.model.SpeechRequest

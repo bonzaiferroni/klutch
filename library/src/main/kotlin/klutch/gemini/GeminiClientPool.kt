@@ -1,6 +1,8 @@
 package klutch.gemini
 
 import io.ktor.http.HttpStatusCode
+import kabinet.gemini.GeminiApiResponse
+import kabinet.gemini.GeminiClient
 import klutch.log.LogLevel
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock

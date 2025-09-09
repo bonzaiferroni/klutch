@@ -2,6 +2,13 @@ package klutch.gemini
 
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
+import kabinet.gemini.GeminiApiRequest
+import kabinet.gemini.GeminiClient
+import kabinet.gemini.GeminiContent
+import kabinet.gemini.GeminiPart
+import kabinet.gemini.GeminiRequest
+import kabinet.gemini.GeminiResponse
+import kabinet.gemini.GenerationConfig
 import kabinet.utils.toSnakeCase
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
