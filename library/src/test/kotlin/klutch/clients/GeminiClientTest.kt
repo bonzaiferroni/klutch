@@ -30,7 +30,7 @@ class GeminiClientTest {
             // Verify result
             assertNotNull(result, "Embeddings result should not be null")
             assertEquals(5, result.size, "Embeddings should have 5 values")
-            assertEquals(0.1f, result[0], "First embedding value should be 0.1")
+            assertEquals(0.1f, result[0], "First embed value should be 0.1")
         }
     }
 }

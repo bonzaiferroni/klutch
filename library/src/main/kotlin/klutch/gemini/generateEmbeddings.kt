@@ -21,7 +21,7 @@ suspend fun GeminiClient.generateEmbedding(
             taskType = taskType,
             outputDimensionality = dimensions
         )
-        GeminiApiRequest("embedContent", request, "gemini-embedding-001")
+        GeminiApiRequest("embedContent", request, "gemini-embed-001")
     }
     if (response?.status == HttpStatusCode.OK) {
         return response.body<GeminiEmbeddingResponse>()
