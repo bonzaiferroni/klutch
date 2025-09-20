@@ -4,7 +4,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import kabinet.gemini.GeminiClient
 import kabinet.gemini.generateEmbedding
-import klutch.log.LogLevel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 

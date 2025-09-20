@@ -1,6 +1,6 @@
 package klutch.db
 
-import klutch.environment.Environment
+import kabinet.utils.Environment
 import klutch.utils.dbLog
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database

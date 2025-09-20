@@ -1,11 +1,12 @@
 package klutch.db.model
 
+import kabinet.model.UserId
 import kotlinx.datetime.Clock
 import kabinet.utils.epochSecondsNow
 
 data class RefreshToken(
     val id: Long,
-    val userId: String,
+    val userId: UserId,
     val token: String,
     val createdAt: Long,
     val ttl: Int,

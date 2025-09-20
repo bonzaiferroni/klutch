@@ -1,5 +1,6 @@
 package klutch.db.tables
 
+import kabinet.model.UserId
 import klutch.db.Aspect
 import kabinet.model.UserRole
 import kabinet.utils.toInstantFromUtc
@@ -24,7 +25,7 @@ object UserAspect: Aspect<UserAspect, User>(
 }
 
 fun ResultRow.toUser() = User(
-    id = this[UserAspect.id].value.toStringId(),
+    userId = UserId(this[UserAspect.id].value.toStringId()),
     name = this[UserAspect.name],
     username = this[UserAspect.username],
     hashedPassword = this[UserAspect.hashedPassword],

@@ -1,6 +1,7 @@
 package klutch.gemini
 
 import kabinet.clients.GeminiMessage
+import kabinet.console.LogLevel
 import kabinet.gemini.GeminiClient
 import kabinet.gemini.generateCacheSpeech
 import kabinet.gemini.generateEmbedding
@@ -10,10 +11,9 @@ import kabinet.gemini.generateTextFromParts
 import kabinet.model.ImageGenRequest
 import kabinet.model.ImageUrls
 import kabinet.model.SpeechRequest
+import kabinet.utils.Environment
 import kabinet.utils.toBase62
-import klutch.environment.Environment
 import klutch.environment.readEnvFromPath
-import klutch.log.LogLevel
 import klutch.utils.pcmToWav
 import klutch.utils.writePngThumbnail
 import kotlinx.datetime.Clock
@@ -86,11 +86,11 @@ class GeminiService(
 private val log = LoggerFactory.getLogger("Gemini")
 
 fun Logger.message(level: LogLevel, msg: String) = when(level) {
-    LogLevel.TRACE -> this.trace(msg)
-    LogLevel.DEBUG -> this.debug(msg)
-    LogLevel.INFO  -> this.info(msg)
-    LogLevel.WARNING  -> this.warn(msg)
-    LogLevel.ERROR -> this.error(msg)
+    LogLevel.Trace -> this.trace(msg)
+    LogLevel.Debug -> this.debug(msg)
+    LogLevel.Info  -> this.info(msg)
+    LogLevel.Warning  -> this.warn(msg)
+    LogLevel.Error -> this.error(msg)
 }
 
 fun toFilename(input: String): String =

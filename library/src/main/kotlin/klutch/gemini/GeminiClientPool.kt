@@ -1,9 +1,9 @@
 package klutch.gemini
 
 import io.ktor.http.HttpStatusCode
+import kabinet.console.LogLevel
 import kabinet.gemini.GeminiApiResponse
 import kabinet.gemini.GeminiClient
-import klutch.log.LogLevel
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -32,7 +32,7 @@ class GeminiClientPool(
 
     suspend fun <T> tryToken(requestBlock: suspend (GeminiClient) -> GeminiApiResponse<T>?): GeminiApiResponse<T>? {
         val isUnlimited = unlimitedClient != null && Clock.System.now() < unlimitedUntil
-        if (isUnlimited) logMessage(LogLevel.INFO, "Unlimited Token Used")
+        if (isUnlimited) logMessage(LogLevel.Info, "Unlimited Token Used")
 
         val client = when {
             isUnlimited -> unlimitedClient
@@ -43,10 +43,10 @@ class GeminiClientPool(
         if (response?.status == HttpStatusCode.TooManyRequests) {
             if (isUnlimited) {
                 restingUntil = Clock.System.now() + 1.hours
-                logMessage(LogLevel.ERROR, "Rate limit reached on unlimited token, resting")
+                logMessage(LogLevel.Error, "Rate limit reached on unlimited token, resting")
             } else {
                 unlimitedUntil = Clock.System.now() + 4.hours
-                logMessage(LogLevel.ERROR, "Token limit reached, attempting unlimited request")
+                logMessage(LogLevel.Error, "Token limit reached, attempting unlimited request")
                 return tryToken(requestBlock)
             }
         }

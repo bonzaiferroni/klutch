@@ -2,7 +2,6 @@ package klutch.server
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import klutch.db.model.User
 import kabinet.model.LoginRequest
@@ -63,7 +62,7 @@ suspend fun testToken(claimedUser: User, refreshToken: String, stayLoggedIn: Boo
     val service = RefreshTokenService()
     val cachedToken = service.readToken(refreshToken)
         ?: return null
-    if (cachedToken.userId != claimedUser.id) {
+    if (cachedToken.userId != claimedUser.userId) {
         return null
     }
     if (cachedToken.isExpired) {
@@ -85,7 +84,7 @@ fun generateToken() = UUID.randomUUID().toString()
 suspend fun createRefreshToken(user: User, stayLoggedIn: Boolean): String {
     val service = RefreshTokenService()
     val generatedToken = generateToken()
-    service.createToken(user.id, generatedToken, stayLoggedIn)
+    service.createToken(user.userId, generatedToken, stayLoggedIn)
     return generatedToken
 }
 

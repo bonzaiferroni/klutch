@@ -1,5 +1,6 @@
 package klutch.db.services
 
+import kabinet.model.UserId
 import kotlinx.datetime.Clock
 import klutch.db.DbService
 import klutch.db.model.RefreshToken
@@ -17,7 +18,7 @@ class RefreshTokenService : DbService() {
             .firstOrNull()?.toSessionToken()
     }
 
-    suspend fun createToken(userId: String, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
+    suspend fun createToken(userId: UserId, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
         val requestedTTL = when(stayLoggedIn) {
             true -> REFRESH_TOKEN_LONG_TTL
             false -> REFRESH_TOKEN_TEMP_TTL

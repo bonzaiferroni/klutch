@@ -45,7 +45,7 @@ class UserApiService : DbService() {
     suspend fun readUserDto(username: String): User {
         val user = readByUsernameOrEmail(username) ?: throw IllegalArgumentException("User not found")
         return User(
-            id = user.id,
+            userId = user.userId,
             username = user.username,
             roles = user.roles,
             avatarUrl = user.avatarUrl,

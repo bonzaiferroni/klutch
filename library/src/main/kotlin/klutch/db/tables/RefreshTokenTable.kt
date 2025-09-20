@@ -1,5 +1,6 @@
 package klutch.db.tables
 
+import kabinet.model.UserId
 import klutch.db.tables.UserTable
 import klutch.db.model.RefreshToken
 import klutch.utils.toStringId
@@ -25,7 +26,7 @@ object RefreshTokenTable : LongIdTable("refresh_token") {
 
 fun ResultRow.toSessionToken() = RefreshToken(
     id = this[RefreshTokenTable.id].value,
-    userId = this[RefreshTokenTable.user].value.toStringId(),
+    userId = UserId(this[RefreshTokenTable.user].value.toStringId()),
     token = this[RefreshTokenTable.token],
     createdAt = this[RefreshTokenTable.createdAt],
     ttl = this[RefreshTokenTable.ttl],
