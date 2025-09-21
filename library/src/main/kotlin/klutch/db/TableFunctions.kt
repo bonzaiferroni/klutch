@@ -1,13 +1,11 @@
 package klutch.db
 
-import klutch.utils.toUUID
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnSet
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
-import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.BatchUpdateStatement
@@ -65,10 +63,10 @@ fun <T : ColumnSet, C> T.readValue(
     .where { block(this@readValue) }
     .single()[column]
 
-fun <T : ColumnSet> T.readCount(
+fun <T : ColumnSet> T.count(
     block: SqlExpressionBuilder.(T) -> Op<Boolean>
 ) = this.selectAll()
-    .where { block(this@readCount) }
+    .where { block(this@count) }
     .count().toInt()
 
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.readById(

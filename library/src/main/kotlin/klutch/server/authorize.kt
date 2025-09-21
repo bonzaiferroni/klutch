@@ -3,6 +3,7 @@ package klutch.server
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
+import kabinet.console.globalConsole
 import klutch.db.model.User
 import kabinet.model.LoginRequest
 import klutch.db.tables.UserTable
@@ -10,36 +11,37 @@ import kabinet.model.Auth
 import kabinet.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
 import klutch.db.services.UserApiService
-import klutch.utils.serverLog
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
+private val console = globalConsole.getHandle("authorize")
+
 suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserApiService = UserApiService()): Auth? {
 
     val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
     if (claimedUser == null) {
-        serverLog.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
+        console.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
         throw InvalidLoginException("Invalid username")
     }
     loginRequest.password?.let {
         val givenPassword = it.deobfuscate()
         val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn)
         if (authInfo == null) {
-            serverLog.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
+            console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid password")
         }
-        serverLog.logInfo("authorize: password login by ${loginRequest.usernameOrEmail}")
+        console.logInfo("authorize: password login by ${loginRequest.usernameOrEmail}")
         return authInfo
     }
     loginRequest.refreshToken?.let {
         val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn)
         if (authInfo == null) {
-            serverLog.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
+            console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid token")
         }
-        serverLog.logDebug("authorize: session login by ${loginRequest.usernameOrEmail}")
+        console.logDebug("authorize: session login by ${loginRequest.usernameOrEmail}")
         this.respond(HttpStatusCode.OK, authInfo)
         return authInfo
     }

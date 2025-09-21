@@ -31,6 +31,7 @@ fun Routing.serveUsers(service: UserApiService = UserApiService()) {
         try {
             call.authorize(request)
         } catch (e: InvalidLoginException) {
+            console.log("Invalid login: ${request.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
             null
         }
