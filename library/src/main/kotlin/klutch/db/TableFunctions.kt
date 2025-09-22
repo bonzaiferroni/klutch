@@ -4,8 +4,10 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnSet
+import org.jetbrains.exposed.sql.ISqlExpressionBuilder
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.BatchUpdateStatement
@@ -150,3 +152,7 @@ fun <Id: Comparable<Id>, T: IdTable<Id>, Item> T.batchUpdate(
     }
     total
 }
+
+fun <Id : Comparable<Id>, T : IdTable<Id>> T.deleteSingle(
+    block: ISqlExpressionBuilder.(T) -> Op<Boolean>
+) = deleteWhere{ it.block(this@deleteSingle) } == 1
