@@ -23,16 +23,3 @@ object UserAspect: Aspect<UserAspect, User>(
     val createdAt = add(UserTable.createdAt)
     val updatedAt = add(UserTable.updatedAt)
 }
-
-fun ResultRow.toUser() = User(
-    userId = UserId(this[UserAspect.id].value.toStringId()),
-    name = this[UserAspect.name],
-    username = this[UserAspect.username],
-    hashedPassword = this[UserAspect.hashedPassword],
-    salt = this[UserAspect.salt],
-    email = this[UserAspect.email],
-    roles = this[UserAspect.roles].map { UserRole.valueOf(it) }.toSet(),
-    avatarUrl = this[UserAspect.avatarUrl],
-    createdAt = this[UserAspect.createdAt].toInstantFromUtc(),
-    updatedAt = this[UserAspect.updatedAt].toInstantFromUtc(),
-)

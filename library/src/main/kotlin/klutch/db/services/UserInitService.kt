@@ -4,24 +4,15 @@ import kabinet.console.globalConsole
 import kabinet.model.SignUpRequest
 import kabinet.model.UserRole
 import kabinet.utils.Environment
-import kabinet.utils.toLocalDateTimeUtc
 import klutch.db.DbService
 import klutch.db.count
-import klutch.db.model.User
-import klutch.db.read
 import klutch.db.tables.UserTable
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.insertIgnore
-import java.io.File
 
 private val console = globalConsole.getHandle(UserInitService::class)
 
 class UserInitService(
     private val env: Environment,
-    private val service: UserApiService = UserApiService()
+    private val service: UserTableService = UserTableService()
 ) : DbService() {
     suspend fun initUsers() = dbQuery {
         val username = env.read(ADMIN_USERNAME_KEY)
@@ -37,7 +28,7 @@ class UserInitService(
                 email = email,
                 name = name
             ),
-            userRoles = listOf(UserRole.USER.name, UserRole.ADMIN.name)
+            userRoles = setOf(UserRole.USER, UserRole.ADMIN)
         )
     }
 }

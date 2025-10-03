@@ -1,18 +1,17 @@
 package klutch.utils
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
 import kabinet.model.UserId
-import klutch.db.services.UserApiService
+import klutch.db.services.UserTableService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 
 suspend fun RoutingContext.getUserId() = getClaim(CLAIM_USERNAME).let {
-    UserApiService().readIdByUsername(it).toStringId().let { UserId(it) }
+    UserTableService().readIdByUsername(it).toStringId().let { UserId(it) }
 }
 
 fun RoutingContext.getUsername(): String {

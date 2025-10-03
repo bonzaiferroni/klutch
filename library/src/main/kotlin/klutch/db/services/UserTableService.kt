@@ -9,22 +9,22 @@ import kabinet.model.User
 import klutch.db.model.User as DbUser
 import kabinet.model.PrivateInfo
 import kabinet.model.SignUpRequest
-import kabinet.utils.randomUuidString
+import kabinet.model.UserId
 import kabinet.utils.toLocalDateTimeUtc
 import kabinet.utils.validEmail
 import kabinet.utils.validPassword
 import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
 import klutch.db.tables.UserAspect
+import klutch.db.tables.writeFull
 import klutch.server.generateUniqueSalt
 import klutch.server.hashPassword
 import klutch.server.toBase64
 import klutch.utils.eqLowercase
-import klutch.utils.toUUID
 import klutch.utils.serverLog
 import org.jetbrains.exposed.sql.*
 
-class UserApiService : DbService() {
+class UserTableService : DbService() {
 
     private fun readByUsername(username: String): DbUser? =
         UserAspect.readFirst { UserTable.username.lowerCase() eq username.lowercase() }
@@ -56,7 +56,7 @@ class UserApiService : DbService() {
 
     suspend fun createUser(
         info: SignUpRequest,
-        userRoles: List<String> = listOf(UserRole.USER.name),
+        userRoles: Set<UserRole> = setOf(UserRole.USER),
     ) = dbQuery {
         serverLog.logInfo("Creating user: ${info.username}")
         validateUsername(info)
@@ -68,15 +68,20 @@ class UserApiService : DbService() {
         val now = Clock.System.now()
 
         UserTable.insertAndGetId {
-            it[id] = randomUuidString().toUUID()
-            it[name] = info.name
-            it[username] = info.username
-            it[hashedPassword] = passwordHashed
-            it[salt] = uniqueSalt.toBase64()
-            it[email] = info.email
-            it[roles] = userRoles
-            it[createdAt] = now.toLocalDateTimeUtc()
-            it[updatedAt] = now.toLocalDateTimeUtc()
+            it.writeFull(
+                DbUser(
+                    userId = UserId.random(),
+                    name = info.name,
+                    username = info.username,
+                    hashedPassword = passwordHashed,
+                    salt = uniqueSalt.toBase64(),
+                    email = info.email,
+                    roles = userRoles.toSet(),
+                    avatarUrl = null,
+                    createdAt = now,
+                    updatedAt = now,
+                )
+            )
         }.value
     }
 

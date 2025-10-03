@@ -18,9 +18,7 @@ fun initDb(env: Environment, tables: List<Table>, execution: (Transaction.() -> 
         execution?.invoke(this)
     }
 
-    runBlocking {
-        initUsers()
-    }
+
 }
 
 fun connectDb(env: Environment) = Database.connect(

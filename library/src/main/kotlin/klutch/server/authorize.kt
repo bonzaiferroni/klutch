@@ -10,7 +10,7 @@ import klutch.db.tables.UserTable
 import kabinet.model.Auth
 import kabinet.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
-import klutch.db.services.UserApiService
+import klutch.db.services.UserTableService
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.SecretKeyFactory
@@ -18,7 +18,7 @@ import javax.crypto.spec.PBEKeySpec
 
 private val console = globalConsole.getHandle("authorize")
 
-suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserApiService = UserApiService()): Auth? {
+suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserTableService = UserTableService()): Auth? {
 
     val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
     if (claimedUser == null) {

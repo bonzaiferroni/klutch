@@ -1,21 +1,17 @@
 package klutch.server
 
-import io.ktor.client.request.request
 import io.ktor.http.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kabinet.api.UserApi
 import kabinet.console.globalConsole
-import kabinet.model.EditUserRequest
-import kabinet.model.SignUpRequest
 import klutch.utils.getClaim
 import kabinet.model.SignUpResult
-import klutch.db.services.UserApiService
+import klutch.db.services.UserTableService
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun Routing.serveUsers(service: UserApiService = UserApiService()) {
+fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 
     post(UserApi.Create) { request, endpoint ->
         try {
