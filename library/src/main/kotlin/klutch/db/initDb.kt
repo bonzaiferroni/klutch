@@ -17,8 +17,6 @@ fun initDb(env: Environment, tables: List<Table>, execution: (Transaction.() -> 
         SchemaUtils.create(*tables.toTypedArray())
         execution?.invoke(this)
     }
-
-
 }
 
 fun connectDb(env: Environment) = Database.connect(
