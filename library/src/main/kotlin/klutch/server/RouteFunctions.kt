@@ -8,14 +8,14 @@ import io.ktor.server.routing.*
 import kabinet.api.*
 import kabinet.db.TableId
 
-fun <Returned, E : GetEndpoint<Returned>> Route.get(
+fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
     endpoint: E,
     block: suspend RoutingContext.(E) -> Returned?
 ) = get(endpoint.path) {
     standardResponse { block(endpoint) }
 }
 
-fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.get(
+fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.getEndpoint(
     endpoint: E,
     convertId: (String) -> IdType,
     block: suspend RoutingContext.(IdType, E) -> Returned?
@@ -24,7 +24,7 @@ fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.get(
     standardResponse { block(id, endpoint) }
 }
 
-fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.get(
+fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.getEndpoint(
     endpoint: E,
     convertId: (String) -> IdType,
     block: suspend RoutingContext.(IdType, E) -> Returned?
@@ -33,7 +33,7 @@ fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> R
     standardResponse { block(id, endpoint) }
 }
 
-inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.post(
+inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Returned?
 ) = post(endpoint.path) {
@@ -41,7 +41,7 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(sentValue, endpoint) }
 }
 
-inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.update(
+inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
 ) = put(endpoint.path) {
@@ -49,7 +49,7 @@ inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.update(
     standardResponse { block(sentValue, endpoint) }
 }
 
-inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.delete(
+inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.deleteEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
 ) = delete(endpoint.path) {

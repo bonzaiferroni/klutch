@@ -13,7 +13,7 @@ private val console = globalConsole.getHandle("serveUsers")
 
 fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 
-    post(UserApi.Create) { request, endpoint ->
+    postEndpoint(UserApi.Create) { request, endpoint ->
         try {
             service.createUser(request)
             SignUpResult(true, "User created.")
@@ -23,7 +23,7 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
         }
     }
 
-    post(UserApi.Login) { request, endpoint ->
+    postEndpoint(UserApi.Login) { request, endpoint ->
         try {
             call.authorize(request)
         } catch (e: InvalidLoginException) {
@@ -34,12 +34,12 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
     }
 
     authenticateJwt {
-        get(UserApi.ReadInfo) {
+        getEndpoint(UserApi.ReadInfo) {
             val username = getClaim(CLAIM_USERNAME)
             service.readUserDto(username)
         }
 
-        get(UserApi.PrivateInfo) {
+        getEndpoint(UserApi.PrivateInfo) {
             val username = getClaim(CLAIM_USERNAME)
             service.getPrivateInfo(username)
         }
