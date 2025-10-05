@@ -10,6 +10,6 @@ fun HEAD.scripts(vararg scripts: String) {
     scripts.forEach { script -> script(src = "/static/$script") {} }
 }
 
-fun HEAD.coreStyles() = styles("styles.css", "button.css", "layout.css", "utilities.css")
+fun HEAD.coreStyles() = styles("reset.css", "styles.css", "button.css", "layout.css", "utilities.css")
 
 fun HEAD.coreScripts() = scripts("helpers.js")

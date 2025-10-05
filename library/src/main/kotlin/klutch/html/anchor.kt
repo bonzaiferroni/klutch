@@ -2,6 +2,9 @@ package klutch.html
 
 import kotlinx.html.*
 
-fun FlowContent.anchor() {
+fun FlowContent.anchor(
+) {
+    a() {
 
+    }
 }
