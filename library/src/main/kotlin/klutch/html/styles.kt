@@ -23,3 +23,8 @@ object Gap0: CssClass { override val value = "gap-0" }
 object AlignItemsCenter: CssClass { override val value = "align-items-center" }
 object FillWidth: CssClass { override val value = "fill-width" }
 object DimText: CssClass { override val value = "dim-text" }
+
+// animation
+object Fade: CssClass { override val value = "fade" }
+object Show: CssClass { override val value = "show" }
+object FadeStack: CssClass { override val value = "fade-stack" }
