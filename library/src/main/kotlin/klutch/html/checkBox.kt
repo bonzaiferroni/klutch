@@ -3,15 +3,15 @@ package klutch.html
 import kotlinx.html.*
 import kotlinx.html.label as labelCore
 
-fun FlowOrInteractiveOrPhrasingContent.checkBox(
+fun FlowContent.checkBox(
     id: Id,
     label: String,
 ) {
-    labelCore {
+    row(modify(AlignItemsCenter)) {
         checkBoxInput {
             this.id = id.value
             this.name = id.value
         }
-        +label
+        paragraph(label)
     }
 }
