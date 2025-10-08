@@ -2,8 +2,9 @@ package klutch.gemini
 
 import kabinet.clients.GeminiMessage
 import kabinet.console.LogLevel
+import kabinet.console.globalConsole
 import kabinet.gemini.GeminiClient
-import kabinet.gemini.generateCacheSpeech
+import kabinet.gemini.generateSpeech
 import kabinet.gemini.generateEmbedding
 import kabinet.gemini.generateImage
 import kabinet.gemini.generateTextFromMessages
@@ -27,6 +28,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+
+private val console = globalConsole.getHandle(GeminiService::class)
 
 class GeminiService(
     private val env: Environment = readEnvFromPath(),
@@ -70,16 +73,30 @@ class GeminiService(
         return ImageUrls(path, thumbPath)
     }
 
-    suspend fun generateSpeech(request: SpeechRequest): String? {
-        val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
-        val folder = "wav"
-        val path = "$folder/$filename.wav"
+    suspend fun generateSpeech(request: SpeechRequest): ByteArray? {
+        val file = request.takeIf { it.isCached }?.let { File(pathOf(it)) }
+        if (file != null && file.exists()) return file.readBytes().also { console.log("returning cached speech") }
+        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
+        val bytes = pcmToWav(Base64.getDecoder().decode(data))
+        file?.writeBytes(bytes)
+        return bytes
+    }
+
+    suspend fun generateSpeechUrl(request: SpeechRequest): String? {
+        val path = pathOf(request)
         val file = File(path)
         if (file.exists()) return path
-        val data = client.generateCacheSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
+        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
         val bytes = pcmToWav(Base64.getDecoder().decode(data))
         file.writeBytes(bytes)
         return path
+    }
+
+    private fun pathOf(request: SpeechRequest): String {
+        val filename = request.filename?.let { toFilename(it) }
+            ?: "${toFilename(request.text)}-${request.voice?.apiName}"
+        val folder = "wav"
+        return "$folder/$filename.wav"
     }
 }
 

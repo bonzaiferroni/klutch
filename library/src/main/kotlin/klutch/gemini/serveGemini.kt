@@ -10,16 +10,20 @@ import klutch.server.*
  */
 fun Routing.serveGemini(api: GeminiApi, service: GeminiService = GeminiService()) {
     // No need for authentication for this endpoint
-    postEndpoint(api.chat) { messages, endpoint ->
+    postEndpoint(api.chat) { messages, _ ->
         // Send the messages to the AI and getEndpoint a response
         service.chat(messages)
     }
 
-    postEndpoint(api.image) { request, endpoint ->
+    postEndpoint(api.image) { request, _ ->
         service.generateImage(request)
     }
 
-    postEndpoint(api.speech) { request, endpoint ->
+    postEndpoint(api.speechUrl) { request, _ ->
+        service.generateSpeechUrl(request)
+    }
+
+    postEndpoint(api.speech) { request, _ ->
         service.generateSpeech(request)
     }
 }
