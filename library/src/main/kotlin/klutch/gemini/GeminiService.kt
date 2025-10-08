@@ -39,6 +39,12 @@ class GeminiService(
         logMessage = log::message,
     )
 ) {
+    private val speechService = SpeechService { request ->
+        client.generateSpeech(request.text, request.theme, request.voice)?.let {
+            pcmToWav(Base64.getDecoder().decode(it))
+        }
+    }
+
     suspend inline fun <reified T> requestJson(vararg parts: String) = client.generateJson<T>(*parts)
 
     suspend fun generateEmbedding(text: String): FloatArray? {
@@ -73,31 +79,9 @@ class GeminiService(
         return ImageUrls(path, thumbPath)
     }
 
-    suspend fun generateSpeech(request: SpeechRequest): ByteArray? {
-        val file = request.takeIf { it.isCached }?.let { File(pathOf(it)) }
-        if (file != null && file.exists()) return file.readBytes().also { console.log("returning cached speech") }
-        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
-        val bytes = pcmToWav(Base64.getDecoder().decode(data))
-        file?.writeBytes(bytes)
-        return bytes
-    }
+    suspend fun generateSpeech(request: SpeechRequest) = speechService.generateSpeech(request)
 
-    suspend fun generateSpeechUrl(request: SpeechRequest): String? {
-        val path = pathOf(request)
-        val file = File(path)
-        if (file.exists()) return path
-        val data = client.generateSpeech(request.text, request.theme, request.voice?.apiName) ?: return null
-        val bytes = pcmToWav(Base64.getDecoder().decode(data))
-        file.writeBytes(bytes)
-        return path
-    }
-
-    private fun pathOf(request: SpeechRequest): String {
-        val filename = request.filename?.let { toFilename(it) }
-            ?: "${toFilename(request.text)}-${request.voice?.apiName}"
-        val folder = "wav"
-        return "$folder/$filename.wav"
-    }
+    suspend fun generateSpeechUrl(request: SpeechRequest) = speechService.generateSpeechUrl(request)
 }
 
 private val log = LoggerFactory.getLogger("Gemini")

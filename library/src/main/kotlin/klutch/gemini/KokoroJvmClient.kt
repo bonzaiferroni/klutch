@@ -17,7 +17,7 @@ class KokoroJvmClient {
         val file = File(path)
         if (file.exists()) return path
         // val data = runPyBytes("../../kokoro/speak.py", request.text)
-        val data = runPyBytes("py/speak.py", request.text, request.voice?.apiName)
+        val data = runPyBytes("py/speak.py", request.text, request.voice)
         // val bytes = pcmToWav(Base64.getDecoder().decode(data))
         file.writeBytes(data)
         return path
