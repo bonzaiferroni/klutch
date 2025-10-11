@@ -2,6 +2,7 @@ package klutch.gemini
 
 import io.ktor.utils.io.charsets.Charset
 import kabinet.model.SpeechRequest
+import kabinet.utils.toFilenameFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.concurrent.thread
@@ -11,7 +12,7 @@ class KokoroJvmClient {
     fun getMessage(text: String) = runPyBytes("../../kokoro/speak.py", text)
 
     fun generateSpeech(request: SpeechRequest): String {
-        val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
+        val filename = request.filename?.let { toFilenameFormat(it) } ?: "${toFilenameFormat(request.text)}-${provideTimestamp()}"
         val folder = "wav"
         val path = "$folder/$filename.wav"
         val file = File(path)

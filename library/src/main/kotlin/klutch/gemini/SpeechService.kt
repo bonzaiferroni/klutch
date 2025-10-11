@@ -3,6 +3,7 @@ package klutch.gemini
 import kabinet.console.globalConsole
 import kabinet.gemini.generateSpeech
 import kabinet.model.SpeechRequest
+import kabinet.utils.toFilenameFormat
 import klutch.utils.pcmToWav
 import java.io.File
 import java.util.Base64
@@ -32,8 +33,7 @@ class SpeechService(
     }
 
     private fun pathOf(request: SpeechRequest): String {
-        val filename = request.filename?.let { toFilename(it) }
-            ?: "${toFilename(request.text)}-${request.voice}"
+        val filename = request.toFilename()
         val folder = "wav"
         return "$folder/$filename.wav"
     }

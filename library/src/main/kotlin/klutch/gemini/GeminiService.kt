@@ -14,6 +14,7 @@ import kabinet.model.ImageUrls
 import kabinet.model.SpeechRequest
 import kabinet.utils.Environment
 import kabinet.utils.toBase62
+import kabinet.utils.toFilenameFormat
 import klutch.environment.readEnvFromPath
 import klutch.utils.pcmToWav
 import klutch.utils.writePngThumbnail
@@ -63,7 +64,7 @@ class GeminiService(
     suspend fun chat(messages: List<GeminiMessage>) = client.generateTextFromMessages(messages)
 
     suspend fun generateImage(request: ImageGenRequest): ImageUrls {
-        val filename = request.filename?.let { toFilename(it) } ?: "${toFilename(request.text)}-${provideTimestamp()}"
+        val filename = request.filename?.let { toFilenameFormat(it) } ?: "${toFilenameFormat(request.text)}-${provideTimestamp()}"
         val folder = "img"
         val path = "$folder/$filename.png"
         val thumbPath = "$folder/$filename-thumb.png"
@@ -93,11 +94,6 @@ fun Logger.message(level: LogLevel, msg: String) = when(level) {
     LogLevel.Warning  -> this.warn(msg)
     LogLevel.Error -> this.error(msg)
 }
-
-fun toFilename(input: String): String =
-    input
-        .take(64).lowercase()
-        .replace(Regex("[^A-Za-z0-9]"), "_")
 
 fun provideTimestamp() = Clock.System.now().toEpochMilliseconds().toBase62()
 
