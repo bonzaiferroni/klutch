@@ -2,6 +2,18 @@ package klutch.html
 
 import kotlinx.html.*
 
+fun FlowContent.label(
+    content: String,
+    vararg modifiers: CssClass?,
+    block: (DIV.() -> Unit)? = null
+) {
+    div {
+        this.classes = modify(*modifiers)
+        block?.let { it() }
+        +content
+    }
+}
+
 fun FlowContent.paragraph(
     content: String,
     modifiers: Set<String>? = null,

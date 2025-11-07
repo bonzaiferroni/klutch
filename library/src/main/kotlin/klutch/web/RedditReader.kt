@@ -43,7 +43,7 @@ class RedditReader {
 }
 
 fun extractLinks(markdown: String): Pair<String, List<WebLink>> {
-    // [text](url) but not ![image](...)
+    // [label](url) but not ![image](...)
     val mdLinkRegex = Regex("""(?<!!)\[(.+?)]\((https?[^)\s]+)(?:\s+"[^"]*")?\)""")
     // Plaintext http(s) links
     val plainLinkRegex = Regex("""https?://\S+""")

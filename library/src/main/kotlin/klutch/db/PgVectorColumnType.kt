@@ -13,7 +13,7 @@ class PgVectorColumnType(private val size: Int) : ColumnType<FloatArray>() {
 
     override fun sqlType(): String = "vector($size)"
 
-    // Read as text to dodge PGobject/PGvector classloader woes
+    // Read as label to dodge PGobject/PGvector classloader woes
     override fun readObject(rs: ResultSet, index: Int): FloatArray? {
         val s = rs.getString(index) ?: return null
         return parseVector(s)
@@ -26,7 +26,7 @@ class PgVectorColumnType(private val size: Int) : ColumnType<FloatArray>() {
         }
         is String -> parseVector(value)
         is PGobject -> {
-            val v = value.value ?: error("Null vector text in PGobject")
+            val v = value.value ?: error("Null vector label in PGobject")
             parseVector(v)
         }
         else -> error("Unexpected DB value for vector: ${value::class.java.name}")

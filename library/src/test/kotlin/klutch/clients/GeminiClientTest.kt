@@ -24,7 +24,7 @@ class GeminiClientTest {
     fun `test generateEmbeddings returns data on successful response`() {
         // Execute the function
         runTest {
-            val result = geminiClient.generateEmbedding("Test text")
+            val result = geminiClient.generateEmbedding("Test label")
 
             // Verify result
             assertNotNull(result, "Embeddings result should not be null")
