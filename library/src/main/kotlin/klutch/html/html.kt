@@ -9,6 +9,8 @@ fun HTML.head(
     head {
         title { +title }
         meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
+        coreStyles()
+        coreScripts()
         block()
     }
 }

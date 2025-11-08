@@ -9,7 +9,7 @@ import kotlinx.html.id
 fun FlowContent.box(
     id: Id,
     vararg modifiers: CssClass,
-    content: DIV.() -> Unit,
+    content: DIV.() -> Unit = { },
 ) {
     div {
         this.id = id.value
@@ -20,7 +20,7 @@ fun FlowContent.box(
 
 fun FlowContent.box(
     vararg modifiers: CssClass,
-    content: DIV.() -> Unit,
+    content: DIV.() -> Unit = { },
 ) {
     div {
         this.classes = modify(Box, *modifiers)
