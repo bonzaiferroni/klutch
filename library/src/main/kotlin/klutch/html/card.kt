@@ -6,24 +6,24 @@ import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.id
 
-fun FlowContent.card(
+inline fun FlowContent.card(
     id: Id,
     vararg modifiers: CssClass,
-    content: DIV.() -> Unit,
+    crossinline content: DIV.() -> Unit,
 ) {
     div {
         this.id = id.value
-        this.classes = modify(Card, *modifiers)
+        modify(Card, *modifiers)
         content()
     }
 }
 
-fun FlowContent.card(
+inline fun FlowContent.card(
     vararg modifiers: CssClass,
-    content: DIV.() -> Unit,
+    crossinline content: DIV.() -> Unit,
 ) {
     div {
-        this.classes = modify(Card, *modifiers)
+        modify(Card, *modifiers)
         content()
     }
 }

@@ -8,7 +8,7 @@ fun FlowContent.label(
     block: (DIV.() -> Unit)? = null
 ) {
     div {
-        this.classes = modify(*modifiers)
+        modify(*modifiers)
         block?.let { it() }
         +content
     }
@@ -16,60 +16,60 @@ fun FlowContent.label(
 
 fun FlowContent.paragraph(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     p {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
 
 fun FlowContent.heading1(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     h1 {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
 
 fun FlowContent.heading2(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     h2 {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
 
 fun FlowContent.heading3(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     h3 {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
 
 fun FlowContent.heading4(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     h4 {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
 
 fun FlowContent.heading5(
     content: String,
-    modifiers: Set<String>? = null,
+    vararg modifiers: CssClass,
 ) {
     h5 {
-        modifiers?.let { this.classes = modifiers }
+        modify(Row, *modifiers)
         +content
     }
 }
