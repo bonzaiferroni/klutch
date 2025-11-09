@@ -2,6 +2,20 @@ package klutch.html
 
 import kotlinx.html.*
 
+fun HTML.head(
+    title: String,
+    block: HEAD.() -> Unit,
+) {
+    head {
+        title { +title }
+        meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
+        coreStyles()
+        coreScripts()
+        script(src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js") { }
+        block()
+    }
+}
+
 fun HEAD.styles(vararg styles: String) {
     styles.forEach { style -> link { rel = "stylesheet"; href = "/static/css/$style" } }
 }
