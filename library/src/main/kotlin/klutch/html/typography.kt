@@ -2,25 +2,27 @@ package klutch.html
 
 import kotlinx.html.*
 
-fun FlowContent.label(
+inline fun FlowContent.label(
     content: String,
     vararg modifiers: CssClass?,
-    block: (DIV.() -> Unit)? = null
+    crossinline block: (DIV.() -> Unit) = { }
 ) {
     div {
         modify(*modifiers)
-        block?.let { it() }
+        block()
         +content
     }
 }
 
-fun FlowContent.paragraph(
-    content: String,
+inline fun FlowContent.paragraph(
+    content: String = "",
     vararg modifiers: CssClass,
+    crossinline block: P.() -> Unit = { }
 ) {
     p {
         modify(Row, *modifiers)
         +content
+        block()
     }
 }
 

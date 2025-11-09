@@ -39,5 +39,6 @@ fun HEAD.coreStyles() = styles(
 fun HEAD.coreScripts() = scripts(
     "utils.js",
     "tabs.js",
-    "logo.js"
+    "logo.js",
+    "lottie.js"
 )
