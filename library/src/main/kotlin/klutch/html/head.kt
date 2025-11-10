@@ -12,6 +12,8 @@ fun HTML.head(
         coreStyles()
         coreScripts()
         script(src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js") { }
+        script(src = "https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.js") { }
+        link(href = "https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.css", "stylesheet")
         block()
     }
 }
@@ -33,12 +35,14 @@ fun HEAD.coreStyles() = styles(
     "utilities.css",
     "animation.css",
     "tabs.css",
-    "logo.css"
+    "logo.css",
+    "geoMap.css"
 )
 
 fun HEAD.coreScripts() = scripts(
     "utils.js",
     "tabs.js",
     "logo.js",
-    "lottie.js"
+    "lottie.js",
+    "geoMap.js"
 )

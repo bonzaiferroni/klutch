@@ -20,7 +20,7 @@ inline fun FlowContent.paragraph(
     crossinline block: P.() -> Unit = { }
 ) {
     p {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
         block()
     }
@@ -31,7 +31,7 @@ fun FlowContent.heading1(
     vararg modifiers: CssClass,
 ) {
     h1 {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
     }
 }
@@ -41,7 +41,7 @@ fun FlowContent.heading2(
     vararg modifiers: CssClass,
 ) {
     h2 {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
     }
 }
@@ -51,7 +51,7 @@ fun FlowContent.heading3(
     vararg modifiers: CssClass,
 ) {
     h3 {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
     }
 }
@@ -61,7 +61,7 @@ fun FlowContent.heading4(
     vararg modifiers: CssClass,
 ) {
     h4 {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
     }
 }
@@ -71,7 +71,7 @@ fun FlowContent.heading5(
     vararg modifiers: CssClass,
 ) {
     h5 {
-        modify(Row, *modifiers)
+        modify(*modifiers)
         +content
     }
 }
