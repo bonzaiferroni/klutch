@@ -12,8 +12,7 @@ fun HTML.head(
         coreStyles()
         coreScripts()
         script(src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js") { }
-        script(src = "https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.js") { }
-        link(href = "https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.css", "stylesheet")
+        link { href = "/static/icon/foxicon.ico"; rel = "icon"}
         block()
     }
 }
@@ -22,27 +21,33 @@ fun HEAD.styles(vararg styles: String) {
     styles.forEach { style -> link { rel = "stylesheet"; href = "/static/css/$style" } }
 }
 
+fun HEAD.coreStyles() {
+    val styles = listOf(
+        "reset.css",
+        "styles.css",
+        "typography.css",
+        "button.css",
+        "layout.css",
+        "utilities.css",
+        "animation.css",
+        "tabs.css",
+        "logo.css",
+        "geoMap.css"
+    )
+    styles.forEach { style -> link { rel = "stylesheet"; href = "/static/core/css/$style" } }
+}
+
 fun HEAD.scripts(vararg scripts: String) {
     scripts.forEach { script -> script(src = "/static/js/$script") {} }
 }
 
-fun HEAD.coreStyles() = styles(
-    "reset.css",
-    "styles.css",
-    "typography.css",
-    "button.css",
-    "layout.css",
-    "utilities.css",
-    "animation.css",
-    "tabs.css",
-    "logo.css",
-    "geoMap.css"
-)
-
-fun HEAD.coreScripts() = scripts(
-    "utils.js",
-    "tabs.js",
-    "logo.js",
-    "lottie.js",
-    "geoMap.js"
-)
+fun HEAD.coreScripts() {
+    val scripts = listOf(
+        "utils.js",
+        "tabs.js",
+        "logo.js",
+        "lottie.js",
+        "geoMap.js"
+    )
+    scripts.forEach { script -> script(src = "/static/core/js/$script") {} }
+}

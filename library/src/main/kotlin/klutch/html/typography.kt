@@ -21,8 +21,8 @@ inline fun FlowContent.paragraph(
 ) {
     p {
         modify(*modifiers)
-        +content
         block()
+        +content
     }
 }
 

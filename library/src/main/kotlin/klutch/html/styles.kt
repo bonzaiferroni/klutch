@@ -22,8 +22,10 @@ object Box : CssClass { override val value = "layout-box"}
 // utilities
 object DisplayNone : CssClass { override val value = "display-none" }
 object Bold: CssClass { override val value = "bold" }
+object Italic: CssClass { override val value = "italic" }
 object NoGap: CssClass { override val value = "no-gap" }
 object AlignItemsCenter: CssClass { override val value = "align-items-center" }
+object AlignItemsStretch: CssClass { override val value = "align-items-stretch" }
 object FillWidth: CssClass { override val value = "fill-width" }
 object Dim: CssClass { override val value = "dim" }
 object NoDim: CssClass { override val value = "no-dim" }
@@ -33,6 +35,9 @@ object Flex2: CssClass { override val value = "flex-2" }
 object Flex3: CssClass { override val value = "flex-3" }
 object Flex4: CssClass { override val value = "flex-4" }
 object Large: CssClass { override val value = "large" }
+object FlexItems1: CssClass { override val value = "flex-items-1" }
+object TextAlignCenter: CssClass { override val value = "text-align-center"}
+object TextAlignRight: CssClass { override val value = "text-align-right"}
 
 // animation
 object Fade: CssClass { override val value = "fade" }

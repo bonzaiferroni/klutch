@@ -16,7 +16,7 @@ fun FlowContent.propertyValue(
     block: DIV.() -> Unit
 ) {
     row {
-        paragraph("${propertyName}:", Dim)
+        paragraph("${propertyName}:", Dim, TextAlignRight)
         block()
     }
 }
