@@ -47,7 +47,8 @@ fun HEAD.coreScripts() {
         "tabs.js",
         "logo.js",
         "lottie.js",
-        "geoMap.js"
+        "geoMap.js",
+        "web.js"
     )
     scripts.forEach { script -> script(src = "/static/core/js/$script") {} }
 }
