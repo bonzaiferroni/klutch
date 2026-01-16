@@ -50,5 +50,7 @@ fun HEAD.coreScripts() {
         "geoMap.js",
         "web.js"
     )
-    scripts.forEach { script -> script(src = "/static/core/js/$script") {} }
+    scripts.forEach { script -> script(src = corePath + script) {} }
 }
+
+val corePath = "/static/core/js/"
