@@ -48,7 +48,7 @@ fun HEAD.coreScripts() {
         "logo.js",
         "lottie.js",
         "geoMap.js",
-        "web.js"
+        "compiled/web.js"
     )
     scripts.forEach { script -> script(src = corePath + script) {} }
 }
