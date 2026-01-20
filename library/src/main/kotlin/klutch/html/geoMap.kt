@@ -6,10 +6,17 @@ fun FlowContent.geoMap(
     width: String = "100%",
     height: String = "400px",
 ) {
-    box(Id("geo-map-box")) {
-        style = "width: $width; height: $height;"
-        box(Id("geo-map"))
-        box(Id("geo-overlay"))
+    column {
+        style = "width: $width;"
+        box(Id("geo-map-box")) {
+            style = "width: $width; height: $height;"
+            box(Id("geo-map"))
+            box(Id("geo-overlay"))
+        }
+        paragraph {
+            id = "select-point"
+            + "no selection"
+        }
     }
 }
 
