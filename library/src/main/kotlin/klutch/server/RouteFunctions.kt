@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
+import io.ktor.util.toMap
 import kabinet.api.*
 import kabinet.db.TableId
 
@@ -31,6 +32,18 @@ fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> R
 ) = get(endpoint.serverIdTemplate) {
     val id = call.getIdOrThrow(convertId)
     standardResponse { block(id, endpoint) }
+}
+
+fun <Sent, Returned, E : QueryEndpoint<Sent, Returned>> Route.queryEndpoint(
+    endpoint: E,
+    factory: (Map<String, List<String>>) -> Sent?,
+    block: suspend RoutingContext.(Sent?, E) -> Returned?
+) = get(endpoint.path) {
+    standardResponse {
+        val params = call.request.queryParameters.toMap()
+        val sentValue = factory(params)
+        block(sentValue, endpoint)
+    }
 }
 
 inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
