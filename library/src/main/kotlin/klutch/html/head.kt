@@ -12,6 +12,8 @@ fun HTML.head(
         coreStyles()
         coreScripts()
         script(src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js") { }
+        script(src = "https://unpkg.com/react@18/umd/react.development.js") { }
+        script(src = "https://unpkg.com/react-dom@18/umd/react-dom.development.js") { }
         link { href = "/static/icon/foxicon.ico"; rel = "icon"}
         block()
     }
