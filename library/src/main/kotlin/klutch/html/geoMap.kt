@@ -13,9 +13,8 @@ fun FlowContent.geoMap(
             box(Id("geo-map"))
             box(Id("geo-overlay"))
         }
-        paragraph {
+        div {
             id = "select-point"
-            + "no selection"
         }
     }
 }
