@@ -1,8 +1,8 @@
 package klutch.gemini
 
 import io.ktor.utils.io.charsets.Charset
-import kabinet.model.SpeechRequest
-import kabinet.utils.toFilenameFormat
+import kampfire.model.SpeechRequest
+import kampfire.utils.toFilenameFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.concurrent.thread

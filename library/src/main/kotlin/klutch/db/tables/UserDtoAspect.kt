@@ -1,9 +1,9 @@
 package klutch.db.tables
 
 import klutch.db.Aspect
-import kabinet.model.UserRole
-import kabinet.model.User
-import kabinet.model.UserId
+import kampfire.model.UserRole
+import kampfire.model.User
+import kampfire.model.UserId
 import kabinet.utils.toInstantFromUtc
 import klutch.utils.toStringId
 import org.jetbrains.exposed.sql.ResultRow

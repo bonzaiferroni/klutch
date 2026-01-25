@@ -1,7 +1,6 @@
 package klutch.db.tables
 
-import kabinet.model.UserId
-import klutch.db.tables.UserTable
+import kampfire.model.UserId
 import klutch.db.model.RefreshToken
 import klutch.utils.toStringId
 import org.jetbrains.exposed.dao.id.LongIdTable

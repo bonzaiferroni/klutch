@@ -1,7 +1,7 @@
 package klutch.db.tables
 
-import kabinet.model.UserId
-import kabinet.model.UserRole
+import kampfire.model.UserId
+import kampfire.model.UserRole
 import kabinet.utils.toInstantFromUtc
 import kabinet.utils.toLocalDateTimeUtc
 import klutch.db.model.User

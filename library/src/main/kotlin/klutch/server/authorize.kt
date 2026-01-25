@@ -4,11 +4,11 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import kabinet.console.globalConsole
+import kampfire.model.Auth
 import klutch.db.model.User
-import kabinet.model.LoginRequest
+import kampfire.model.LoginRequest
 import klutch.db.tables.UserTable
-import kabinet.model.Auth
-import kabinet.utils.deobfuscate
+import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
 import klutch.db.services.UserTableService
 import java.security.SecureRandom
@@ -18,7 +18,7 @@ import javax.crypto.spec.PBEKeySpec
 
 private val console = globalConsole.getHandle("authorize")
 
-suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserTableService = UserTableService()): Auth? {
+suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserTableService = UserTableService()): Auth {
 
     val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
     if (claimedUser == null) {

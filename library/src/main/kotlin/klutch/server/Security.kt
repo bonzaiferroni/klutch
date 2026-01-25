@@ -11,8 +11,8 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import klutch.environment.readEnvFromPath
-import kabinet.model.UserRole
-import kabinet.model.toClaimValue
+import kampfire.model.UserRole
+import kampfire.model.toClaimValue
 import klutch.utils.serverLog
 import java.util.*
 

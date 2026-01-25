@@ -9,7 +9,7 @@ import kabinet.gemini.GeminiPart
 import kabinet.gemini.GeminiRequest
 import kabinet.gemini.GeminiResponse
 import kabinet.gemini.GenerationConfig
-import kabinet.utils.toSnakeCase
+import kampfire.utils.toSnakeCase
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor

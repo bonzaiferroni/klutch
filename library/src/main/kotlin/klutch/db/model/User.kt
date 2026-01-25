@@ -2,9 +2,9 @@ package klutch.db.model
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kabinet.model.UserRole
-import kabinet.model.PrivateInfo
-import kabinet.model.UserId
+import kampfire.model.UserRole
+import kampfire.model.PrivateInfo
+import kampfire.model.UserId
 
 @Serializable
 data class User(

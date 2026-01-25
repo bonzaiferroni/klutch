@@ -5,7 +5,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
-import kabinet.model.UserId
+import kampfire.model.UserId
 import klutch.db.services.UserTableService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME

@@ -6,8 +6,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.util.toMap
-import kabinet.api.*
-import kabinet.db.TableId
+import kampfire.api.*
 
 fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
     endpoint: E,

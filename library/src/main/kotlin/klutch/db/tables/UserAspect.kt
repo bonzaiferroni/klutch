@@ -1,11 +1,7 @@
 package klutch.db.tables
 
-import kabinet.model.UserId
 import klutch.db.Aspect
-import kabinet.model.UserRole
-import kabinet.utils.toInstantFromUtc
 import klutch.db.model.User
-import klutch.utils.toStringId
 import org.jetbrains.exposed.sql.ResultRow
 
 object UserAspect: Aspect<UserAspect, User>(

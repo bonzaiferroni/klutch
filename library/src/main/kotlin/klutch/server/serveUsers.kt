@@ -3,10 +3,10 @@ package klutch.server
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kabinet.api.UserApi
+import kampfire.api.UserApi
 import kabinet.console.globalConsole
 import klutch.utils.getClaim
-import kabinet.model.SignUpResult
+import kampfire.model.SignUpResult
 import klutch.db.services.UserTableService
 
 private val console = globalConsole.getHandle("serveUsers")
@@ -39,7 +39,7 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
             service.readUserDto(username)
         }
 
-        getEndpoint(UserApi.PrivateInfo) {
+        getEndpoint(UserApi.UserInfo) {
             val username = getClaim(CLAIM_USERNAME)
             service.getPrivateInfo(username)
         }

@@ -1,7 +1,7 @@
 package klutch.gemini
 
 import io.ktor.server.routing.Routing
-import kabinet.api.SpeechApi
+import kampfire.api.SpeechApi
 import klutch.server.postEndpoint
 
 fun Routing.serveSpeech(api: SpeechApi, service: SpeechService) {

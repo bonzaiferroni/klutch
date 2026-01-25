@@ -1,6 +1,6 @@
 package klutch.db.services
 
-import kabinet.model.UserId
+import kampfire.model.UserId
 import kotlinx.datetime.Clock
 import klutch.db.DbService
 import klutch.db.model.RefreshToken

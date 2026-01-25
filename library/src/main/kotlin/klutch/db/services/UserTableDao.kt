@@ -1,6 +1,6 @@
 package klutch.db.services
 
-import kabinet.model.UserId
+import kampfire.model.UserId
 import klutch.db.DbService
 import klutch.db.readById
 import klutch.db.tables.UserTable

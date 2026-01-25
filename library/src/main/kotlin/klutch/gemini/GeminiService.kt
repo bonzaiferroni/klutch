@@ -9,12 +9,12 @@ import kabinet.gemini.generateEmbedding
 import kabinet.gemini.generateImage
 import kabinet.gemini.generateTextFromMessages
 import kabinet.gemini.generateTextFromParts
-import kabinet.model.ImageGenRequest
-import kabinet.model.ImageUrls
-import kabinet.model.SpeechRequest
+import kampfire.model.ImageGenRequest
+import kampfire.model.ImageUrls
+import kampfire.model.SpeechRequest
 import kabinet.utils.Environment
 import kabinet.utils.toBase62
-import kabinet.utils.toFilenameFormat
+import kampfire.utils.toFilenameFormat
 import klutch.environment.readEnvFromPath
 import klutch.utils.pcmToWav
 import klutch.utils.writePngThumbnail

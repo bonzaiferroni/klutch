@@ -1,8 +1,8 @@
 package klutch.db.services
 
 import kabinet.console.globalConsole
-import kabinet.model.SignUpRequest
-import kabinet.model.UserRole
+import kampfire.model.SignUpRequest
+import kampfire.model.UserRole
 import kabinet.utils.Environment
 import klutch.db.DbService
 import klutch.db.count

@@ -1,12 +1,8 @@
 package klutch.gemini
 
 import kabinet.console.globalConsole
-import kabinet.gemini.generateSpeech
-import kabinet.model.SpeechRequest
-import kabinet.utils.toFilenameFormat
-import klutch.utils.pcmToWav
+import kampfire.model.SpeechRequest
 import java.io.File
-import java.util.Base64
 import kotlin.io.readBytes
 
 private val console = globalConsole.getHandle(SpeechService::class)

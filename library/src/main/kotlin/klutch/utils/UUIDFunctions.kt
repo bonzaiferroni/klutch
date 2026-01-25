@@ -2,7 +2,7 @@
 
 package klutch.utils
 
-import kabinet.db.TableId
+import kampfire.api.TableId
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.ExpressionWithColumnType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

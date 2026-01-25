@@ -1,15 +1,15 @@
 package klutch.db.services
 
-import kabinet.model.EditUserRequest
+import kampfire.model.EditUserRequest
 import klutch.db.tables.UserTable
 import kotlinx.datetime.Clock
 import klutch.db.DbService
-import kabinet.model.UserRole
-import kabinet.model.User
+import kampfire.model.UserRole
+import kampfire.model.User
 import klutch.db.model.User as DbUser
-import kabinet.model.PrivateInfo
-import kabinet.model.SignUpRequest
-import kabinet.model.UserId
+import kampfire.model.PrivateInfo
+import kampfire.model.SignUpRequest
+import kampfire.model.UserId
 import kabinet.utils.toLocalDateTimeUtc
 import kabinet.utils.validEmail
 import kabinet.utils.validPassword
