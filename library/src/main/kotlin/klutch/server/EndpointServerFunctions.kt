@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.util.toMap
 import kampfire.api.*
+import kampfire.utils.ParameterMap
 
 fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
     endpoint: E,
@@ -35,7 +36,7 @@ fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> R
 
 fun <Sent, Returned, E : QueryEndpoint<Sent, Returned>> Route.queryEndpoint(
     endpoint: E,
-    factory: (Map<String, List<String>>) -> Sent?,
+    factory: (ParameterMap) -> Sent?,
     block: suspend RoutingContext.(Sent?, E) -> Returned?
 ) = get(endpoint.path) {
     standardResponse {
