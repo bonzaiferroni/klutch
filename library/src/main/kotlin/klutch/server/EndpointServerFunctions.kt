@@ -71,6 +71,7 @@ inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.deleteEndpoint(
 }
 
 suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
+    if (call.response.isCommitted) return
     try {
         val value = block()
         if (value != null) {
