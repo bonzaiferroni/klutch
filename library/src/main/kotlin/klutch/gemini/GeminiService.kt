@@ -35,8 +35,8 @@ private val console = globalConsole.getHandle(GeminiService::class)
 class GeminiService(
     private val env: Environment = readEnvFromPath(),
     val client: GeminiClient = GeminiClient(
-        token = env.read("GEMINI_KEY_RATE_LIMIT_A"),
-        backupToken = env.read("GEMINI_KEY_RATE_LIMIT_B"),
+        token = env.read("GEMINI_KEY_A"),
+        backupToken = env.read("GEMINI_KEY_B"),
         logMessage = log::message,
     )
 ) {
