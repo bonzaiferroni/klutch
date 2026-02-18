@@ -8,6 +8,7 @@ import kabinet.console.globalConsole
 import klutch.utils.getClaim
 import kampfire.model.SignUpResult
 import klutch.db.services.UserTableService
+import klutch.utils.getUsername
 
 private val console = globalConsole.getHandle("serveUsers")
 
@@ -35,12 +36,12 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 
     authenticateJwt {
         getEndpoint(UserApi.ReadInfo) {
-            val username = getClaim(CLAIM_USERNAME)
-            service.readUserDto(username)
+            val username = getUsername()
+            service.readUserInfo(username)
         }
 
-        getEndpoint(UserApi.UserInfo) {
-            val username = getClaim(CLAIM_USERNAME)
+        getEndpoint(UserApi.Private) {
+            val username = getUsername()
             service.getPrivateInfo(username)
         }
 

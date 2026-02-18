@@ -15,6 +15,7 @@ import kabinet.utils.validEmail
 import kabinet.utils.validPassword
 import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
+import kampfire.model.UserInfo
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
 import klutch.server.generateUniqueSalt
@@ -42,15 +43,13 @@ class UserTableService : DbService() {
             .first()[UserTable.id].value
     }
 
-    suspend fun readUserDto(username: String): User {
+    suspend fun readUserInfo(username: String): UserInfo {
         val user = readByUsernameOrEmail(username) ?: throw IllegalArgumentException("User not found")
-        return User(
-            userId = user.userId,
+        return UserInfo(
             username = user.username,
             roles = user.roles,
             avatarUrl = user.avatarUrl,
             createdAt = user.createdAt,
-            updatedAt = user.updatedAt,
         )
     }
 
