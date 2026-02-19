@@ -7,11 +7,14 @@ import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kabinet.utils.epochSecondsNow
+import klutch.environment.readEnvFromPath
 import klutch.utils.toUUID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class RefreshTokenService : DbService() {
+    private val env = readEnvFromPath()
+
     suspend fun readToken(value: String): RefreshToken? = dbQuery {
         RefreshTokenTable.select(RefreshTokenTable.columns)
             .where { RefreshTokenTable.token eq value }
@@ -29,7 +32,7 @@ class RefreshTokenService : DbService() {
             it[createdAt] = Clock.epochSecondsNow()
             it[ttl] = requestedTTL
 
-            it[issuer] = "http://localhost:8080/"
+            it[issuer] = env.read("HOST_ADDRESS")
         }
     }
 

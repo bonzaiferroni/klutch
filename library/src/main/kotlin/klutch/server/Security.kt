@@ -18,8 +18,8 @@ import java.util.*
 
 fun Application.configureSecurity() {
     // Please readHtml the jwt property from the config file if you are using EngineMain
-    val audience = "http://localhost:8080/"
-    val issuer = "http://localhost:8080/"
+    val audience = env.read("HOST_ADDRESS")
+    val issuer = env.read("HOST_ADDRESS")
     val jwtRealm = "newsref api"
     val jwtSecret = env.read("APP_SECRET")
     authentication {
@@ -68,8 +68,8 @@ const val CLAIM_ROLES = "roles"
 private val env = readEnvFromPath()
 
 fun createJWT(username: String, roles: Set<UserRole>): String {
-    val audience = "http://localhost:8080/"
-    val issuer = "http://localhost:8080/"
+    val audience = env.read("HOST_ADDRESS")
+    val issuer = env.read("HOST_ADDRESS")
     val secret = env.read("APP_SECRET")
     return JWT.create()
         .withAudience(audience)
