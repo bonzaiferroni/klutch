@@ -52,7 +52,7 @@ fun Application.configureSecurity() {
                         serverLog.logError("Security: Invalid JWT format: ${e.message}")
                     }
                 } else {
-                    serverLog.logError("Security: No Bearer token found in the request.")
+                    serverLog.logWarn("Security: No Bearer token found in the request.")
                 }
                 serverLog.logDebug("Security: JWT authentication failed")
                 call.respond(HttpStatusCode.Unauthorized)
