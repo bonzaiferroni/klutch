@@ -54,6 +54,14 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(sentValue, endpoint) }
 }
 
+inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(PostRequest<Sent, Returned, E>) -> Returned?
+) = post(endpoint.path) {
+    val sentValue = call.receive<Sent>()
+    standardResponse { block(PostRequest(sentValue, endpoint)) }
+}
+
 inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
@@ -103,3 +111,8 @@ fun <T: Any> ApplicationCall.getIdOrThrow(convertId: (String) -> T?): T {
 }
 
 class UnauthorizedUserException(override val message: String? = null) : Exception()
+
+data class PostRequest<Sent, Returned, Endpoint: PostEndpoint<Sent, Returned>>(
+    val body: Sent,
+    val endpoint: Endpoint
+)
