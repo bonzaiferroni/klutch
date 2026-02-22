@@ -19,18 +19,35 @@ class ConsoleAppender(
     }
 
     companion object {
+
         private fun defaultHandler(e: ILoggingEvent) {
-            // example: print yer own format
-            // val line = "${e.level} ${e.loggerName} - ${e.formattedMessage}"
-            // println(line)
             if (e.level == Level.OFF) return
-            val throwable = e.throwableProxy  // just the exception message
 
             val msg = buildString {
                 append("${e.level} ${e.loggerName} - ${e.formattedMessage}")
+
+                val throwable = e.throwableProxy
                 if (throwable != null) {
                     appendLine()
                     append("${throwable.className}: ${throwable.message}")
+
+                    throwable.stackTraceElementProxyArray?.forEach { element ->
+                        appendLine()
+                        append("\tat ${element.steAsString}")
+                    }
+
+                    var cause = throwable.cause
+                    while (cause != null) {
+                        appendLine()
+                        append("Caused by: ${cause.className}: ${cause.message}")
+
+                        cause.stackTraceElementProxyArray?.forEach { element ->
+                            appendLine()
+                            append("\tat ${element.steAsString}")
+                        }
+
+                        cause = cause.cause
+                    }
                 }
             }
 
