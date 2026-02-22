@@ -7,9 +7,11 @@ import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.CustomFunction
 import org.jetbrains.exposed.sql.DoubleColumnType
 import org.jetbrains.exposed.sql.Expression
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.QueryBuilder
 import org.jetbrains.exposed.sql.QueryParameter
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.andWhere
@@ -49,6 +51,21 @@ fun Column<PGpoint>.lat(): Expression<Double> =
             queryBuilder.append("("); queryBuilder.append(this@lat); queryBuilder.append(")[2]::float8")
         }
     }
+
+private const val NEAR_EQ_METERS = 5.0  // “a few meters”, tweak if ye like
+
+fun Column<PGpoint>.isNearEq(point: GeoPoint): Op<Boolean> {
+    val lat = point.lat
+
+    val degLat = NEAR_EQ_METERS / METERS_PER_DEG_LAT
+    val degLng = NEAR_EQ_METERS / (METERS_PER_DEG_LAT * cos(Math.toRadians(lat)).coerceAtLeast(1e-9))
+    val radiusDegrees = minOf(degLat, degLng)
+
+    val centerParam = QueryParameter(PGpoint(point.lng, point.lat), PointColumnType)
+    val dist = InfixOpDouble(this, "<->", centerParam)
+
+    return dist lessEq QueryParameter(radiusDegrees, DoubleColumnType())
+}
 
 private class InfixOpDouble(
     private val left: Expression<*>,
