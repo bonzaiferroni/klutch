@@ -52,13 +52,11 @@ fun Column<PGpoint>.lat(): Expression<Double> =
         }
     }
 
-private const val NEAR_EQ_METERS = 5.0  // “a few meters”, tweak if ye like
-
-fun Column<PGpoint>.isNearEq(point: GeoPoint): Op<Boolean> {
+fun Column<PGpoint>.isNearEq(point: GeoPoint, errorMarginMeters: Double = 100.0): Op<Boolean> {
     val lat = point.lat
 
-    val degLat = NEAR_EQ_METERS / METERS_PER_DEG_LAT
-    val degLng = NEAR_EQ_METERS / (METERS_PER_DEG_LAT * cos(Math.toRadians(lat)).coerceAtLeast(1e-9))
+    val degLat = errorMarginMeters / METERS_PER_DEG_LAT
+    val degLng = errorMarginMeters / (METERS_PER_DEG_LAT * cos(Math.toRadians(lat)).coerceAtLeast(1e-9))
     val radiusDegrees = minOf(degLat, degLng)
 
     val centerParam = QueryParameter(PGpoint(point.lng, point.lat), PointColumnType)
