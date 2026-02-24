@@ -33,7 +33,7 @@ class ConsoleAppender(
 
                     throwable.stackTraceElementProxyArray?.forEach { element ->
                         appendLine()
-                        append("\tat ${element.steAsString}")
+                        append("  ${element.steAsString}")
                     }
 
                     var cause = throwable.cause
@@ -43,7 +43,7 @@ class ConsoleAppender(
 
                         cause.stackTraceElementProxyArray?.forEach { element ->
                             appendLine()
-                            append("\tat ${element.steAsString}")
+                            append("  ${element.steAsString}")
                         }
 
                         cause = cause.cause
