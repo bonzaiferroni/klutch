@@ -1,6 +1,7 @@
 package klutch.db
 
 import kampfire.model.Distance
+import kampfire.model.GeoBounds
 import kampfire.model.GeoPoint
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnType
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.QueryBuilder
 import org.jetbrains.exposed.sql.QueryParameter
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
@@ -41,14 +43,14 @@ object PointColumnType : ColumnType<PGpoint>() {
 fun Column<PGpoint>.lng(): Expression<Double> =
     object : Expression<Double>() {
         override fun toQueryBuilder(queryBuilder: QueryBuilder) {
-            queryBuilder.append("("); queryBuilder.append(this@lng); queryBuilder.append(")[1]::float8")
+            queryBuilder.append("("); queryBuilder.append(this@lng); queryBuilder.append(")[0]::float8")
         }
     }
 
 fun Column<PGpoint>.lat(): Expression<Double> =
     object : Expression<Double>() {
         override fun toQueryBuilder(queryBuilder: QueryBuilder) {
-            queryBuilder.append("("); queryBuilder.append(this@lat); queryBuilder.append(")[2]::float8")
+            queryBuilder.append("("); queryBuilder.append(this@lat); queryBuilder.append(")[1]::float8")
         }
     }
 
@@ -63,6 +65,19 @@ fun Column<PGpoint>.isNearEq(point: GeoPoint, errorMarginMeters: Double = 100.0)
     val dist = InfixOpDouble(this, "<->", centerParam)
 
     return dist lessEq QueryParameter(radiusDegrees, DoubleColumnType())
+}
+
+fun Column<PGpoint>.inBounds(bounds: GeoBounds): Op<Boolean> {
+    val x = lng()
+    val y = lat()
+
+    val minLng = minOf(bounds.sw.lng, bounds.ne.lng)
+    val maxLng = maxOf(bounds.sw.lng, bounds.ne.lng)
+    val minLat = minOf(bounds.sw.lat, bounds.ne.lat)
+    val maxLat = maxOf(bounds.sw.lat, bounds.ne.lat)
+
+    return (x greaterEq doubleParam(minLng)) and (x lessEq doubleParam(maxLng)) and
+            (y greaterEq doubleParam(minLat)) and (y lessEq doubleParam(maxLat))
 }
 
 private class InfixOpDouble(
