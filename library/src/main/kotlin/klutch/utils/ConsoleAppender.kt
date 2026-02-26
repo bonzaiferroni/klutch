@@ -36,18 +36,18 @@ class ConsoleAppender(
                         append("  ${element.steAsString}")
                     }
 
-                    var cause = throwable.cause
-                    while (cause != null) {
-                        appendLine()
-                        append("Caused by: ${cause.className}: ${cause.message}")
-
-                        cause.stackTraceElementProxyArray?.forEach { element ->
-                            appendLine()
-                            append("  ${element.steAsString}")
-                        }
-
-                        cause = cause.cause
-                    }
+//                    var cause = throwable.cause
+//                    while (cause != null) {
+//                        appendLine()
+//                        append("Caused by: ${cause.className}: ${cause.message}")
+//
+//                        cause.stackTraceElementProxyArray?.forEach { element ->
+//                            appendLine()
+//                            append("  ${element.steAsString}")
+//                        }
+//
+//                        cause = cause.cause
+//                    }
                 }
             }
 

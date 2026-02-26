@@ -58,7 +58,15 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> Returned?
 ) = post(endpoint.path) {
-    val sentValue = call.receive<Sent>()
+    val raw = call.receive<Sent>()
+
+    val sentValue: Sent =
+        if (raw is String && Sent::class == String::class) {
+            raw.removeSurrounding("\"") as Sent
+        } else {
+            raw
+        }
+
     standardResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
