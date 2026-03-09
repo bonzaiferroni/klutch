@@ -16,7 +16,15 @@ fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
     standardResponse { block(endpoint) }
 }
 
-fun <Returned, E : GetByIdEndpoint<Returned>, IdType> Route.getEndpoint(
+fun <Returned, E : GetByIdEndpoint<String, Returned>> Route.getEndpoint(
+    endpoint: E,
+    block: suspend RoutingContext.(DataRequest<String, Returned, E>) -> Returned?
+) = get(endpoint.serverIdTemplate) {
+    val id = call.getStringIdOrThrow()
+    standardResponse { block(DataRequest(id, endpoint)) }
+}
+
+fun <Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getEndpoint(
     endpoint: E,
     convertId: (String) -> IdType,
     block: suspend RoutingContext.(IdType, E) -> Returned?
@@ -114,13 +122,16 @@ class MissingParameterException(val param: String) : Exception("Missing required
 
 fun ApplicationCall.getIdOrThrow() = getIdOrThrow { it.toIntOrNull() }
 
+fun ApplicationCall.getStringIdOrThrow(): String = this.parameters["id"] ?: throw IllegalArgumentException("Id not found")
+
 fun <T: Any> ApplicationCall.getIdOrThrow(convertId: (String) -> T?): T {
     return this.parameters["id"]?.let { convertId(it) } ?: throw IllegalArgumentException("Id not found")
 }
 
 class UnauthorizedUserException(override val message: String? = null) : Exception()
 
-data class DataRequest<Sent, Returned, Endpoint: PostEndpoint<Sent, Returned>>(
-    val body: Sent,
-    val endpoint: Endpoint
+data class DataRequest<Sent, Returned, E: Endpoint<Sent, Returned>>(
+    val data: Sent,
+    val endpoint: E
 )
+
