@@ -80,6 +80,6 @@ fun createJWT(username: String, roles: Set<UserRole>): String {
         .sign(Algorithm.HMAC256(secret))
 }
 
-fun Route.authenticateJwt(block: Route.() -> Unit) = authenticate(TOKEN_NAME) {
+fun Route.authenticateJwt(optional: Boolean = false, block: Route.() -> Unit) = authenticate(TOKEN_NAME, optional = optional) {
     block()
 }

@@ -40,7 +40,7 @@ class UserTableService : DbService() {
     suspend fun readIdByUsername(username: String) = dbQuery {
         UserTable.select(UserTable.id)
             .where { UserTable.username.eq(username) }
-            .first()[UserTable.id].value
+            .firstOrNull()?.getOrNull(UserTable.id)?.value
     }
 
     suspend fun readUserInfo(username: String): UserInfo {

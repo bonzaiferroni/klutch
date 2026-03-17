@@ -5,7 +5,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kampfire.api.UserApi
 import kabinet.console.globalConsole
-import klutch.utils.getClaim
 import kampfire.model.SignUpResult
 import klutch.db.services.UserTableService
 import klutch.utils.getUsername

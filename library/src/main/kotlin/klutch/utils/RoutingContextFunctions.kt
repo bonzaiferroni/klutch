@@ -10,20 +10,26 @@ import klutch.db.services.UserTableService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 
-suspend fun RoutingContext.getUserId() = getClaim(CLAIM_USERNAME).let {
-    UserTableService().readIdByUsername(it).toStringId().let { UserId(it) }
+suspend fun RoutingContext.getUserId() = getUserIdOrNull() ?: error("user id not provided")
+
+suspend fun RoutingContext.getUserIdOrNull() = getClaimOrNull(CLAIM_USERNAME)?.let { username ->
+    UserTableService().readIdByUsername(username)?.toStringId()?.let { UserId(it) }
+}
+
+fun RoutingContext.getUsernameOrNull(): String? {
+    return getClaimOrNull(CLAIM_USERNAME)
 }
 
 fun RoutingContext.getUsername(): String {
-    return getClaim(CLAIM_USERNAME)
+    return getClaimOrNull(CLAIM_USERNAME) ?: error("username not provided")
 }
 
 fun RoutingContext.testRole(role: String): Boolean {
-    return getClaim(CLAIM_ROLES).contains(role)
+    return getClaimOrNull(CLAIM_ROLES)?.contains(role) ?: false
 }
 
-fun RoutingContext.getClaim(name: String): String {
-    return call.principal<JWTPrincipal>()?.payload?.getClaim(name)?.asString() ?: ""
+fun RoutingContext.getClaimOrNull(name: String): String? {
+    return call.principal<JWTPrincipal>()?.payload?.getClaim(name)?.asString()
 }
 
 suspend inline fun <reified T: Any> RoutingContext.okData(data: T) {
