@@ -7,6 +7,7 @@ import kampfire.api.UserApi
 import kabinet.console.globalConsole
 import kampfire.model.SignUpResult
 import klutch.db.services.UserTableService
+import klutch.utils.getUserId
 import klutch.utils.getUsername
 
 private val console = globalConsole.getHandle("serveUsers")
@@ -42,6 +43,11 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
         getEndpoint(UserApi.Private) {
             val username = getUsername()
             service.getPrivateInfo(username)
+        }
+
+        postEndpoint(UserApi.Update) {
+            val userId = getUserId()
+            service.updateUser(it.data, userId)
         }
 
 //        put(UserApi.Users.Update) {

@@ -16,11 +16,14 @@ import kabinet.utils.validPassword
 import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
 import kampfire.model.UserInfo
+import klutch.db.readFirst
+import klutch.db.readFirstOrNull
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
 import klutch.server.generateUniqueSalt
 import klutch.server.hashPassword
 import klutch.server.toBase64
+import klutch.utils.eq
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
 import org.jetbrains.exposed.sql.*
@@ -110,6 +113,7 @@ class UserTableService : DbService() {
             ?: throw IllegalArgumentException("User not found")
     }
 
+    // I made this a long time ago, suitable for account deletion
     suspend fun updateUser(username: String, info: EditUserRequest) = dbQuery {
         if (info.deleteUser) {
             serverLog.logInfo("UserService: Deleting user $username")
@@ -125,5 +129,16 @@ class UserTableService : DbService() {
                 it[updatedAt] = Clock.System.now().toLocalDateTimeUtc()
             }
         }
+    }
+
+    suspend fun updateUser(user: UserInfo, userId: UserId) = dbQuery {
+        UserTable.update({ UserTable.id.eq(userId)}) {
+            it[this.username] = user.username
+            it[this.avatarUrl] = user.avatarUrl
+        } == 1
+    }
+
+    suspend fun checkUsername(username: String) = dbQuery {
+        UserTable.readFirstOrNull { UserTable.username.eqLowercase(username) } == null
     }
 }
