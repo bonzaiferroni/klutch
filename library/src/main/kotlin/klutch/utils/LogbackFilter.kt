@@ -3,9 +3,9 @@ package klutch.utils
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.filter.Filter
 import ch.qos.logback.core.spi.FilterReply
-import kabinet.console.console
+import kabinet.console.globalConsole
 
-private val console = console.getHandle(LogbackFilter::class)
+private val console = globalConsole.getHandle(LogbackFilter::class)
 
 class LogbackFilter : Filter<ILoggingEvent>() {
     override fun decide(event: ILoggingEvent): FilterReply {

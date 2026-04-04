@@ -25,7 +25,7 @@ fun ResultRow.toUserDto() = User(
     username = this[UserDtoAspect.username],
     roles = this[UserDtoAspect.roles].map { UserRole.valueOf(it) }.toSet(),
     avatarUrl = this[UserDtoAspect.avatarUrl],
-    createdAt = this[UserDtoAspect.createdAt].toInstantFromUtc(),
-    updatedAt = this[UserDtoAspect.updatedAt].toInstantFromUtc(),
+    createdAt = this[UserDtoAspect.createdAt],
+    updatedAt = this[UserDtoAspect.updatedAt],
 )
 

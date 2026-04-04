@@ -1,11 +1,11 @@
 package klutch.gemini
 
-import kabinet.console.console
+import kabinet.console.globalConsole
 import kampfire.model.SpeechRequest
 import java.io.File
 import kotlin.io.readBytes
 
-private val console = console.getHandle(SpeechService::class)
+private val console = globalConsole.getHandle(SpeechService::class)
 
 class SpeechService(
     private val provideSpeech: suspend (SpeechRequest) -> ByteArray?

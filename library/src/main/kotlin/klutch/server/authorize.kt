@@ -3,7 +3,7 @@ package klutch.server
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import kabinet.console.console
+import kabinet.console.globalConsole
 import kampfire.model.Auth
 import klutch.db.model.User
 import kampfire.model.LoginRequest
@@ -16,7 +16,7 @@ import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-private val console = console.getHandle("authorize")
+private val console = globalConsole.getHandle("authorize")
 
 suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserTableService = UserTableService()): Auth {
 

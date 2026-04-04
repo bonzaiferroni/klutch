@@ -4,13 +4,13 @@ import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kampfire.api.UserApi
-import kabinet.console.console
+import kabinet.console.globalConsole
 import kampfire.model.SignUpResult
 import klutch.db.services.UserTableService
 import klutch.utils.getUserId
 import klutch.utils.getUsername
 
-private val console = console.getHandle("serveUsers")
+private val console = globalConsole.getHandle("serveUsers")
 
 fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 

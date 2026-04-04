@@ -1,6 +1,6 @@
 package klutch.db.services
 
-import kabinet.console.console
+import kabinet.console.globalConsole
 import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
 import kabinet.utils.Environment
@@ -8,7 +8,7 @@ import klutch.db.DbService
 import klutch.db.count
 import klutch.db.tables.UserTable
 
-private val console = console.getHandle(UserInitService::class)
+private val console = globalConsole.getHandle(UserInitService::class)
 
 class UserInitService(
     private val env: Environment,

@@ -126,7 +126,7 @@ class UserTableService : DbService() {
                 it[email] = info.email
                 if (info.deleteEmail) it[email] = null
                 it[avatarUrl] = info.avatarUrl
-                it[updatedAt] = Clock.System.now().toLocalDateTimeUtc()
+                it[updatedAt] = Clock.System.now()
             }
         }
     }

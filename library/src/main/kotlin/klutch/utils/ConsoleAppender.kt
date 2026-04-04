@@ -3,7 +3,7 @@ package klutch.utils
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import kabinet.console.LogLevel
-import kabinet.console.console
+import kabinet.console.globalConsole
 import ch.qos.logback.classic.Level
 
 class ConsoleAppender(
@@ -51,7 +51,7 @@ class ConsoleAppender(
                 }
             }
 
-            console.log(e.loggerName, e.level.toLogLevel(), msg)
+            globalConsole.log(e.loggerName, e.level.toLogLevel(), msg)
         }
     }
 }

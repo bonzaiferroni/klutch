@@ -7,11 +7,11 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import kabinet.console.console
+import kabinet.console.globalConsole
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
-private val console = console.getHandle(HtmlFeedClient::class)
+private val console = globalConsole.getHandle(HtmlFeedClient::class)
 
 class HtmlFeedClient(
     val feedUrl: String,
