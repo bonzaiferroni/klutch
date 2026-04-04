@@ -2,7 +2,7 @@ package klutch.gemini
 
 import kabinet.clients.GeminiMessage
 import kabinet.console.LogLevel
-import kabinet.console.globalConsole
+import kabinet.console.console
 import kabinet.gemini.GeminiClient
 import kabinet.gemini.generateSpeech
 import kabinet.gemini.generateEmbedding
@@ -30,7 +30,7 @@ import java.nio.ByteOrder
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
-private val console = globalConsole.getHandle(GeminiService::class)
+private val console = console.getHandle(GeminiService::class)
 
 class GeminiService(
     private val env: Environment = readEnvFromPath(),

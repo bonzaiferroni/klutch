@@ -11,6 +11,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
+import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 object UserTable : UUIDTable("user") {
     val name = text("name").nullable()
@@ -20,8 +21,8 @@ object UserTable : UUIDTable("user") {
     val email = text("email").nullable()
     val roles = array<String>("roles")
     val avatarUrl = text("avatar_url").nullable()
-    val createdAt = datetime("created_at")
-    val updatedAt = datetime("updated_at")
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
 }
 
 // Row mapper
@@ -34,8 +35,8 @@ fun ResultRow.toUser() = User(
     email = this[UserTable.email],
     roles = this[UserTable.roles].map { UserRole.valueOf(it) }.toSet(),
     avatarUrl = this[UserTable.avatarUrl],
-    createdAt = this[UserTable.createdAt].toInstantFromUtc(),
-    updatedAt = this[UserTable.updatedAt].toInstantFromUtc(),
+    createdAt = this[UserTable.createdAt],
+    updatedAt = this[UserTable.updatedAt],
 )
 
 // Updaters
@@ -52,7 +53,7 @@ fun UpdateBuilder<*>.writeUpdate(user: User) {
     this[UserTable.email] = user.email
     this[UserTable.roles] = user.roles.map { it.name }
     this[UserTable.avatarUrl] = user.avatarUrl
-    this[UserTable.createdAt] = user.createdAt.toLocalDateTimeUtc()
-    this[UserTable.updatedAt] = user.updatedAt.toLocalDateTimeUtc()
+    this[UserTable.createdAt] = user.createdAt
+    this[UserTable.updatedAt] = user.updatedAt
 }
 
