@@ -27,10 +27,10 @@ fun <Returned, E : GetByIdEndpoint<String, Returned>> Route.getEndpoint(
 fun <Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getEndpoint(
     endpoint: E,
     convertId: (String) -> IdType,
-    block: suspend RoutingContext.(IdType, E) -> Returned?
+    block: suspend RoutingContext.(DataRequest<IdType, Returned, E>) -> Returned?
 ) = get(endpoint.serverIdTemplate) {
     val id = call.getIdOrThrow(convertId)
-    standardResponse { block(id, endpoint) }
+    standardResponse { block(DataRequest(id, endpoint)) }
 }
 
 fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.getEndpoint(
