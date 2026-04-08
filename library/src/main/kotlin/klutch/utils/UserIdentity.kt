@@ -1,12 +1,11 @@
 package klutch.utils
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
-import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
 import kampfire.model.UserId
-import klutch.db.services.UserTableService
+import klutch.db.services.BasicUserTableDao
+import klutch.db.services.CreateUserService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 
@@ -14,7 +13,7 @@ data class UserIdentity(val userId: UserId, val username: String)
 
 suspend fun RoutingContext.getUserIdentityOrNull(): UserIdentity? {
     val username = getClaimOrNull(CLAIM_USERNAME) ?: return null
-    val userId = UserTableService().readIdByUsername(username)?.toStringId()?.let { UserId(it) } ?: return null
+    val userId = BasicUserTableDao().readIdByUsername(username)?.toStringId()?.let { UserId(it) } ?: return null
     return UserIdentity(userId, username)
 }
 

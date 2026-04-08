@@ -3,6 +3,7 @@ package klutch.db
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.select
 
+@Deprecated("just use the Exposed api")
 open class Aspect<Self: Aspect<Self, Data>, Data>(
     val columnSet: ColumnSet,
     val toData: ResultRow.() -> Data

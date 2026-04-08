@@ -8,7 +8,7 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.dao.id.LongIdTable
 
 object RefreshTokenTable : LongIdTable("refresh_token") {
-    val user = reference("user_id", UserTable, onDelete = ReferenceOption.CASCADE)
+    val user = reference("user_id", BasicUserTable, onDelete = ReferenceOption.CASCADE)
     val token = text("token")
     val createdAt = long("created_at") // epoch seconds
     val ttl = integer("ttl") // in seconds

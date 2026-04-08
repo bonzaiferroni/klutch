@@ -4,21 +4,22 @@ import kabinet.console.globalConsole
 import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
 import kabinet.utils.Environment
+import kampfire.model.BasicUser
+import kampfire.model.provideBasicUser
 import klutch.db.DbService
 import klutch.db.count
-import klutch.db.tables.UserTable
-import klutch.utils.eq
+import klutch.db.tables.BasicUserTable
 import org.jetbrains.exposed.v1.core.eq
 
 private val console = globalConsole.getHandle(UserInitService::class)
 
 class UserInitService(
     private val env: Environment,
-    private val service: UserTableService = UserTableService()
+    private val service: CreateUserService<BasicUser> = CreateUserService(BasicUserTableDao(), ::provideBasicUser)
 ) : DbService() {
     suspend fun initUsers() = dbQuery {
         val username = env.read(ADMIN_USERNAME_KEY)
-        if (UserTable.count { it.username.eq(username) } > 0) return@dbQuery
+        if (BasicUserTable.count { it.username.eq(username) } > 0) return@dbQuery
         console.log("Initializing admin user: $username")
         val name = env.read(ADMIN_NAME_KEY)
         val email = env.read(ADMIN_EMAIL_KEY)
@@ -30,7 +31,7 @@ class UserInitService(
                 email = email,
                 name = name
             ),
-            userRoles = setOf(UserRole.USER, UserRole.ADMIN)
+            roles = setOf(UserRole.USER, UserRole.ADMIN)
         )
     }
 }

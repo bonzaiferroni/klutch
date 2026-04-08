@@ -6,6 +6,7 @@ import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kabinet.utils.epochSecondsNow
+import kampfire.api.TableId
 import klutch.db.tables.RefreshTokenTable.token
 import klutch.environment.readEnvFromPath
 import klutch.utils.toUUID
@@ -24,7 +25,7 @@ class RefreshTokenService : DbService() {
             .firstOrNull()?.toSessionToken()
     }
 
-    suspend fun createToken(userId: UserId, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
+    suspend fun createToken(userId: TableId<String>, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
         val requestedTTL = when(stayLoggedIn) {
             true -> REFRESH_TOKEN_LONG_TTL
             false -> REFRESH_TOKEN_TEMP_TTL

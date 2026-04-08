@@ -2,7 +2,7 @@ package klutch.db
 
 import kabinet.utils.toLocalDateTimeUtc
 import kampfire.api.TableId
-import klutch.db.tables.UserTable.default
+import klutch.db.tables.BasicUserTable.default
 import klutch.utils.toUUID
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column

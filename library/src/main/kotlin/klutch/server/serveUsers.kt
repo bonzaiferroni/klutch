@@ -5,14 +5,19 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kampfire.api.UserApi
 import kabinet.console.globalConsole
+import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
-import klutch.db.services.UserTableService
+import kampfire.model.UserSeed
+import klutch.db.services.AuthUserDao
+import klutch.db.services.CreateUserService
 import klutch.utils.getUserId
 import klutch.utils.getUsername
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun Routing.serveUsers(service: UserTableService = UserTableService()) {
+fun <T: AuthUser> Routing.serveUsers(dao: AuthUserDao<T>, provideUser: (UserSeed) -> T) {
+
+    val service = CreateUserService(dao, provideUser)
 
     postEndpoint(UserApi.Create) {
         try {
@@ -26,7 +31,7 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 
     postEndpoint(UserApi.Login) {
         try {
-            call.authorize(it.data)
+            call.authorize(it.data, dao::readByUsernameOrEmail)
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
@@ -37,17 +42,17 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
     authenticateJwt {
         getEndpoint(UserApi.ReadInfo) {
             val username = getUsername()
-            service.readUserInfo(username)
+            dao.readUserInfo(username)
         }
 
         getEndpoint(UserApi.Private) {
             val username = getUsername()
-            service.getPrivateInfo(username)
+            dao.readPrivateInfo(username)
         }
 
         postEndpoint(UserApi.Update) {
             val userId = getUserId()
-            service.updateUser(it.data, userId)
+            dao.updateUser(it.data, userId)
         }
 
 //        put(UserApi.Users.Update) {

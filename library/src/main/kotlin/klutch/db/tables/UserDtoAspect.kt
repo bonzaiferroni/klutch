@@ -2,25 +2,24 @@ package klutch.db.tables
 
 import klutch.db.Aspect
 import kampfire.model.UserRole
-import kampfire.model.User
+import kampfire.model.UserOld
 import kampfire.model.UserId
-import kabinet.utils.toInstantFromUtc
 import klutch.utils.toStringId
 import org.jetbrains.exposed.v1.core.ResultRow
 
-object UserDtoAspect : Aspect<UserDtoAspect, User>(
-    UserTable,
+object UserDtoAspect : Aspect<UserDtoAspect, UserOld>(
+    BasicUserTable,
     ResultRow::toUserDto
 ) {
-    val id = add(UserTable.id)
-    val username = add(UserTable.username)
-    val roles = add(UserTable.roles)
-    val avatarUrl = add(UserTable.avatarUrl)
-    val createdAt = add(UserTable.createdAt)
-    val updatedAt = add(UserTable.updatedAt)
+    val id = add(BasicUserTable.id)
+    val username = add(BasicUserTable.username)
+    val roles = add(BasicUserTable.roles)
+    val avatarUrl = add(BasicUserTable.avatarUrl)
+    val createdAt = add(BasicUserTable.createdAt)
+    val updatedAt = add(BasicUserTable.updatedAt)
 }
 
-fun ResultRow.toUserDto() = User(
+fun ResultRow.toUserDto() = UserOld(
     userId = UserId(this[UserDtoAspect.id].value.toStringId()),
     username = this[UserDtoAspect.username],
     roles = this[UserDtoAspect.roles].map { UserRole.valueOf(it) }.toSet(),

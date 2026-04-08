@@ -1,21 +1,21 @@
 package klutch.db.tables
 
+import kampfire.model.BasicUser
 import klutch.db.Aspect
-import klutch.db.model.User
 import org.jetbrains.exposed.v1.core.ResultRow
 
-object UserAspect: Aspect<UserAspect, User>(
-    UserTable,
+object UserAspect: Aspect<UserAspect, BasicUser>(
+    BasicUserTable,
     ResultRow::toUser
 ) {
-    val id = add(UserTable.id)
-    val name = add(UserTable.name)
-    val username = add(UserTable.username)
-    val hashedPassword = add(UserTable.hashedPassword)
-    val salt = add(UserTable.salt)
-    val email = add(UserTable.email)
-    val roles = add(UserTable.roles)
-    val avatarUrl = add(UserTable.avatarUrl)
-    val createdAt = add(UserTable.createdAt)
-    val updatedAt = add(UserTable.updatedAt)
+    val id = add(BasicUserTable.id)
+    val name = add(BasicUserTable.name)
+    val username = add(BasicUserTable.username)
+    val hashedPassword = add(BasicUserTable.hashedPassword)
+    val salt = add(BasicUserTable.salt)
+    val email = add(BasicUserTable.email)
+    val roles = add(BasicUserTable.roles)
+    val avatarUrl = add(BasicUserTable.avatarUrl)
+    val createdAt = add(BasicUserTable.createdAt)
+    val updatedAt = add(BasicUserTable.updatedAt)
 }

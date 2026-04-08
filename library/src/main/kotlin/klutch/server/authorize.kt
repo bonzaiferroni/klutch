@@ -5,12 +5,11 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import kabinet.console.globalConsole
 import kampfire.model.Auth
-import klutch.db.model.User
+import kampfire.model.AuthUser
 import kampfire.model.LoginRequest
-import klutch.db.tables.UserTable
+import klutch.db.tables.BasicUserTable
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
-import klutch.db.services.UserTableService
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.select
 import java.security.SecureRandom
@@ -20,9 +19,12 @@ import javax.crypto.spec.PBEKeySpec
 
 private val console = globalConsole.getHandle("authorize")
 
-suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserTableService = UserTableService()): Auth {
+suspend fun ApplicationCall.authorize(
+    loginRequest: LoginRequest,
+    readByUsernameOrEmail: suspend (String) -> AuthUser?
+): Auth {
 
-    val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
+    val claimedUser = readByUsernameOrEmail(loginRequest.usernameOrEmail)
     if (claimedUser == null) {
         console.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
         throw InvalidLoginException("Invalid username")
@@ -50,7 +52,7 @@ suspend fun ApplicationCall.authorize(loginRequest: LoginRequest, service: UserT
     throw InvalidLoginException("Missing password and token")
 }
 
-suspend fun testPassword(claimedUser: User, givenPassword: String, stayLoggedIn: Boolean): Auth? {
+suspend fun testPassword(claimedUser: AuthUser, givenPassword: String, stayLoggedIn: Boolean): Auth? {
     val byteArray = claimedUser.salt.base64ToByteArray()
     val hashedPassword = hashPassword(givenPassword, byteArray)
     if (hashedPassword != claimedUser.hashedPassword) {
@@ -62,7 +64,7 @@ suspend fun testPassword(claimedUser: User, givenPassword: String, stayLoggedIn:
     return Auth(jwt, sessionToken)
 }
 
-suspend fun testToken(claimedUser: User, refreshToken: String, stayLoggedIn: Boolean): Auth? {
+suspend fun testToken(claimedUser: AuthUser, refreshToken: String, stayLoggedIn: Boolean): Auth? {
     val service = RefreshTokenService()
     val cachedToken = service.readToken(refreshToken)
         ?: return null
@@ -83,9 +85,9 @@ suspend fun testToken(claimedUser: User, refreshToken: String, stayLoggedIn: Boo
     return Auth(jwt, returnedToken)
 }
 
-fun generateToken() = UUID.randomUUID().toString()
+private fun generateToken() = UUID.randomUUID().toString()
 
-suspend fun createRefreshToken(user: User, stayLoggedIn: Boolean): String {
+private suspend fun createRefreshToken(user: AuthUser, stayLoggedIn: Boolean): String {
     val service = RefreshTokenService()
     val generatedToken = generateToken()
     service.createToken(user.userId, generatedToken, stayLoggedIn)
@@ -104,15 +106,15 @@ fun hashPassword(password: String, salt: ByteArray): String {
 fun generateUniqueSalt(): ByteArray {
     while (true) {
         val salt = generateSalt()
-        val isUnique = UserTable
-            .select(UserTable.salt)
-            .where { UserTable.salt.eq(salt.toBase64()) }
+        val isUnique = BasicUserTable
+            .select(BasicUserTable.salt)
+            .where { BasicUserTable.salt.eq(salt.toBase64()) }
             .toList().isEmpty()
         if (isUnique) return salt
     }
 }
 
-fun generateSalt(): ByteArray {
+private fun generateSalt(): ByteArray {
     val random = SecureRandom()
     val salt = ByteArray(16)
     random.nextBytes(salt)
@@ -123,7 +125,7 @@ fun ByteArray.toBase64(): String {
     return Base64.getEncoder().encodeToString(this)
 }
 
-fun String.base64ToByteArray(): ByteArray {
+private fun String.base64ToByteArray(): ByteArray {
     return Base64.getDecoder().decode(this)
 }
 
