@@ -54,15 +54,6 @@ fun <Sent, Returned, E : QueryEndpoint<Sent, Returned>> Route.queryEndpoint(
     }
 }
 
-@Deprecated("use postEndpoint that provides DataRequest")
-inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
-    endpoint: E,
-    noinline block: suspend RoutingContext.(Sent, E) -> Returned?
-) = post(endpoint.path) {
-    val sentValue = call.receive<Sent>()
-    standardResponse { block(sentValue, endpoint) }
-}
-
 inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> Returned?

@@ -14,9 +14,9 @@ private val console = globalConsole.getHandle("serveUsers")
 
 fun Routing.serveUsers(service: UserTableService = UserTableService()) {
 
-    postEndpoint(UserApi.Create) { request, endpoint ->
+    postEndpoint(UserApi.Create) {
         try {
-            service.createUser(request)
+            service.createUser(it.data)
             SignUpResult(true, "User created.")
         } catch (e: IllegalArgumentException) {
             console.logError("serveUsers.createUser fail: ${e.message}")
@@ -24,11 +24,11 @@ fun Routing.serveUsers(service: UserTableService = UserTableService()) {
         }
     }
 
-    postEndpoint(UserApi.Login) { request, endpoint ->
+    postEndpoint(UserApi.Login) {
         try {
-            call.authorize(request)
+            call.authorize(it.data)
         } catch (e: InvalidLoginException) {
-            console.log("Invalid login: ${request.usernameOrEmail}")
+            console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
             null
         }
