@@ -3,22 +3,21 @@ package klutch.db
 import kampfire.model.Distance
 import kampfire.model.GeoBounds
 import kampfire.model.GeoPoint
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.ColumnType
-import org.jetbrains.exposed.sql.CustomFunction
-import org.jetbrains.exposed.sql.DoubleColumnType
-import org.jetbrains.exposed.sql.Expression
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.Query
-import org.jetbrains.exposed.sql.QueryBuilder
-import org.jetbrains.exposed.sql.QueryParameter
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.doubleParam
-import org.jetbrains.exposed.sql.statements.api.PreparedStatementApi
+import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ColumnType
+import org.jetbrains.exposed.v1.core.DoubleColumnType
+import org.jetbrains.exposed.v1.core.Expression
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.QueryBuilder
+import org.jetbrains.exposed.v1.core.QueryParameter
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.doubleParam
+import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.lessEq
+import org.jetbrains.exposed.v1.core.statements.api.PreparedStatementApi
+import org.jetbrains.exposed.v1.jdbc.Query
+import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.postgresql.geometric.PGpoint
 import kotlin.math.cos
 
@@ -26,11 +25,12 @@ object PointColumnType : ColumnType<PGpoint>() {
     override fun sqlType(): String = "POINT"
 
     override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
-        stmt[index] = when (value) {
+        val value = when (value) {
             is Pair<*, *> -> PGpoint((value.first as Number).toDouble(), (value.second as Number).toDouble())
             is PGpoint -> value
             else -> error("Unsupported value type for POINT: $value")
         }
+        stmt.set(index, value, this)
     }
 
     override fun valueFromDB(value: Any): PGpoint = when (value) {

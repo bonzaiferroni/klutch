@@ -3,9 +3,9 @@ package klutch.db.tables
 import kampfire.model.UserId
 import klutch.db.model.RefreshToken
 import klutch.utils.toStringId
-import org.jetbrains.exposed.dao.id.LongIdTable
-import org.jetbrains.exposed.sql.ReferenceOption
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.dao.id.LongIdTable
 
 object RefreshTokenTable : LongIdTable("refresh_token") {
     val user = reference("user_id", UserTable, onDelete = ReferenceOption.CASCADE)

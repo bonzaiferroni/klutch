@@ -2,21 +2,17 @@ package klutch.db.services
 
 import kampfire.model.EditUserRequest
 import klutch.db.tables.UserTable
-import kotlinx.datetime.Clock
 import klutch.db.DbService
 import kampfire.model.UserRole
-import kampfire.model.User
 import klutch.db.model.User as DbUser
 import kampfire.model.PrivateInfo
 import kampfire.model.SignUpRequest
 import kampfire.model.UserId
-import kabinet.utils.toLocalDateTimeUtc
 import kabinet.utils.validEmail
 import kabinet.utils.validPassword
 import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
 import kampfire.model.UserInfo
-import klutch.db.readFirst
 import klutch.db.readFirstOrNull
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
@@ -26,7 +22,14 @@ import klutch.server.toBase64
 import klutch.utils.eq
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insertAndGetId
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.update
+import kotlin.time.Clock
 
 class UserTableService : DbService() {
 

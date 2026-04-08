@@ -7,11 +7,10 @@ import kabinet.utils.toLocalDateTimeUtc
 import klutch.db.model.User
 import klutch.utils.toStringId
 import klutch.utils.toUUID
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.statements.UpdateBuilder
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
+import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import org.jetbrains.exposed.v1.datetime.timestamp
 
 object UserTable : UUIDTable("user") {
     val name = text("name").nullable()

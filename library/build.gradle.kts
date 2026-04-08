@@ -40,7 +40,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("com.pgvector:pgvector:0.1.6")
 
-    implementation(libs.exposed.migration)
+    implementation(libs.exposed.migration.core)
+    implementation(libs.exposed.migration.jdbc)
     implementation("org.flywaydb:flyway-core:11.7.0")
     implementation("org.flywaydb:flyway-database-postgresql:11.7.0")
 

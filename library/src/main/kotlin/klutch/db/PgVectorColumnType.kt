@@ -1,8 +1,9 @@
 package klutch.db
 
 import com.pgvector.PGvector
-import org.jetbrains.exposed.sql.ColumnType
-import org.jetbrains.exposed.sql.statements.api.PreparedStatementApi
+import org.jetbrains.exposed.v1.core.ColumnType
+import org.jetbrains.exposed.v1.core.statements.api.PreparedStatementApi
+import org.jetbrains.exposed.v1.core.statements.api.RowApi
 import org.postgresql.util.PGobject
 import java.sql.ResultSet
 
@@ -14,7 +15,7 @@ class PgVectorColumnType(private val size: Int) : ColumnType<FloatArray>() {
     override fun sqlType(): String = "vector($size)"
 
     // Read as label to dodge PGobject/PGvector classloader woes
-    override fun readObject(rs: ResultSet, index: Int): FloatArray? {
+    override fun readObject(rs: RowApi, index: Int): Any? {
         val s = rs.getString(index) ?: return null
         return parseVector(s)
     }
@@ -50,7 +51,7 @@ class PgVectorColumnType(private val size: Int) : ColumnType<FloatArray>() {
             setType("vector")
             setValue(vec.joinToString(prefix = "[", postfix = "]"))
         }
-        stmt[index] = pg
+        stmt.set(index, pg, this)
     }
 
     private fun parseVector(text: String): FloatArray {

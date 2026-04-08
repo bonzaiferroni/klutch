@@ -11,6 +11,7 @@ import klutch.db.tables.toUserDto
 import klutch.utils.eqLowercase
 import klutch.utils.toStringId
 import klutch.utils.toUUID
+import org.jetbrains.exposed.v1.jdbc.select
 
 class UserTableDao: DbService() {
     suspend fun readById(userId: UserId) = dbQuery {

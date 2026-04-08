@@ -11,6 +11,8 @@ import klutch.db.tables.UserTable
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
 import klutch.db.services.UserTableService
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.select
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.SecretKeyFactory

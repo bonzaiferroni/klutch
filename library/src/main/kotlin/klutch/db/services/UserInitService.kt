@@ -7,6 +7,8 @@ import kabinet.utils.Environment
 import klutch.db.DbService
 import klutch.db.count
 import klutch.db.tables.UserTable
+import klutch.utils.eq
+import org.jetbrains.exposed.v1.core.eq
 
 private val console = globalConsole.getHandle(UserInitService::class)
 

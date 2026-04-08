@@ -1,7 +1,7 @@
 package klutch.db
 
-import org.jetbrains.exposed.sql.Query
-import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.v1.jdbc.Query
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
 fun Query.printQuery(): Query = apply {
     val transaction = TransactionManager.current()

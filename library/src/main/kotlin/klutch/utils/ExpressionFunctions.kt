@@ -1,54 +1,56 @@
 package klutch.utils
 
 import kabinet.utils.toLocalDateTimeUtc
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import klutch.utils.eq
 import kotlinx.datetime.LocalDateTime
-import org.jetbrains.exposed.sql.Expression
-import org.jetbrains.exposed.sql.ExpressionWithColumnType
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.lowerCase
-import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.less
+import org.jetbrains.exposed.v1.core.lessEq
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.neq
+import org.jetbrains.exposed.v1.core.or
+import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 // fun Column<LocalDateTime>.less(instant: Instant): LessOp = this.less(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime>.since(duration: Duration) = duration.let { (Clock.System.now() - it).toLocalDateTimeUtc() }
-    .let { Op.build { this@since.greater(it) } }
+    .let { this@since.greater(it) }
 
 fun ExpressionWithColumnType<LocalDateTime>.greaterEq(instant: Instant) =
-    Op.build { this@greaterEq.greaterEq(instant.toLocalDateTimeUtc()) }
+    this@greaterEq.greaterEq(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime?>.greaterEqNullable(instant: Instant) =
-    Op.build { this@greaterEqNullable.greaterEq(instant.toLocalDateTimeUtc()) }
+    this@greaterEqNullable.greaterEq(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime>.greater(instant: Instant) =
-    Op.build { this@greater.greater(instant.toLocalDateTimeUtc()) }
+    this@greater.greater(instant.toLocalDateTimeUtc())
 
-fun ExpressionWithColumnType<LocalDateTime?>.greaterNullable(instant: Instant) =
-    Op.build { greater(instant.toLocalDateTimeUtc()) }
+fun ExpressionWithColumnType<LocalDateTime?>.greaterNullable(instant: Instant) = greater(instant.toLocalDateTimeUtc())
 
-fun ExpressionWithColumnType<LocalDateTime>.less(instant: Instant) =
-    Op.build { less(instant.toLocalDateTimeUtc()) }
+fun ExpressionWithColumnType<LocalDateTime>.less(instant: Instant) = less(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime?>.lessNullable(instant: Instant) =
-    Op.build { less(instant.toLocalDateTimeUtc()) }
+    less(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime>.lessEq(instant: Instant) =
-    Op.build { lessEq(instant.toLocalDateTimeUtc()) }
+    lessEq(instant.toLocalDateTimeUtc())
 
 fun ExpressionWithColumnType<LocalDateTime?>.lessEqNullable(instant: Instant) =
-    Op.build { lessEq(instant.toLocalDateTimeUtc()) }
+    lessEq(instant.toLocalDateTimeUtc())
 
-fun <T> ExpressionWithColumnType<T>.isNullOrEq(t: T) =
-    Op.build { isNull() or eq(t) }
+fun <T> ExpressionWithColumnType<T>.isNullOrEq(t: T) = isNull() or eq(t)
 
-fun <T> ExpressionWithColumnType<T>.isNullOrNeq(t: T) =
-    Op.build { isNull() or neq(t) }
+fun <T> ExpressionWithColumnType<T>.isNullOrNeq(t: T) = isNull() or neq(t)
 
-fun ExpressionWithColumnType<String>.eqLowercase(str: String) =
-    Op.build { lowerCase() eq str.lowercase()}
+fun ExpressionWithColumnType<String>.eqLowercase(str: String) = lowerCase() eq str.lowercase()
 
 fun ExpressionWithColumnType<LocalDateTime?>.betweenNullable(start: Instant, end: Instant) =
-    Op.build { greaterEqNullable(start) and lessNullable(end) }
+    greaterEqNullable(start) and lessNullable(end)

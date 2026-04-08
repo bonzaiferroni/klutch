@@ -5,10 +5,10 @@ import kabinet.console.LogLevel
 import kabinet.gemini.GeminiApiResponse
 import kabinet.gemini.GeminiClient
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 class GeminiClientPool(
     val limitedClient: GeminiClient,

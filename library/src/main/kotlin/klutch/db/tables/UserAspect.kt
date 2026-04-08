@@ -2,7 +2,7 @@ package klutch.db.tables
 
 import klutch.db.Aspect
 import klutch.db.model.User
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.v1.core.ResultRow
 
 object UserAspect: Aspect<UserAspect, User>(
     UserTable,

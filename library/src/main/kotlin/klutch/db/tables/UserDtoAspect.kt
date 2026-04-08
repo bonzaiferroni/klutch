@@ -6,7 +6,7 @@ import kampfire.model.User
 import kampfire.model.UserId
 import kabinet.utils.toInstantFromUtc
 import klutch.utils.toStringId
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.v1.core.ResultRow
 
 object UserDtoAspect : Aspect<UserDtoAspect, User>(
     UserTable,

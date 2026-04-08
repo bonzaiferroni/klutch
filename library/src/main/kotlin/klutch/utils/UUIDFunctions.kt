@@ -3,10 +3,10 @@
 package klutch.utils
 
 import kampfire.api.TableId
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.ExpressionWithColumnType
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
+import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.isNull
 import java.util.Base64
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi

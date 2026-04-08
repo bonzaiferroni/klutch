@@ -1,12 +1,7 @@
 package klutch.db
 
-import org.jetbrains.exposed.sql.ColumnSet
-import org.jetbrains.exposed.sql.Expression
-import org.jetbrains.exposed.sql.ExpressionWithColumnType
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.jdbc.select
 
 open class Aspect<Self: Aspect<Self, Data>, Data>(
     val columnSet: ColumnSet,
@@ -27,19 +22,19 @@ open class Aspect<Self: Aspect<Self, Data>, Data>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun where(predicate: SqlExpressionBuilder.(Self) -> Op<Boolean>) =
-        query.where { predicate(this, this@Aspect as Self) }
+    fun where(predicate: (Self) -> Op<Boolean>) =
+        query.where { predicate(this@Aspect as Self) }
 
-    fun readFirst(predicate: SqlExpressionBuilder.(Self) -> Op<Boolean>) = where(predicate)
+    fun readFirst(predicate: (Self) -> Op<Boolean>) = where(predicate)
         .firstOrNull()?.let { toData(it) }
 
-    fun read(predicate: SqlExpressionBuilder.(Self) -> Op<Boolean>) = where(predicate).map { toData(it) }
+    fun read(predicate: (Self) -> Op<Boolean>) = where(predicate).map { toData(it) }
 
     fun read(
         sortBy: Expression<*>,
         orderBy: SortOrder,
         limit: Int,
-        predicate: SqlExpressionBuilder.(Self) -> Op<Boolean>
+        predicate: (Self) -> Op<Boolean>
     ) = where(predicate)
         .orderBy(sortBy, orderBy)
         .limit(limit)
@@ -54,5 +49,5 @@ open class Aspect<Self: Aspect<Self, Data>, Data>(
         .limit(limit)
         .map { toData(it) }
 
-    fun any(predicate: SqlExpressionBuilder.(Self) -> Op<Boolean>) = readFirst(predicate) != null
+    fun any(predicate: (Self) -> Op<Boolean>) = readFirst(predicate) != null
 }

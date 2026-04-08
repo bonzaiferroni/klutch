@@ -1,16 +1,19 @@
 package klutch.db.services
 
 import kampfire.model.UserId
-import kotlinx.datetime.Clock
 import klutch.db.DbService
 import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kabinet.utils.epochSecondsNow
+import klutch.db.tables.RefreshTokenTable.token
 import klutch.environment.readEnvFromPath
 import klutch.utils.toUUID
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
+import kotlin.time.Clock
 
 class RefreshTokenService : DbService() {
     private val env = readEnvFromPath()
