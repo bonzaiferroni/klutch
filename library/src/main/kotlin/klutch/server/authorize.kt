@@ -7,9 +7,9 @@ import kabinet.console.globalConsole
 import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.LoginRequest
-import klutch.db.tables.BasicUserTable
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
+import klutch.db.tables.RefreshTokenTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.select
 import java.security.SecureRandom
@@ -20,6 +20,7 @@ import javax.crypto.spec.PBEKeySpec
 private val console = globalConsole.getHandle("authorize")
 
 suspend fun ApplicationCall.authorize(
+    refreshTokenTable: RefreshTokenTable,
     loginRequest: LoginRequest,
     readByUsernameOrEmail: suspend (String) -> AuthUser?
 ): Auth {
@@ -29,9 +30,11 @@ suspend fun ApplicationCall.authorize(
         console.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
         throw InvalidLoginException("Invalid username")
     }
+    console.log(loginRequest.password)
+    console.log(loginRequest.password?.deobfuscate())
     loginRequest.password?.let {
         val givenPassword = it.deobfuscate()
-        val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn)
+        val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn, refreshTokenTable)
         if (authInfo == null) {
             console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid password")
@@ -40,7 +43,7 @@ suspend fun ApplicationCall.authorize(
         return authInfo
     }
     loginRequest.refreshToken?.let {
-        val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn)
+        val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn, refreshTokenTable)
         if (authInfo == null) {
             console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid token")
@@ -52,20 +55,33 @@ suspend fun ApplicationCall.authorize(
     throw InvalidLoginException("Missing password and token")
 }
 
-suspend fun testPassword(claimedUser: AuthUser, givenPassword: String, stayLoggedIn: Boolean): Auth? {
+suspend fun testPassword(
+    claimedUser: AuthUser,
+    givenPassword: String,
+    stayLoggedIn: Boolean,
+    refreshTokenTable: RefreshTokenTable,
+): Auth? {
     val byteArray = claimedUser.salt.base64ToByteArray()
+    console.log(givenPassword)
     val hashedPassword = hashPassword(givenPassword, byteArray)
+    console.log(hashedPassword)
+    console.log(claimedUser.hashedPassword)
     if (hashedPassword != claimedUser.hashedPassword) {
         return null
     }
 
-    val sessionToken = createRefreshToken(claimedUser, stayLoggedIn)
+    val sessionToken = createRefreshToken(claimedUser, stayLoggedIn, refreshTokenTable)
     val jwt = createJWT(claimedUser.username, claimedUser.roles)
     return Auth(jwt, sessionToken)
 }
 
-suspend fun testToken(claimedUser: AuthUser, refreshToken: String, stayLoggedIn: Boolean): Auth? {
-    val service = RefreshTokenService()
+suspend fun testToken(
+    claimedUser: AuthUser,
+    refreshToken: String,
+    stayLoggedIn: Boolean,
+    refreshTokenTable: RefreshTokenTable,
+): Auth? {
+    val service = RefreshTokenService(refreshTokenTable)
     val cachedToken = service.readToken(refreshToken)
         ?: return null
     if (cachedToken.userId != claimedUser.userId) {
@@ -77,7 +93,7 @@ suspend fun testToken(claimedUser: AuthUser, refreshToken: String, stayLoggedIn:
     }
     val returnedToken = if (cachedToken.needsRotating) {
         service.deleteToken(refreshToken)
-        createRefreshToken(claimedUser, stayLoggedIn)
+        createRefreshToken(claimedUser, stayLoggedIn, refreshTokenTable)
     } else {
         refreshToken
     }
@@ -87,8 +103,12 @@ suspend fun testToken(claimedUser: AuthUser, refreshToken: String, stayLoggedIn:
 
 private fun generateToken() = UUID.randomUUID().toString()
 
-private suspend fun createRefreshToken(user: AuthUser, stayLoggedIn: Boolean): String {
-    val service = RefreshTokenService()
+private suspend fun createRefreshToken(
+    user: AuthUser,
+    stayLoggedIn: Boolean,
+    refreshTokenTable: RefreshTokenTable,
+): String {
+    val service = RefreshTokenService(refreshTokenTable)
     val generatedToken = generateToken()
     service.createToken(user.userId, generatedToken, stayLoggedIn)
     return generatedToken

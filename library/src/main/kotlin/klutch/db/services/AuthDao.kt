@@ -1,17 +1,19 @@
 package klutch.db.services
 
+import kampfire.api.TableId
 import kampfire.model.AuthUser
-import kampfire.model.BasicUserInfo
 import kampfire.model.PrivateInfo
-import kampfire.model.UserId
 import java.util.UUID
 
-interface AuthDao<T: AuthUser> {
+interface AuthDao<User: AuthUser, Id: AuthId> {
 
-    suspend fun createUser(user: T): UUID
-    suspend fun readByUsernameOrEmail(identity: String): T?
+    suspend fun createUser(user: User): UUID
+    suspend fun readIdByUsername(username: String): Id?
+    suspend fun readByUsernameOrEmail(identity: String): User?
     suspend fun readPrivateInfo(identity: String): PrivateInfo?
     suspend fun readSaltExists(salt: String): Boolean
     // suspend fun readUserInfo(identity: String): BasicUserInfo
     // suspend fun updateUser(user: BasicUserInfo, userId: UserId): Boolean
 }
+
+typealias AuthId = TableId<String>

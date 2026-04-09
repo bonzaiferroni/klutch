@@ -9,16 +9,16 @@ import kampfire.model.UserSeed
 
 private val console = globalConsole.getHandle(UserInitService::class)
 
-class UserInitService<T: AuthUser>(
+class UserInitService<User: AuthUser, Id: AuthId>(
     private val env: Environment,
-    private val dao: AuthDao<T>,
-    private val provideUser: (UserSeed) -> T,
+    private val dao: AuthDao<User, Id>,
+    private val provideUser: (UserSeed) -> User,
 ) {
     suspend fun initUsers() {
         val service = AuthService(dao, provideUser)
         val username = env.read(ADMIN_USERNAME_KEY)
-        val existingUser = dao.readByUsernameOrEmail(username)
-        if (existingUser != null) return
+        val id = dao.readIdByUsername(username)
+        if (id != null) return
         console.log("Initializing admin user: $username")
         val email = env.read(ADMIN_EMAIL_KEY)
         val password = env.read(ADMIN_PASSWORD_KEY)

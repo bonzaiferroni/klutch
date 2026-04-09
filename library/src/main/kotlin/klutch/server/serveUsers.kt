@@ -9,12 +9,19 @@ import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
 import kampfire.model.UserSeed
 import klutch.db.services.AuthDao
+import klutch.db.services.AuthId
 import klutch.db.services.AuthService
-import klutch.utils.getUsername
+import klutch.db.tables.RefreshTokenTable
+import klutch.utils.Identity
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun <T: AuthUser> Routing.serveUserAuth(dao: AuthDao<T>, provideUser: (UserSeed) -> T) {
+fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
+    dao: AuthDao<User, Id>,
+    identity: Identity<User, Id>,
+    refreshTokenTable: RefreshTokenTable,
+    provideUser: (UserSeed) -> User
+) {
 
     val service = AuthService(dao, provideUser)
 
@@ -30,7 +37,7 @@ fun <T: AuthUser> Routing.serveUserAuth(dao: AuthDao<T>, provideUser: (UserSeed)
 
     postEndpoint(UserApi.Login) {
         try {
-            call.authorize(it.data, dao::readByUsernameOrEmail)
+            call.authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail)
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
@@ -45,7 +52,7 @@ fun <T: AuthUser> Routing.serveUserAuth(dao: AuthDao<T>, provideUser: (UserSeed)
 //        }
 
         getEndpoint(UserApi.Private) {
-            val username = getUsername()
+            val username = identity.getUsername(call)
             dao.readPrivateInfo(username)
         }
 

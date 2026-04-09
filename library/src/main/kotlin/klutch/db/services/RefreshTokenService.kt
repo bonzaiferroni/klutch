@@ -7,7 +7,6 @@ import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kabinet.utils.epochSecondsNow
 import kampfire.api.TableId
-import klutch.db.tables.RefreshTokenTable.token
 import klutch.environment.readEnvFromPath
 import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.eq
@@ -16,13 +15,15 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import kotlin.time.Clock
 
-class RefreshTokenService : DbService() {
+class RefreshTokenService(
+    private val table: RefreshTokenTable
+) : DbService() {
     private val env = readEnvFromPath()
 
     suspend fun readToken(value: String): RefreshToken? = dbQuery {
-        RefreshTokenTable.select(RefreshTokenTable.columns)
-            .where { RefreshTokenTable.token eq value }
-            .firstOrNull()?.toSessionToken()
+        table.select(table.columns)
+            .where { table.token eq value }
+            .firstOrNull()?.toSessionToken(table)
     }
 
     suspend fun createToken(userId: TableId<String>, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
@@ -30,7 +31,7 @@ class RefreshTokenService : DbService() {
             true -> REFRESH_TOKEN_LONG_TTL
             false -> REFRESH_TOKEN_TEMP_TTL
         }
-        RefreshTokenTable.insert {
+        table.insert {
             it[user] = userId.toUUID()
             it[token] = generatedToken
             it[createdAt] = Clock.epochSecondsNow()
@@ -41,7 +42,7 @@ class RefreshTokenService : DbService() {
     }
 
     suspend fun deleteToken(value: String) = dbQuery {
-        RefreshTokenTable.deleteWhere { token eq value }
+        table.deleteWhere { token eq value }
     }
 }
 

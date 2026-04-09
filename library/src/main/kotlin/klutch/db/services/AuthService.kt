@@ -8,17 +8,14 @@ import kabinet.utils.validUsernameChars
 import kabinet.utils.validUsernameLength
 import kampfire.model.AuthUser
 import kampfire.model.UserSeed
-import klutch.db.tables.BasicUserTable
 import klutch.server.generateSalt
 import klutch.server.hashPassword
 import klutch.server.toBase64
 import klutch.utils.serverLog
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.select
 
-class AuthService<T: AuthUser>(
-    private val dao: AuthDao<T>,
-    private val provideUser: (UserSeed) -> T
+class AuthService<User: AuthUser, Id: AuthId>(
+    private val dao: AuthDao<User, Id>,
+    private val provideUser: (UserSeed) -> User
 ) {
     suspend fun createUser(
         info: SignUpRequest,
@@ -46,8 +43,8 @@ class AuthService<T: AuthUser>(
     private suspend fun validateUsername(info: SignUpRequest) {
         if (!info.username.validUsernameLength) throw IllegalArgumentException("Username should be least 3 characters.")
         if (!info.username.validUsernameChars) throw IllegalArgumentException("Username has invalid characters.")
-        val user = dao.readByUsernameOrEmail(info.username)
-        if (user != null) throw IllegalArgumentException("Username already exists.")
+        val id = dao.readIdByUsername(info.username)
+        if (id != null) throw IllegalArgumentException("Username already exists.")
     }
 
     private suspend fun validateEmail(info: SignUpRequest) {

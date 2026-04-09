@@ -15,6 +15,7 @@ import klutch.server.toBase64
 import klutch.utils.eq
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
+import klutch.utils.toStringId
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
@@ -24,7 +25,7 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.time.Clock
 
-class BasicUserTableDao: AuthDao<BasicUser>, DbService() {
+class BasicUserTableDao: AuthDao<BasicUser, UserId>, DbService() {
     private fun readByUsername(username: String): BasicUser? =
         UserAspect.readFirst { BasicUserTable.username.lowerCase() eq username.lowercase() }
 
@@ -42,10 +43,10 @@ class BasicUserTableDao: AuthDao<BasicUser>, DbService() {
             ?: throw IllegalArgumentException("User not found")
     }
 
-    suspend fun readIdByUsername(username: String) = dbQuery {
+    override suspend fun readIdByUsername(username: String) = dbQuery {
         BasicUserTable.select(BasicUserTable.id)
             .where { BasicUserTable.username.eq(username) }
-            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value
+            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { UserId(it.toStringId())}
     }
 
     suspend fun readUserInfo(identity: String): BasicUserInfo {
