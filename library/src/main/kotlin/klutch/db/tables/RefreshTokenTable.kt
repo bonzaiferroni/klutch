@@ -1,8 +1,6 @@
 package klutch.db.tables
 
-import kampfire.model.UserId
 import klutch.db.model.RefreshToken
-import klutch.utils.toStringId
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.dao.id.LongIdTable

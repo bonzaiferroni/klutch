@@ -1,6 +1,5 @@
 package klutch.db.services
 
-import kampfire.model.UserId
 import klutch.db.DbService
 import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable

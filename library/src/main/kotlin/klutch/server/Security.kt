@@ -20,7 +20,7 @@ fun Application.configureSecurity() {
     // Please readHtml the jwt property from the config file if you are using EngineMain
     val audience = env.read("HOST_ADDRESS")
     val issuer = env.read("HOST_ADDRESS")
-    val jwtRealm = "newsref api"
+    val jwtRealm = "klutch api"
     val jwtSecret = env.read("APP_SECRET")
     authentication {
         jwt(TOKEN_NAME) {
@@ -74,7 +74,7 @@ fun createJWT(username: String, roles: Set<UserRole>): String {
     return JWT.create()
         .withAudience(audience)
         .withIssuer(issuer)
-        .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+        .withExpiresAt(Date(System.currentTimeMillis() + 60000)) // 1 minute
         .withClaim(CLAIM_USERNAME, username)
         .withClaim(CLAIM_ROLES, roles.toClaimValue())
         .sign(Algorithm.HMAC256(secret))

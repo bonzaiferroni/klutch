@@ -3,9 +3,7 @@ package klutch.utils
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.RoutingCall
-import io.ktor.server.routing.RoutingContext
 import kampfire.model.AuthUser
-import kampfire.model.UserId
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.server.CLAIM_ROLES

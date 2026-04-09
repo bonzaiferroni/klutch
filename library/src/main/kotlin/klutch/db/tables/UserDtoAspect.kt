@@ -1,11 +1,5 @@
 package klutch.db.tables
 
-import klutch.db.Aspect
-import kampfire.model.UserRole
-import kampfire.model.UserId
-import klutch.utils.toStringId
-import org.jetbrains.exposed.v1.core.ResultRow
-
 //object UserDtoAspect : Aspect<UserDtoAspect, UserOld>(
 //    BasicUserTable,
 //    ResultRow::toUserDto

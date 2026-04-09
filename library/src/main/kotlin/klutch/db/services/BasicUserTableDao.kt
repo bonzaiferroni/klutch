@@ -4,14 +4,13 @@ import kampfire.model.BasicUser
 import kampfire.model.BasicUserInfo
 import kampfire.model.EditUserRequest
 import kampfire.model.PrivateInfo
-import kampfire.model.UserId
+import kampfire.model.BasicUserId
 import kampfire.model.UserSeed
 import klutch.db.DbService
 import klutch.db.readFirstOrNull
 import klutch.db.tables.BasicUserTable
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
-import klutch.server.toBase64
 import klutch.utils.eq
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
@@ -25,7 +24,7 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.time.Clock
 
-class BasicUserTableDao: AuthDao<BasicUser, UserId>, DbService() {
+class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
     private fun readByUsername(username: String): BasicUser? =
         UserAspect.readFirst { BasicUserTable.username.lowerCase() eq username.lowercase() }
 
@@ -46,7 +45,7 @@ class BasicUserTableDao: AuthDao<BasicUser, UserId>, DbService() {
     override suspend fun readIdByUsername(username: String) = dbQuery {
         BasicUserTable.select(BasicUserTable.id)
             .where { BasicUserTable.username.eq(username) }
-            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { UserId(it.toStringId())}
+            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { BasicUserId(it.toStringId())}
     }
 
     suspend fun readUserInfo(identity: String): BasicUserInfo {
@@ -82,7 +81,7 @@ class BasicUserTableDao: AuthDao<BasicUser, UserId>, DbService() {
         }
     }
 
-    suspend fun updateUser(user: BasicUserInfo, userId: UserId) = dbQuery {
+    suspend fun updateUser(user: BasicUserInfo, userId: BasicUserId) = dbQuery {
         BasicUserTable.update({ BasicUserTable.id.eq(userId)}) {
             it[this.username] = user.username
             it[this.avatarUrl] = user.avatarUrl
@@ -108,7 +107,7 @@ private fun eqIdentity(identity: String) =
 fun provideBasicUser(seed: UserSeed): BasicUser {
     val now = Clock.System.now()
     return BasicUser(
-        userId = UserId.random(),
+        userId = BasicUserId.random(),
         name = null,
         username = seed.request.username,
         hashedPassword = seed.hashedPassword,

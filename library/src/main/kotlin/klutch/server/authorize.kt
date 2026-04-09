@@ -10,6 +10,7 @@ import kampfire.model.LoginRequest
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
 import klutch.db.tables.RefreshTokenTable
+import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.select
 import java.security.SecureRandom
@@ -30,8 +31,6 @@ suspend fun ApplicationCall.authorize(
         console.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
         throw InvalidLoginException("Invalid username")
     }
-    console.log(loginRequest.password)
-    console.log(loginRequest.password?.deobfuscate())
     loginRequest.password?.let {
         val givenPassword = it.deobfuscate()
         val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn, refreshTokenTable)
@@ -45,7 +44,7 @@ suspend fun ApplicationCall.authorize(
     loginRequest.refreshToken?.let {
         val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn, refreshTokenTable)
         if (authInfo == null) {
-            console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
+            console.logInfo("authorize: Invalid token attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid token")
         }
         console.logDebug("authorize: session login by ${loginRequest.usernameOrEmail}")
@@ -62,10 +61,7 @@ suspend fun testPassword(
     refreshTokenTable: RefreshTokenTable,
 ): Auth? {
     val byteArray = claimedUser.salt.base64ToByteArray()
-    console.log(givenPassword)
     val hashedPassword = hashPassword(givenPassword, byteArray)
-    console.log(hashedPassword)
-    console.log(claimedUser.hashedPassword)
     if (hashedPassword != claimedUser.hashedPassword) {
         return null
     }
@@ -84,7 +80,7 @@ suspend fun testToken(
     val service = RefreshTokenService(refreshTokenTable)
     val cachedToken = service.readToken(refreshToken)
         ?: return null
-    if (cachedToken.userId != claimedUser.userId) {
+    if (cachedToken.userId != claimedUser.userId.toUUID()) { // td: use kotlin Uuid to avoid this
         return null
     }
     if (cachedToken.isExpired) {

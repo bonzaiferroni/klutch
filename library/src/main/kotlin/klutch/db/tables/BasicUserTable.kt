@@ -1,16 +1,14 @@
 package klutch.db.tables
 
 import kampfire.model.BasicUser
-import kampfire.model.UserId
+import kampfire.model.BasicUserId
 import kampfire.model.UserRole
-import kampfire.model.UserSeed
 import klutch.utils.toStringId
 import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.datetime.timestamp
-import kotlin.time.Clock
 
 object BasicUserTable : UUIDTable("user") {
     val name = text("name").nullable()
@@ -26,7 +24,7 @@ object BasicUserTable : UUIDTable("user") {
 
 // Row mapper
 fun ResultRow.toUser() = BasicUser(
-    userId = UserId(this[BasicUserTable.id].value.toStringId()),
+    userId = BasicUserId(this[BasicUserTable.id].value.toStringId()),
     name = this[BasicUserTable.name],
     username = this[BasicUserTable.username],
     hashedPassword = this[BasicUserTable.hashedPassword],

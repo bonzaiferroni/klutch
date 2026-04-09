@@ -1,6 +1,5 @@
 package klutch.db.model
 
-import kampfire.model.UserId
 import kabinet.utils.epochSecondsNow
 import java.util.UUID
 import kotlin.time.Clock
