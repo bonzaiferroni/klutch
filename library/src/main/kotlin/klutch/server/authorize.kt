@@ -103,18 +103,7 @@ fun hashPassword(password: String, salt: ByteArray): String {
     return Base64.getEncoder().encodeToString(hash)
 }
 
-fun generateUniqueSalt(): ByteArray {
-    while (true) {
-        val salt = generateSalt()
-        val isUnique = BasicUserTable
-            .select(BasicUserTable.salt)
-            .where { BasicUserTable.salt.eq(salt.toBase64()) }
-            .toList().isEmpty()
-        if (isUnique) return salt
-    }
-}
-
-private fun generateSalt(): ByteArray {
+fun generateSalt(): ByteArray {
     val random = SecureRandom()
     val salt = ByteArray(16)
     random.nextBytes(salt)

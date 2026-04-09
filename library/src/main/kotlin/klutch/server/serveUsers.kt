@@ -8,16 +8,15 @@ import kabinet.console.globalConsole
 import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
 import kampfire.model.UserSeed
-import klutch.db.services.AuthUserDao
-import klutch.db.services.CreateUserService
-import klutch.utils.getUserId
+import klutch.db.services.AuthDao
+import klutch.db.services.AuthService
 import klutch.utils.getUsername
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun <T: AuthUser> Routing.serveUsers(dao: AuthUserDao<T>, provideUser: (UserSeed) -> T) {
+fun <T: AuthUser> Routing.serveUserAuth(dao: AuthDao<T>, provideUser: (UserSeed) -> T) {
 
-    val service = CreateUserService(dao, provideUser)
+    val service = AuthService(dao, provideUser)
 
     postEndpoint(UserApi.Create) {
         try {
@@ -40,20 +39,20 @@ fun <T: AuthUser> Routing.serveUsers(dao: AuthUserDao<T>, provideUser: (UserSeed
     }
 
     authenticateJwt {
-        getEndpoint(UserApi.ReadInfo) {
-            val username = getUsername()
-            dao.readUserInfo(username)
-        }
+//        getEndpoint(UserApi.ReadInfo) {
+//            val username = getUsername()
+//            dao.readUserInfo(username)
+//        }
 
         getEndpoint(UserApi.Private) {
             val username = getUsername()
             dao.readPrivateInfo(username)
         }
 
-        postEndpoint(UserApi.Update) {
-            val userId = getUserId()
-            dao.updateUser(it.data, userId)
-        }
+//        postEndpoint(UserApi.Update) {
+//            val userId = getUserId()
+//            dao.updateUser(it.data, userId)
+//        }
 
 //        put(UserApi.Users.Update) {
 //            val username = call.getClaim(CLAIM_USERNAME)

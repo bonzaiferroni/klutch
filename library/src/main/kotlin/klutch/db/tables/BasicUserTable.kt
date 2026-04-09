@@ -3,12 +3,14 @@ package klutch.db.tables
 import kampfire.model.BasicUser
 import kampfire.model.UserId
 import kampfire.model.UserRole
+import kampfire.model.UserSeed
 import klutch.utils.toStringId
 import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.Clock
 
 object BasicUserTable : UUIDTable("user") {
     val name = text("name").nullable()
@@ -53,4 +55,3 @@ fun UpdateBuilder<*>.writeUpdate(user: BasicUser) {
     this[BasicUserTable.createdAt] = user.createdAt
     this[BasicUserTable.updatedAt] = user.updatedAt
 }
-

@@ -5,7 +5,6 @@ import io.ktor.server.auth.principal
 import io.ktor.server.routing.RoutingContext
 import kampfire.model.UserId
 import klutch.db.services.BasicUserTableDao
-import klutch.db.services.CreateUserService
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 

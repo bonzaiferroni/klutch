@@ -5,11 +5,13 @@ import kampfire.model.BasicUserInfo
 import kampfire.model.EditUserRequest
 import kampfire.model.PrivateInfo
 import kampfire.model.UserId
+import kampfire.model.UserSeed
 import klutch.db.DbService
 import klutch.db.readFirstOrNull
 import klutch.db.tables.BasicUserTable
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
+import klutch.server.toBase64
 import klutch.utils.eq
 import klutch.utils.eqLowercase
 import klutch.utils.serverLog
@@ -22,7 +24,7 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.time.Clock
 
-class BasicUserTableDao: AuthUserDao<BasicUser>, DbService() {
+class BasicUserTableDao: AuthDao<BasicUser>, DbService() {
     private fun readByUsername(username: String): BasicUser? =
         UserAspect.readFirst { BasicUserTable.username.lowerCase() eq username.lowercase() }
 
@@ -46,7 +48,7 @@ class BasicUserTableDao: AuthUserDao<BasicUser>, DbService() {
             .firstOrNull()?.getOrNull(BasicUserTable.id)?.value
     }
 
-    override suspend fun readUserInfo(identity: String): BasicUserInfo {
+    suspend fun readUserInfo(identity: String): BasicUserInfo {
         val user = readByUsernameOrEmail(identity) ?: throw IllegalArgumentException("User not found")
         return BasicUserInfo(
             username = user.username,
@@ -79,7 +81,7 @@ class BasicUserTableDao: AuthUserDao<BasicUser>, DbService() {
         }
     }
 
-    override suspend fun updateUser(user: BasicUserInfo, userId: UserId) = dbQuery {
+    suspend fun updateUser(user: BasicUserInfo, userId: UserId) = dbQuery {
         BasicUserTable.update({ BasicUserTable.id.eq(userId)}) {
             it[this.username] = user.username
             it[this.avatarUrl] = user.avatarUrl
@@ -89,8 +91,31 @@ class BasicUserTableDao: AuthUserDao<BasicUser>, DbService() {
     suspend fun checkUsername(username: String) = dbQuery {
         BasicUserTable.readFirstOrNull { BasicUserTable.username.eqLowercase(username) } == null
     }
+
+    override suspend fun readSaltExists(salt: String) = dbQuery {
+        BasicUserTable
+            .select(BasicUserTable.salt)
+            .where { BasicUserTable.salt.eq(salt) }
+            .firstOrNull() != null
+    }
 }
 
 private fun eqIdentity(identity: String) =
     (BasicUserTable.username.lowerCase() eq identity.lowercase()) or
         (BasicUserTable.email.lowerCase() eq identity.lowercase())
+
+fun provideBasicUser(seed: UserSeed): BasicUser {
+    val now = Clock.System.now()
+    return BasicUser(
+        userId = UserId.random(),
+        name = null,
+        username = seed.request.username,
+        hashedPassword = seed.hashedPassword,
+        salt = seed.salt,
+        email = seed.request.email,
+        roles = seed.roles.toSet(),
+        avatarUrl = null,
+        createdAt = now,
+        updatedAt = now,
+    )
+}
