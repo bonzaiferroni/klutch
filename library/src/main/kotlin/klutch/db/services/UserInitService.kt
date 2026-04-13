@@ -28,7 +28,7 @@ class UserInitService<User: AuthUser, Id: AuthId>(
                 password = password,
                 email = email,
             ),
-            roles = setOf(UserRole.USER, UserRole.ADMIN)
+            roles = setOf(UserRole.User, UserRole.Admin)
         )
     }
 }

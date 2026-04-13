@@ -4,20 +4,25 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.RoutingCall
 import kampfire.model.AuthUser
+import kampfire.model.UserRole
+import kampfire.model.toUserRoleSet
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.server.CLAIM_ROLES
 import klutch.server.CLAIM_USERNAME
 
-data class UserIdentity<Id: AuthId>(val userId: Id, val username: String)
+data class UserIdentity<Id: AuthId>(val userId: Id, val username: String, val roles: Set<UserRole>) {
+    val isAdmin get() = roles.contains(UserRole.Admin)
+}
 
 class Identity<User: AuthUser, Id: AuthId>(
     private val dao: AuthDao<User, Id>
 ) {
     suspend fun getUserIdentityOrNull(call: RoutingCall): UserIdentity<Id>? {
         val username = getClaimOrNull(call, CLAIM_USERNAME) ?: return null
+        val roles = getClaimOrNull(call, CLAIM_ROLES)?.toUserRoleSet() ?: return null
         val userId = dao.readIdByUsername(username) ?: return null
-        return UserIdentity(userId, username)
+        return UserIdentity(userId, username, roles)
     }
 
     suspend fun getUserIdentity(call: RoutingCall) = getUserIdentityOrNull(call) ?: error("user identity not found")

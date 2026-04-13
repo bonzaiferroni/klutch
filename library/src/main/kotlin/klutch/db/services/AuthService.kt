@@ -19,7 +19,7 @@ class AuthService<User: AuthUser, Id: AuthId>(
 ) {
     suspend fun createUser(
         info: SignUpRequest,
-        roles: Set<UserRole> = setOf(UserRole.USER),
+        roles: Set<UserRole> = setOf(UserRole.User),
     ) {
         serverLog.logInfo("Creating user: ${info.username}")
         validateUsername(info)
