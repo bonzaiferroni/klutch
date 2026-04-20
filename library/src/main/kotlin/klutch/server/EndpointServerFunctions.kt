@@ -7,7 +7,11 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.util.toMap
 import kampfire.api.*
+import kampfire.model.ApiResponse
+import kampfire.model.ApiResponseSerializer
 import kampfire.utils.ParameterMap
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
     endpoint: E,
@@ -70,6 +74,22 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
+inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postApi(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> ApiResponse<Returned>?
+) = post(endpoint.path) {
+    val raw = call.receive<Sent>()
+
+    val sentValue: Sent =
+        if (raw is String && Sent::class == String::class) {
+            raw.removeSurrounding("\"") as Sent
+        } else {
+            raw
+        }
+
+    apiResponse { block(DataRequest(sentValue, endpoint)) }
+}
+
 inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
@@ -92,6 +112,26 @@ suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
         val value = block()
         if (value != null) {
             call.respond(HttpStatusCode.OK, value)
+        } else if (!call.response.isCommitted) {
+            call.respond(HttpStatusCode.NotFound)
+        }
+    } catch (e: MissingParameterException) {
+        call.respond(HttpStatusCode.BadRequest, "Missing required parameter: ${e.param}")
+    } catch (e: UnauthorizedUserException) {
+        call.respond(HttpStatusCode.Forbidden, e.message ?: "Request unauthorized for this user")
+    }
+}
+
+suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> ApiResponse<T>?) {
+    if (call.response.isCommitted) return
+    try {
+        val value = block()
+        if (value != null) {
+            val json = Json.encodeToString(
+                ApiResponseSerializer(serializer<T>()),
+                value
+            )
+            call.respond(HttpStatusCode.OK, json)
         } else if (!call.response.isCommitted) {
             call.respond(HttpStatusCode.NotFound)
         }
