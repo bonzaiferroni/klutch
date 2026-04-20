@@ -10,6 +10,8 @@ import kampfire.api.*
 import kampfire.model.ApiResponse
 import kampfire.model.ApiResponseSerializer
 import kampfire.utils.ParameterMap
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
@@ -122,12 +124,13 @@ suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
     }
 }
 
+@ExperimentalSerializationApi
 suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> ApiResponse<T>?) {
     if (call.response.isCommitted) return
     try {
         val value = block()
         if (value != null) {
-            val json = Json.encodeToString(
+            val json = Cbor.encodeToByteArray(
                 ApiResponseSerializer(serializer<T>()),
                 value
             )
