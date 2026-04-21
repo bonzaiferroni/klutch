@@ -76,6 +76,7 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postApi(
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> ApiResponse<Returned>?
@@ -130,10 +131,7 @@ suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> A
     try {
         val value = block()
         if (value != null) {
-            val json = Cbor.encodeToByteArray(
-                ApiResponseSerializer(serializer<T>()),
-                value
-            )
+            val json = Cbor.encodeToByteArray(ApiResponseSerializer(serializer<T>()), value)
             call.respond(HttpStatusCode.OK, json)
         } else if (!call.response.isCommitted) {
             call.respond(HttpStatusCode.NotFound)
