@@ -18,16 +18,16 @@ data class UserIdentity<Id: AuthId>(val userId: Id, val username: String, val ro
 class Identity<User: AuthUser, Id: AuthId>(
     private val dao: AuthDao<User, Id>
 ) {
-    suspend fun getUserIdentityOrNull(call: RoutingCall): UserIdentity<Id>? {
+    suspend fun getIdentityOrNull(call: RoutingCall): UserIdentity<Id>? {
         val username = getClaimOrNull(call, CLAIM_USERNAME) ?: return null
         val roles = getClaimOrNull(call, CLAIM_ROLES)?.toUserRoleSet() ?: return null
         val userId = dao.readIdByUsername(username) ?: return null
         return UserIdentity(userId, username, roles)
     }
 
-    suspend fun getUserIdentity(call: RoutingCall) = getUserIdentityOrNull(call) ?: error("user identity not found")
+    suspend fun getIdentity(call: RoutingCall) = getIdentityOrNull(call) ?: error("user identity not found")
 
-    suspend fun getUserIdOrNull(call: RoutingCall) = getUserIdentityOrNull(call)?.userId
+    suspend fun getUserIdOrNull(call: RoutingCall) = getIdentityOrNull(call)?.userId
 
     suspend fun getUserId(call: RoutingCall) = getUserIdOrNull(call) ?: error("user id not provided")
 
