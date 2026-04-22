@@ -39,6 +39,7 @@ fun <Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getEndpoint(
     standardResponse { block(DataRequest(id, endpoint)) }
 }
 
+@Deprecated("use GetByIdEndpoint")
 fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.getEndpoint(
     endpoint: E,
     convertId: (String) -> IdType,
