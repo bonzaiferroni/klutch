@@ -18,6 +18,7 @@ fun <Id : Comparable<Id>, T : IdTable<Id>> T.updateById(
     block: T.(UpdateStatement) -> Unit
 ) = this.update(where = { this@updateById.id.eq(id) }, body = block)
 
+@Deprecated("implementation is not idiomatic")
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.updateSingleWhere(
     where: (T) -> Op<Boolean>,
     block: T.(UpdateStatement) -> Unit
