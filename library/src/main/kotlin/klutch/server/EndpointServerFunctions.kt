@@ -94,6 +94,16 @@ inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returne
     apiResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getApi(
+    endpoint: E,
+    noinline convertId: (String) -> IdType,
+    noinline block: suspend RoutingContext.(DataRequest<IdType, Returned, E>) -> ApiResponse<Returned>?
+) = get(endpoint.serverIdTemplate) {
+    val id = call.getIdOrThrow(convertId)
+    apiResponse { block(DataRequest(id, endpoint)) }
+}
+
 inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
