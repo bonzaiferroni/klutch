@@ -95,6 +95,14 @@ inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returne
 }
 
 @OptIn(ExperimentalSerializationApi::class)
+inline fun <reified Returned, E : GetEndpoint<Returned>> Route.getApi(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(E) -> ApiResponse<Returned>?
+) = get(endpoint.path) {
+    apiResponse { block(endpoint) }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getApi(
     endpoint: E,
     noinline convertId: (String) -> IdType,
