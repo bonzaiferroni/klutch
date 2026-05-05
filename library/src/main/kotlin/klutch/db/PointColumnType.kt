@@ -24,14 +24,19 @@ import kotlin.math.cos
 object PointColumnType : ColumnType<PGpoint>() {
     override fun sqlType(): String = "POINT"
 
-    override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
-        val value = when (value) {
-            is Pair<*, *> -> PGpoint((value.first as Number).toDouble(), (value.second as Number).toDouble())
-            is PGpoint -> value
-            else -> error("Unsupported value type for POINT: $value")
-        }
-        stmt.set(index, value, this)
-    }
+//    override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
+//        val value = when (value) {
+//            is Pair<*, *> -> PGpoint((value.first as Number).toDouble(), (value.second as Number).toDouble())
+//            is PGpoint -> value
+//            else -> error("Unsupported value type for POINT: $value")
+//        }
+//        stmt.set(index, value, this)
+//    }
+
+    override fun notNullValueToDB(value: PGpoint): Any = value
+
+    override fun nonNullValueToString(value: PGpoint): String =
+        "'(${value.x},${value.y})'"
 
     override fun valueFromDB(value: Any): PGpoint = when (value) {
         is PGpoint -> value
