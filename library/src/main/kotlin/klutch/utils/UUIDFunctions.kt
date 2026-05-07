@@ -4,6 +4,7 @@ package klutch.utils
 
 import kampfire.api.TableId
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
+import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.isNull
@@ -16,7 +17,13 @@ fun ExpressionWithColumnType<EntityID<UUID>>.eq(value: String) = this.eq(value.t
 
 @JvmName("eqStringId")
 fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<String>?) =
-    tableId?.let { this.eq(it.value.toUUID()) } ?: this.isNull()
+    tableId?.let {
+        try {
+            this.eq(it.value.toUUID())
+        } catch (_: IllegalArgumentException) {
+            Op.FALSE
+        }
+    } ?: Op.FALSE
 
 @JvmName("eqUuidId")
 fun <T : EntityID<UUID>?> ExpressionWithColumnType<T>.eq(tableId: TableId<Uuid>?) =
