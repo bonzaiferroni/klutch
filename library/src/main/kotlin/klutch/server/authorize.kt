@@ -7,6 +7,7 @@ import kabinet.console.globalConsole
 import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.LoginRequest
+import kampfire.model.UserRole
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
 import klutch.db.tables.RefreshTokenTable
@@ -23,7 +24,8 @@ private val console = globalConsole.getHandle("authorize")
 suspend fun ApplicationCall.authorize(
     refreshTokenTable: RefreshTokenTable,
     loginRequest: LoginRequest,
-    readByUsernameOrEmail: suspend (String) -> AuthUser?
+    readByUsernameOrEmail: suspend (String) -> AuthUser?,
+    createToken: (String, String, Set<UserRole>) -> String
 ): Auth {
 
     val claimedUser = readByUsernameOrEmail(loginRequest.usernameOrEmail)
@@ -33,7 +35,7 @@ suspend fun ApplicationCall.authorize(
     }
     loginRequest.password?.let {
         val givenPassword = it.deobfuscate()
-        val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn, refreshTokenTable)
+        val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn, refreshTokenTable, createToken)
         if (authInfo == null) {
             console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid password")
@@ -42,7 +44,7 @@ suspend fun ApplicationCall.authorize(
         return authInfo
     }
     loginRequest.refreshToken?.let {
-        val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn, refreshTokenTable)
+        val authInfo = testToken(claimedUser, it, loginRequest.stayLoggedIn, refreshTokenTable, createToken)
         if (authInfo == null) {
             console.logInfo("authorize: Invalid token attempt from ${loginRequest.usernameOrEmail}")
             throw InvalidLoginException("Invalid token")
@@ -59,6 +61,7 @@ suspend fun testPassword(
     givenPassword: String,
     stayLoggedIn: Boolean,
     refreshTokenTable: RefreshTokenTable,
+    createToken: (String, String, Set<UserRole>) -> String
 ): Auth? {
     val byteArray = claimedUser.salt.base64ToByteArray()
     val hashedPassword = hashPassword(givenPassword, byteArray)
@@ -67,7 +70,7 @@ suspend fun testPassword(
     }
 
     val sessionToken = createRefreshToken(claimedUser, stayLoggedIn, refreshTokenTable)
-    val jwt = createJWT(claimedUser.username, claimedUser.roles)
+    val jwt = createToken(claimedUser.userId.value, claimedUser.username, claimedUser.roles)
     return Auth(jwt, sessionToken)
 }
 
@@ -76,6 +79,7 @@ suspend fun testToken(
     refreshToken: String,
     stayLoggedIn: Boolean,
     refreshTokenTable: RefreshTokenTable,
+    createToken: (String, String, Set<UserRole>) -> String
 ): Auth? {
     val service = RefreshTokenService(refreshTokenTable)
     val cachedToken = service.readToken(refreshToken)
@@ -93,7 +97,7 @@ suspend fun testToken(
     } else {
         refreshToken
     }
-    val jwt = createJWT(claimedUser.username, claimedUser.roles)
+    val jwt = createToken(claimedUser.userId.value, claimedUser.username, claimedUser.roles)
     return Auth(jwt, returnedToken)
 }
 

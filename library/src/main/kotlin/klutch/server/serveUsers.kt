@@ -7,6 +7,7 @@ import kampfire.api.UserApi
 import kabinet.console.globalConsole
 import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
+import kampfire.model.UserRole
 import kampfire.model.UserSeed
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
@@ -20,7 +21,9 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     dao: AuthDao<User, Id>,
     identity: Identity<User, Id>,
     refreshTokenTable: RefreshTokenTable,
-    provideUser: (UserSeed) -> User
+    provideUser: (UserSeed) -> User,
+    createToken: (String, String, Set<UserRole>) -> String,
+    authGate: (Boolean, Route.() -> Unit) -> Unit
 ) {
 
     val service = AuthService(dao, provideUser)
@@ -37,7 +40,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 
     postEndpoint(UserApi.Login) {
         try {
-            call.authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail)
+            call.authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail, createToken)
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
@@ -45,7 +48,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
         }
     }
 
-    authenticateJwt {
+    authGate(true) {
 //        getEndpoint(UserApi.ReadInfo) {
 //            val username = getUsername()
 //            dao.readUserInfo(username)
