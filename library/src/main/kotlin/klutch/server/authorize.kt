@@ -21,7 +21,7 @@ import javax.crypto.spec.PBEKeySpec
 
 private val console = globalConsole.getHandle("authorize")
 
-suspend fun ApplicationCall.authorize(
+suspend fun authorize(
     refreshTokenTable: RefreshTokenTable,
     loginRequest: LoginRequest,
     readByUsernameOrEmail: suspend (String) -> AuthUser?,
@@ -50,7 +50,6 @@ suspend fun ApplicationCall.authorize(
             throw InvalidLoginException("Invalid token")
         }
         console.logDebug("authorize: session login by ${loginRequest.usernameOrEmail}")
-        this.respond(HttpStatusCode.OK, authInfo)
         return authInfo
     }
     throw InvalidLoginException("Missing password and token")

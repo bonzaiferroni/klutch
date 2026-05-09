@@ -40,7 +40,19 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 
     postEndpoint(UserApi.Login) {
         try {
-            call.authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail, createToken)
+            val auth = authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail, createToken)
+            call.response.cookies.append(
+                Cookie(
+                    name = "auth_token",
+                    value = auth.jwt,
+                    httpOnly = true,
+                    secure = true,
+                    path = "/",
+                    maxAge = 1800,
+                    extensions = mapOf("SameSite" to "Strict")
+                )
+            )
+            call.respond(HttpStatusCode.OK)
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
