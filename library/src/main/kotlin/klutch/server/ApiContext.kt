@@ -5,16 +5,14 @@ import kampfire.model.AuthUser
 import klutch.db.services.AuthId
 import klutch.utils.Identity
 
-class ApiContext<out Model, User: AuthUser, Id: AuthId>(
+class ApiContext<out Model>(
     val model: Model,
     context: Routing,
-    val identity: Identity<User, Id>
 ): Routing by context {
 }
 
-fun <T, User: AuthUser, Id: AuthId> Routing.routingContextOf(
+fun <T> Routing.routingContextOf(
     model: T,
-    identity: Identity<User, Id>,
-    block: ApiContext<T, User, Id>.() -> Unit
-) = ApiContext(model, this, identity).block()
+    block: ApiContext<T>.() -> Unit
+) = ApiContext(model, this).block()
 

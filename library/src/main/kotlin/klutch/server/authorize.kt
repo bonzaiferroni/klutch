@@ -25,7 +25,7 @@ suspend fun ApplicationCall.authorize(
     refreshTokenTable: RefreshTokenTable,
     loginRequest: LoginRequest,
     readByUsernameOrEmail: suspend (String) -> AuthUser?,
-    createToken: (String, String, Set<UserRole>) -> String
+    createToken: (String) -> String,
 ): Auth {
 
     val claimedUser = readByUsernameOrEmail(loginRequest.usernameOrEmail)
@@ -61,7 +61,7 @@ suspend fun testPassword(
     givenPassword: String,
     stayLoggedIn: Boolean,
     refreshTokenTable: RefreshTokenTable,
-    createToken: (String, String, Set<UserRole>) -> String
+    createToken: (String) -> String,
 ): Auth? {
     val byteArray = claimedUser.salt.base64ToByteArray()
     val hashedPassword = hashPassword(givenPassword, byteArray)
@@ -70,7 +70,7 @@ suspend fun testPassword(
     }
 
     val sessionToken = createRefreshToken(claimedUser, stayLoggedIn, refreshTokenTable)
-    val jwt = createToken(claimedUser.userId.value, claimedUser.username, claimedUser.roles)
+    val jwt = createToken(claimedUser.userId.value)
     return Auth(jwt, sessionToken)
 }
 
@@ -79,7 +79,7 @@ suspend fun testToken(
     refreshToken: String,
     stayLoggedIn: Boolean,
     refreshTokenTable: RefreshTokenTable,
-    createToken: (String, String, Set<UserRole>) -> String
+    createToken: (String) -> String,
 ): Auth? {
     val service = RefreshTokenService(refreshTokenTable)
     val cachedToken = service.readToken(refreshToken)
@@ -97,7 +97,7 @@ suspend fun testToken(
     } else {
         refreshToken
     }
-    val jwt = createToken(claimedUser.userId.value, claimedUser.username, claimedUser.roles)
+    val jwt = createToken(claimedUser.userId.value)
     return Auth(jwt, returnedToken)
 }
 

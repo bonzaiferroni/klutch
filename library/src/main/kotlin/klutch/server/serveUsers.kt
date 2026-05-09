@@ -19,11 +19,11 @@ private val console = globalConsole.getHandle("serveUsers")
 
 fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     dao: AuthDao<User, Id>,
-    identity: Identity<User, Id>,
     refreshTokenTable: RefreshTokenTable,
     provideUser: (UserSeed) -> User,
-    createToken: (String, String, Set<UserRole>) -> String,
-    authGate: (Boolean, Route.() -> Unit) -> Unit
+    createToken: (String) -> String,
+    authGate: (Boolean, Route.() -> Unit) -> Unit,
+    getUsername: (RoutingCall) -> String,
 ) {
 
     val service = AuthService(dao, provideUser)
@@ -55,7 +55,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 //        }
 
         getEndpoint(UserApi.Private) {
-            val username = identity.getUsername(call)
+            val username = getUsername(call)
             dao.readPrivateInfo(username)
         }
 
