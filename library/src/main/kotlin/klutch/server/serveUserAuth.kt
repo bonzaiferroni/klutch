@@ -5,28 +5,28 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kampfire.api.UserApi
 import kabinet.console.globalConsole
+import kampfire.api.TableId
+import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
-import kampfire.model.UserRole
+import kampfire.model.Token
 import kampfire.model.UserSeed
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.db.services.AuthService
 import klutch.db.tables.RefreshTokenTable
-import klutch.utils.Identity
 
 private val console = globalConsole.getHandle("serveUsers")
 
 fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     dao: AuthDao<User, Id>,
     refreshTokenTable: RefreshTokenTable,
-    provideUser: (UserSeed) -> User,
-    createToken: (String) -> String,
+    createToken: (String) -> Token,
     authGate: (Boolean, Route.() -> Unit) -> Unit,
-    getUsername: (RoutingCall) -> String,
+    getUsername: (RoutingCall) -> String
 ) {
-
-    val service = AuthService(dao, provideUser)
+    val authorizer = Authorizer(refreshTokenTable, dao::readByUsernameOrEmail, createToken)
+    val service = AuthService(dao)
 
     postEndpoint(UserApi.Create) {
         try {
@@ -38,20 +38,18 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
         }
     }
 
+    post(UserApi.Refresh.path) {
+        val refreshToken = call.request.cookies["refresh_token"]
+            ?: return@post call.respond(HttpStatusCode.Unauthorized)
+        val auth = authorizer.authorize(refreshToken)
+        call.appendCookies(auth)
+        call.respond(HttpStatusCode.OK)
+    }
+
     postEndpoint(UserApi.Login) {
         try {
-            val auth = authorize(refreshTokenTable, it.data, dao::readByUsernameOrEmail, createToken)
-            call.response.cookies.append(
-                Cookie(
-                    name = "auth_token",
-                    value = auth.jwt,
-                    httpOnly = true,
-                    secure = true,
-                    path = "/",
-                    maxAge = 1800,
-                    extensions = mapOf("SameSite" to "Strict")
-                )
-            )
+            val auth = authorizer.authorize(it.data)
+            call.appendCookies(auth)
             call.respond(HttpStatusCode.OK)
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
@@ -83,4 +81,29 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 //            call.respond(HttpStatusCode.OK, true)
 //        }
     }
+}
+
+private fun RoutingCall.appendCookies(auth: Auth) {
+    response.cookies.append(
+        Cookie(
+            name = "auth_token",
+            value = auth.jwt.value,
+            httpOnly = true,
+            secure = true,
+            path = "/",
+            maxAge = auth.jwt.maxAgeSeconds,
+            extensions = mapOf("SameSite" to "Strict")
+        )
+    )
+    response.cookies.append(
+        Cookie(
+            name = "refresh_token",
+            value = auth.refreshToken.value,
+            httpOnly = true,
+            secure = true,
+            path = UserApi.Refresh.path,
+            maxAge = auth.refreshToken.maxAgeSeconds,
+            extensions = mapOf("SameSite" to "Strict")
+        )
+    )
 }

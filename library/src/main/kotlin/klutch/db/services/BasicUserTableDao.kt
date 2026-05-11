@@ -58,7 +58,21 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
         )
     }
 
-    override suspend fun createUser(user: BasicUser) = dbQuery {
+    override suspend fun createUser(seed: UserSeed) = dbQuery {
+        val now = Clock.System.now()
+        val user = BasicUser(
+            userId = BasicUserId.random(),
+            name = null,
+            username = seed.request.username,
+            hashedPassword = seed.hashedPassword,
+            salt = seed.salt,
+            email = seed.request.email,
+            roles = seed.roles.toSet(),
+            avatarUrl = null,
+            createdAt = now,
+            updatedAt = now,
+        )
+
         BasicUserTable.insertAndGetId {
             it.writeFull(user)
         }.value
@@ -103,19 +117,3 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
 private fun eqIdentity(identity: String) =
     (BasicUserTable.username.lowerCase() eq identity.lowercase()) or
         (BasicUserTable.email.lowerCase() eq identity.lowercase())
-
-fun provideBasicUser(seed: UserSeed): BasicUser {
-    val now = Clock.System.now()
-    return BasicUser(
-        userId = BasicUserId.random(),
-        name = null,
-        username = seed.request.username,
-        hashedPassword = seed.hashedPassword,
-        salt = seed.salt,
-        email = seed.request.email,
-        roles = seed.roles.toSet(),
-        avatarUrl = null,
-        createdAt = now,
-        updatedAt = now,
-    )
-}

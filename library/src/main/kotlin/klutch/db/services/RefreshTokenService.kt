@@ -4,20 +4,19 @@ import klutch.db.DbService
 import klutch.db.model.RefreshToken
 import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
-import kabinet.utils.epochSecondsNow
 import kampfire.api.TableId
-import klutch.environment.readEnvFromPath
+import kampfire.model.Token
 import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 
 class RefreshTokenService(
-    private val table: RefreshTokenTable
+    private val table: RefreshTokenTable,
 ) : DbService() {
-    private val env = readEnvFromPath()
 
     suspend fun readToken(value: String): RefreshToken? = dbQuery {
         table.select(table.columns)
@@ -33,11 +32,10 @@ class RefreshTokenService(
         table.insert {
             it[user] = userId.toUUID()
             it[token] = generatedToken
-            it[createdAt] = Clock.epochSecondsNow()
-            it[ttl] = requestedTTL
-
-            it[issuer] = env.read("HOST_ADDRESS")
+            it[createdAt] = Clock.System.now()
+            it[expiresAt] = Clock.System.now() + requestedTTL
         }
+        Token(generatedToken, requestedTTL.inWholeSeconds.toInt())
     }
 
     suspend fun deleteToken(value: String) = dbQuery {
@@ -45,5 +43,5 @@ class RefreshTokenService(
     }
 }
 
-const val REFRESH_TOKEN_LONG_TTL = 60 * 60 * 24 * 30 // 30 days
-const val REFRESH_TOKEN_TEMP_TTL = 60 * 2 // 2 hours
+val REFRESH_TOKEN_LONG_TTL = 30.days
+val REFRESH_TOKEN_TEMP_TTL = 1.days

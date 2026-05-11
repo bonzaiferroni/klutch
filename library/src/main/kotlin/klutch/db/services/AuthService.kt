@@ -15,7 +15,6 @@ import klutch.utils.serverLog
 
 class AuthService<User: AuthUser, Id: AuthId>(
     private val dao: AuthDao<User, Id>,
-    private val provideUser: (UserSeed) -> User
 ) {
     suspend fun createUser(
         info: SignUpRequest,
@@ -35,9 +34,7 @@ class AuthService<User: AuthUser, Id: AuthId>(
             roles = roles
         )
 
-        val user = provideUser(seed)
-
-        dao.createUser(user)
+        dao.createUser(seed)
     }
 
     private suspend fun validateUsername(info: SignUpRequest) {

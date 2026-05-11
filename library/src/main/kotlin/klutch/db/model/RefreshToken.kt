@@ -1,19 +1,20 @@
 package klutch.db.model
 
 import kabinet.utils.epochSecondsNow
+import kampfire.api.TableId
 import java.util.UUID
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 data class RefreshToken(
     val id: Long,
-    val userId: UUID,
+    val userId: TableId<String>,
     val token: String,
-    val createdAt: Long,
-    val ttl: Int,
-    val issuer: String,
+    val createdAt: Instant,
+    val expiresAt: Instant,
 ) {
-    val isExpired get() = Clock.epochSecondsNow() > createdAt + ttl
-    val needsRotating get() = Clock.epochSecondsNow() > createdAt + ttl * REFRESH_TOKEN_ROTATION_FACTOR
+    val isExpired get() = Clock.System.now() > expiresAt
+    val needsRotating get() = Clock.System.now() > expiresAt - 7.days
 }
 
-const val REFRESH_TOKEN_ROTATION_FACTOR = .25f // 1/4 TTL

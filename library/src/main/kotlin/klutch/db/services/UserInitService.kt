@@ -12,10 +12,9 @@ private val console = globalConsole.getHandle(UserInitService::class)
 class UserInitService<User: AuthUser, Id: AuthId>(
     private val env: Environment,
     private val dao: AuthDao<User, Id>,
-    private val provideUser: (UserSeed) -> User,
 ) {
     suspend fun initUsers() {
-        val service = AuthService(dao, provideUser)
+        val service = AuthService(dao)
         val username = env.read(ADMIN_USERNAME_KEY)
         val id = dao.readIdByUsername(username)
         if (id != null) return
