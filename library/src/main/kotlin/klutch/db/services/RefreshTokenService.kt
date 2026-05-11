@@ -6,6 +6,7 @@ import klutch.db.tables.RefreshTokenTable
 import klutch.db.tables.toSessionToken
 import kampfire.api.TableId
 import kampfire.model.Token
+import klutch.utils.eq
 import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -36,6 +37,10 @@ class RefreshTokenService(
             it[expiresAt] = Clock.System.now() + requestedTTL
         }
         Token(generatedToken, requestedTTL.inWholeSeconds.toInt())
+    }
+
+    suspend fun deleteTokens(userId: TableId<String>) = dbQuery {
+        table.deleteWhere { table.user.eq(userId) }
     }
 
     suspend fun deleteToken(value: String) = dbQuery {

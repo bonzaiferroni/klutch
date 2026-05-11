@@ -18,11 +18,10 @@ import kotlin.time.Clock
 private val console = globalConsole.getHandle("authorize")
 
 class Authorizer(
-    private val refreshTokenTable: RefreshTokenTable,
+    private val refreshTokenService: RefreshTokenService,
     private val readByUsernameOrEmail: suspend (String) -> AuthUser?,
     private val createToken: (String) -> Token,
 ) {
-    private val service = RefreshTokenService(refreshTokenTable)
 
     suspend fun authorize(
         loginRequest: LoginRequest,
@@ -76,19 +75,19 @@ class Authorizer(
     }
 
     suspend fun testToken(refreshToken: String): Auth? {
-        val cachedToken = service.readToken(refreshToken)
+        val cachedToken = refreshTokenService.readToken(refreshToken)
             ?: return null
         if (cachedToken.isExpired) {
-            service.deleteToken(refreshToken)
+            refreshTokenService.deleteToken(refreshToken)
             return null
         }
         val returnedToken = if (cachedToken.needsRotating) {
-            service.deleteToken(refreshToken)
+            refreshTokenService.deleteToken(refreshToken)
             createRefreshToken(cachedToken.userId, true)
         } else {
             Token(refreshToken, (cachedToken.expiresAt - Clock.System.now()).inWholeSeconds.toInt())
         }
-        val jwt = createToken(cachedToken.token)
+        val jwt = createToken(cachedToken.userId.value)
         return Auth(jwt, returnedToken)
     }
 
@@ -96,7 +95,7 @@ class Authorizer(
         userId: TableId<String>,
         stayLoggedIn: Boolean,
     ): Token {
-        return service.createToken(userId, generateTokenString(), stayLoggedIn)
+        return refreshTokenService.createToken(userId, generateTokenString(), stayLoggedIn)
     }
 }
 

@@ -3,17 +3,17 @@ package klutch.server
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.date.GMTDate
 import kampfire.api.UserApi
 import kabinet.console.globalConsole
-import kampfire.api.TableId
 import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.SignUpResult
 import kampfire.model.Token
-import kampfire.model.UserSeed
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.db.services.AuthService
+import klutch.db.services.RefreshTokenService
 import klutch.db.tables.RefreshTokenTable
 
 private val console = globalConsole.getHandle("serveUsers")
@@ -23,14 +23,16 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     refreshTokenTable: RefreshTokenTable,
     createToken: (String) -> Token,
     authGate: (Boolean, Route.() -> Unit) -> Unit,
-    getUsername: (RoutingCall) -> String
+    getUsername: (RoutingCall) -> String,
+    getUserId: (RoutingCall) -> Id
 ) {
-    val authorizer = Authorizer(refreshTokenTable, dao::readByUsernameOrEmail, createToken)
-    val service = AuthService(dao)
+    val refreshTokenService = RefreshTokenService(refreshTokenTable)
+    val authorizer = Authorizer(refreshTokenService, dao::readByUsernameOrEmail, createToken)
+    val authService = AuthService(dao)
 
     postEndpoint(UserApi.Create) {
         try {
-            service.createUser(it.data)
+            authService.createUser(it.data)
             SignUpResult(true, "User created.")
         } catch (e: IllegalArgumentException) {
             console.logError("serveUsers.createUser fail: ${e.message}")
@@ -39,6 +41,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     }
 
     post(UserApi.Refresh.path) {
+        console.log("refreshing")
         val refreshToken = call.request.cookies["refresh_token"]
             ?: return@post call.respond(HttpStatusCode.Unauthorized)
         val auth = authorizer.authorize(refreshToken)
@@ -48,6 +51,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 
     postEndpoint(UserApi.Login) {
         try {
+            console.log("logging in")
             val auth = authorizer.authorize(it.data)
             call.appendCookies(auth)
             call.respond(HttpStatusCode.OK)
@@ -59,27 +63,38 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     }
 
     authGate(true) {
-//        getEndpoint(UserApi.ReadInfo) {
-//            val username = getUsername()
-//            dao.readUserInfo(username)
-//        }
+        post(UserApi.Logout.path) {
+            val userId = getUserId(call)
+            refreshTokenService.deleteTokens(userId)
+            call.response.cookies.append(
+                Cookie(
+                    name = "auth_token",
+                    value = "",
+                    httpOnly = true,
+                    secure = true,
+                    path = "/",
+                    expires = GMTDate.START,
+                    extensions = mapOf("SameSite" to "Strict")
+                )
+            )
+            call.response.cookies.append(
+                Cookie(
+                    name = "refresh_token",
+                    value = "",
+                    httpOnly = true,
+                    secure = true,
+                    path = UserApi.Refresh.path,
+                    expires = GMTDate.START,
+                    extensions = mapOf("SameSite" to "Strict")
+                )
+            )
+            call.respond(HttpStatusCode.OK)
+        }
 
         getEndpoint(UserApi.Private) {
             val username = getUsername(call)
             dao.readPrivateInfo(username)
         }
-
-//        postEndpoint(UserApi.Update) {
-//            val userId = getUserId()
-//            dao.updateUser(it.data, userId)
-//        }
-
-//        put(UserApi.Users.Update) {
-//            val username = call.getClaim(CLAIM_USERNAME)
-//            val info = call.receive<EditUserRequest>()
-//            service.updateUser(username, info)
-//            call.respond(HttpStatusCode.OK, true)
-//        }
     }
 }
 
