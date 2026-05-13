@@ -49,4 +49,7 @@ dependencies {
     implementation("black.ninia:jep:4.2.2")
 
     implementation(project(":kabinet"))
+
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
 }

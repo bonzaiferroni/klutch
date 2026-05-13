@@ -18,16 +18,15 @@ import klutch.db.tables.RefreshTokenTable
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
+fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
     dao: AuthDao<User, Id>,
-    refreshTokenTable: RefreshTokenTable,
-    createToken: (String) -> Token,
     authGate: (Boolean, Route.() -> Unit) -> Unit,
     getUsername: (RoutingCall) -> String,
     getUserId: (RoutingCall) -> Id
 ) {
-    val refreshTokenService = RefreshTokenService(refreshTokenTable)
-    val authorizer = Authorizer(refreshTokenService, dao::readByUsernameOrEmail, createToken)
+    val refreshTokenService = server.get<RefreshTokenService>()
+    val jwtService = server.get<JwtService>()
+    val authorizer = Authorizer(refreshTokenService, jwtService, dao::readByUsernameOrEmail)
     val authService = AuthService(dao)
 
     postEndpoint(UserApi.Create) {

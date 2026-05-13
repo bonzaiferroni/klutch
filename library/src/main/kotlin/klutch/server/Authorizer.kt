@@ -19,8 +19,8 @@ private val console = globalConsole.getHandle("authorize")
 
 class Authorizer(
     private val refreshTokenService: RefreshTokenService,
+    private val jwtService: JwtService,
     private val readByUsernameOrEmail: suspend (String) -> AuthUser?,
-    private val createToken: (String) -> Token,
 ) {
 
     suspend fun authorize(
@@ -70,7 +70,7 @@ class Authorizer(
         }
 
         val sessionToken = createRefreshToken(claimedUser.userId, stayLoggedIn)
-        val jwt = createToken(claimedUser.userId.value)
+        val jwt = jwtService.createAccessToken(claimedUser.userId.value)
         return Auth(jwt, sessionToken)
     }
 
@@ -87,7 +87,7 @@ class Authorizer(
         } else {
             Token(refreshToken, (cachedToken.expiresAt - Clock.System.now()).inWholeSeconds.toInt())
         }
-        val jwt = createToken(cachedToken.userId.value)
+        val jwt = jwtService.createAccessToken(cachedToken.userId.value)
         return Auth(jwt, returnedToken)
     }
 
