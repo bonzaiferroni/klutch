@@ -1,10 +1,11 @@
 package klutch.utils
 
 import kabinet.utils.toLocalDateTimeUtc
-import klutch.utils.eq
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
 import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.QueryBuilder
+import org.jetbrains.exposed.v1.core.VarCharColumnType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
@@ -50,7 +51,19 @@ fun <T> ExpressionWithColumnType<T>.isNullOrEq(t: T) = isNull() or eq(t)
 
 fun <T> ExpressionWithColumnType<T>.isNullOrNeq(t: T) = isNull() or neq(t)
 
-fun ExpressionWithColumnType<String>.eqLowercase(str: String) = lowerCase() eq str.lowercase()
+// not efficient because it does not use the index
+fun ExpressionWithColumnType<String>.eqIgnoreCase(str: String) = lowerCase() eq str.lowercase()
+
+fun ExpressionWithColumnType<List<String>>.anyEqIgnoreCase(str: String): Op<Boolean> =
+    object : Op<Boolean>() {
+        override fun toQueryBuilder(queryBuilder: QueryBuilder) = queryBuilder {
+            append("LOWER(")
+            registerArgument(VarCharColumnType(), str)
+            append(") = ANY(SELECT LOWER(unnest(")
+            append(this@anyEqIgnoreCase)
+            append(")))")
+        }
+    }
 
 fun ExpressionWithColumnType<LocalDateTime?>.betweenNullable(start: Instant, end: Instant) =
     greaterEqNullable(start) and lessNullable(end)

@@ -12,7 +12,7 @@ import klutch.db.tables.BasicUserTable
 import klutch.db.tables.UserAspect
 import klutch.db.tables.writeFull
 import klutch.utils.eq
-import klutch.utils.eqLowercase
+import klutch.utils.eqIgnoreCase
 import klutch.utils.serverLog
 import klutch.utils.toStringId
 import org.jetbrains.exposed.v1.core.eq
@@ -81,10 +81,10 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
     suspend fun updateUser(username: String, info: EditUserRequest) = dbQuery {
         if (info.deleteUser) {
             serverLog.logInfo("UserService: Deleting user $username")
-            BasicUserTable.deleteWhere { BasicUserTable.username.eqLowercase(username) }
+            BasicUserTable.deleteWhere { BasicUserTable.username.eqIgnoreCase(username) }
         } else {
             serverLog.logInfo("UserService: Updating user $username")
-            BasicUserTable.update({ BasicUserTable.username.eqLowercase(username) }) {
+            BasicUserTable.update({ BasicUserTable.username.eqIgnoreCase(username) }) {
                 it[name] = info.name
                 if (info.deleteName) it[name] = null
                 it[email] = info.email
@@ -103,7 +103,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
     }
 
     suspend fun checkUsername(username: String) = dbQuery {
-        BasicUserTable.readFirstOrNull { BasicUserTable.username.eqLowercase(username) } == null
+        BasicUserTable.readFirstOrNull { BasicUserTable.username.eqIgnoreCase(username) } == null
     }
 
     override suspend fun readSaltExists(salt: String) = dbQuery {
