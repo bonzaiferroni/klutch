@@ -6,10 +6,11 @@ import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 data class RefreshToken(
     val id: Long,
-    val userId: TableId<String>,
+    val userId: TableId<Uuid>,
     val token: String,
     val createdAt: Instant,
     val expiresAt: Instant,

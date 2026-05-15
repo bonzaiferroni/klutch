@@ -17,8 +17,9 @@ import klutch.utils.serverLog
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.Date
+import kotlin.uuid.Uuid
 
-fun Application.configureAuth(server: ServerContext, principalOf: suspend (String) -> Any?) {
+fun Application.configureAuth(server: ServerContext, principalOf: suspend (Uuid) -> Any?) {
     val env = server.get<Environment>()
     val config = server.get<TokenConfig>()
     val secret = env.read(APP_SECRET_KEY)
@@ -41,7 +42,7 @@ fun Application.configureAuth(server: ServerContext, principalOf: suspend (Strin
             )
             validate { credential ->
                 credential.payload.subject?.let {
-                    principalOf(it)
+                    principalOf(Uuid.parse(it))
                 }
             }
             challenge { _, _ ->
@@ -66,13 +67,13 @@ class JwtService(
     private val env: Environment,
     private val config: TokenConfig,
 ) {
-    fun createAccessToken(userId: StringId): Token {
+    fun createAccessToken(userId: Uuid): Token {
         val secret = env.read(APP_SECRET_KEY)
         val value = JWT.create()
             .withAudience(config.audience)
             .withIssuer(config.issuer)
             .withExpiresAt(Date(System.currentTimeMillis() + config.lifetimeSeconds * 1000)) // 30 minutes
-            .withSubject(userId)
+            .withSubject(userId.toString())
             .sign(Algorithm.HMAC256(secret))
         return Token(value, config.lifetimeSeconds)
     }

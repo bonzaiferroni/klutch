@@ -7,13 +7,13 @@ import klutch.db.tables.toSessionToken
 import kampfire.api.TableId
 import kampfire.model.Token
 import klutch.utils.eq
-import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.uuid.Uuid
 
 class RefreshTokenService(
     private val table: RefreshTokenTable,
@@ -25,13 +25,13 @@ class RefreshTokenService(
             .firstOrNull()?.toSessionToken(table)
     }
 
-    suspend fun createToken(userId: TableId<String>, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
+    suspend fun createToken(userId: TableId<Uuid>, generatedToken: String, stayLoggedIn: Boolean) = dbQuery {
         val requestedTTL = when(stayLoggedIn) {
             true -> REFRESH_TOKEN_LONG_TTL
             false -> REFRESH_TOKEN_TEMP_TTL
         }
         table.insert {
-            it[user] = userId.toUUID()
+            it[user] = userId.value
             it[token] = generatedToken
             it[createdAt] = Clock.System.now()
             it[expiresAt] = Clock.System.now() + requestedTTL
@@ -39,7 +39,7 @@ class RefreshTokenService(
         Token(generatedToken, requestedTTL.inWholeSeconds.toInt())
     }
 
-    suspend fun deleteTokens(userId: TableId<String>) = dbQuery {
+    suspend fun deleteTokens(userId: TableId<Uuid>) = dbQuery {
         table.deleteWhere { table.user.eq(userId) }
     }
 

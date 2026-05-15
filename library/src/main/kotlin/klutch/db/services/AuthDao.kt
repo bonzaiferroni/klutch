@@ -5,10 +5,11 @@ import kampfire.model.AuthUser
 import kampfire.model.PrivateInfo
 import kampfire.model.UserSeed
 import java.util.UUID
+import kotlin.uuid.Uuid
 
 interface AuthDao<User: AuthUser, Id: AuthId> {
 
-    suspend fun createUser(seed: UserSeed): UUID
+    suspend fun createUser(seed: UserSeed): Uuid
     suspend fun readIdByUsername(username: String): Id?
     suspend fun readByUsernameOrEmail(identity: String): User?
     suspend fun readPrivateInfo(identity: String): PrivateInfo?
@@ -17,4 +18,4 @@ interface AuthDao<User: AuthUser, Id: AuthId> {
     // suspend fun updateUser(user: BasicUserInfo, userId: UserId): Boolean
 }
 
-typealias AuthId = TableId<String>
+typealias AuthId = TableId<Uuid>

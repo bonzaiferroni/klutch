@@ -14,6 +14,7 @@ import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 private val console = globalConsole.getHandle("authorize")
 
@@ -92,7 +93,7 @@ class Authorizer(
     }
 
     private suspend fun createRefreshToken(
-        userId: TableId<String>,
+        userId: TableId<Uuid>,
         stayLoggedIn: Boolean,
     ): Token {
         return refreshTokenService.createToken(userId, generateTokenString(), stayLoggedIn)

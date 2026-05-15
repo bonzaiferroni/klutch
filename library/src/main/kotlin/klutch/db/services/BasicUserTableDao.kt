@@ -14,7 +14,6 @@ import klutch.db.tables.writeFull
 import klutch.utils.eq
 import klutch.utils.eqIgnoreCase
 import klutch.utils.serverLog
-import klutch.utils.toStringId
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
@@ -45,7 +44,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
     override suspend fun readIdByUsername(username: String) = dbQuery {
         BasicUserTable.select(BasicUserTable.id)
             .where { BasicUserTable.username.eq(username) }
-            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { BasicUserId(it.toStringId())}
+            .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { BasicUserId(it)}
     }
 
     suspend fun readUserInfo(identity: String): BasicUserInfo {

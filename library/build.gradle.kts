@@ -55,3 +55,9 @@ dependencies {
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
 }
+
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+}

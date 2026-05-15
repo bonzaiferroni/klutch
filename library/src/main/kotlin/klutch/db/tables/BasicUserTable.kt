@@ -3,14 +3,13 @@ package klutch.db.tables
 import kampfire.model.BasicUser
 import kampfire.model.BasicUserId
 import kampfire.model.UserRole
-import klutch.utils.toStringId
-import klutch.utils.toUUID
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.dao.id.UuidTable
 import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.datetime.timestamp
 
-object BasicUserTable : UUIDTable("user") {
+object BasicUserTable : UuidTable("user") {
     val name = text("name").nullable()
     val username = text("username")
     val hashedPassword = text("hashed_password")
@@ -24,7 +23,7 @@ object BasicUserTable : UUIDTable("user") {
 
 // Row mapper
 fun ResultRow.toUser() = BasicUser(
-    userId = BasicUserId(this[BasicUserTable.id].value.toStringId()),
+    userId = BasicUserId(this[BasicUserTable.id].value),
     name = this[BasicUserTable.name],
     username = this[BasicUserTable.username],
     hashedPassword = this[BasicUserTable.hashedPassword],
@@ -38,7 +37,7 @@ fun ResultRow.toUser() = BasicUser(
 
 // Updaters
 fun UpdateBuilder<*>.writeFull(user: BasicUser) {
-    this[BasicUserTable.id] = user.userId.value.toUUID()
+    this[BasicUserTable.id] = user.userId.value
     writeUpdate(user)
 }
 
