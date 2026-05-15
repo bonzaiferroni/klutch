@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package klutch.server
 
 import io.ktor.http.HttpStatusCode
@@ -9,12 +11,9 @@ import io.ktor.util.toMap
 import kampfire.api.*
 import kampfire.model.ApiResponse
 import kampfire.model.ApiResponseSerializer
-import kampfire.model.Ok
-import kampfire.model.Problem
 import kampfire.utils.ParameterMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
@@ -51,18 +50,6 @@ fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> R
     standardResponse { block(id, endpoint) }
 }
 
-fun <Sent, Returned, E : QueryEndpoint<Sent, Returned>> Route.queryEndpoint(
-    endpoint: E,
-    factory: (ParameterMap) -> Sent?,
-    block: suspend RoutingContext.(Sent?, E) -> Returned?
-) = get(endpoint.path) {
-    standardResponse {
-        val params = call.request.queryParameters.toMap()
-        val sentValue = factory(params)
-        block(sentValue, endpoint)
-    }
-}
-
 inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> Returned?
@@ -79,7 +66,6 @@ inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Rout
     standardResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
-@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postApi(
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> ApiResponse<Returned>?
@@ -96,7 +82,6 @@ inline fun <reified Returned, reified Sent : Any, E : PostEndpoint<Sent, Returne
     apiResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
-@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified Returned, E : GetEndpoint<Returned>> Route.getApi(
     endpoint: E,
     noinline block: suspend RoutingContext.(E) -> ApiResponse<Returned>?
@@ -104,7 +89,6 @@ inline fun <reified Returned, E : GetEndpoint<Returned>> Route.getApi(
     apiResponse { block(endpoint) }
 }
 
-@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getApi(
     endpoint: E,
     noinline convertId: (String) -> IdType,
@@ -112,6 +96,26 @@ inline fun <reified Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Rou
 ) = get(endpoint.serverIdTemplate) {
     val id = call.getIdOrThrow(convertId)
     apiResponse { block(DataRequest(id, endpoint)) }
+}
+
+inline fun <reified Returned, E : GetByIdEndpoint<String, Returned>> Route.getApi(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(DataRequest<String, Returned, E>) -> ApiResponse<Returned>?
+) = get(endpoint.serverIdTemplate) {
+    val id = call.getIdOrThrow { it }
+    apiResponse { block(DataRequest(id, endpoint)) }
+}
+
+inline fun <reified Returned, E : QueryEndpoint<Sent, Returned>, Sent> Route.getApi(
+    endpoint: E,
+    noinline factory: (ParameterMap) -> Sent,
+    noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> ApiResponse<Returned>?
+) = get(endpoint.path) {
+    apiResponse {
+        val params = call.request.queryParameters.toMap()
+        val sentValue = factory(params)
+        block(DataRequest(sentValue, endpoint))
+    }
 }
 
 inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
@@ -122,12 +126,12 @@ inline fun <reified Sent : Any, E : UpdateEndpoint<Sent>> Route.updateEndpoint(
     standardResponse { block(sentValue, endpoint) }
 }
 
-inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.deleteEndpoint(
+inline fun <reified Sent: Any, E: DeleteEndpoint<Sent>> Route.deleteApi(
     endpoint: E,
-    noinline block: suspend RoutingContext.(Sent, E) -> Boolean?
+    noinline block: suspend RoutingContext.(DataRequest<Sent, Boolean, E>) -> ApiResponse<Boolean>?
 ) = delete(endpoint.path) {
     val sentValue = call.receive<Sent>()
-    standardResponse { block(sentValue, endpoint) }
+    apiResponse { block(DataRequest(sentValue, endpoint)) }
 }
 
 suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {

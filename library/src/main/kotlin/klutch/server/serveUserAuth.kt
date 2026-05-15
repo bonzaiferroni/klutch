@@ -8,8 +8,10 @@ import kampfire.api.UserApi
 import kabinet.console.globalConsole
 import kampfire.model.Auth
 import kampfire.model.AuthUser
+import kampfire.model.Ok
 import kampfire.model.SignUpResult
 import kampfire.model.Token
+import kampfire.model.responseOf
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.db.services.AuthService
@@ -29,14 +31,15 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
     val authorizer = Authorizer(refreshTokenService, jwtService, dao::readByUsernameOrEmail)
     val authService = AuthService(dao)
 
-    postEndpoint(UserApi.Create) {
-        try {
+    postApi(UserApi.Create) {
+        val result = try {
             authService.createUser(it.data)
             SignUpResult(true, "User created.")
         } catch (e: IllegalArgumentException) {
             console.logError("serveUsers.createUser fail: ${e.message}")
             SignUpResult(false, e.message.toString())
         }
+        Ok(result)
     }
 
     post(UserApi.Refresh.path) {
@@ -90,9 +93,9 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
             call.respond(HttpStatusCode.OK)
         }
 
-        getEndpoint(UserApi.Private) {
+        getApi(UserApi.Private) {
             val username = getUsername(call)
-            dao.readPrivateInfo(username)
+            responseOf(dao.readPrivateInfo(username))
         }
     }
 }
