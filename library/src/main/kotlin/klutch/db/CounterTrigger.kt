@@ -2,11 +2,11 @@ package klutch.db
 
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 
 data class CounterTrigger(
-    val parentTable: Table,
-    val parentIdColumn: Column<*>,
+    val parentTable: IdTable<*>,
     val childTable: Table,
     val childFkColumn: Column<*>,
     val counterColumn: Column<*>,
@@ -21,7 +21,7 @@ fun JdbcTransaction.createCounterTrigger(config: CounterTrigger) {
         BEGIN
             UPDATE ${config.parentTable.tableName}
             SET ${config.counterColumn.name} = ${config.counterColumn.name} + 1
-            WHERE ${config.parentIdColumn.name} = NEW.${config.childFkColumn.name};
+            WHERE ${config.parentTable.id.name} = NEW.${config.childFkColumn.name};
             RETURN NEW;
         END;
         ${'$'}${'$'} LANGUAGE plpgsql;
@@ -33,7 +33,7 @@ fun JdbcTransaction.createCounterTrigger(config: CounterTrigger) {
         BEGIN
             UPDATE ${config.parentTable.tableName}
             SET ${config.counterColumn.name} = ${config.counterColumn.name} - 1
-            WHERE ${config.parentIdColumn.name} = OLD.${config.childFkColumn.name};
+            WHERE ${config.parentTable.id.name} = OLD.${config.childFkColumn.name};
             RETURN OLD;
         END;
         ${'$'}${'$'} LANGUAGE plpgsql;
