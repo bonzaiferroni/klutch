@@ -173,6 +173,12 @@ fun <T> RoutingContext.readParamOrNull(param: EndpointParam<T>): T? {
     return param.read(str)
 }
 
+@JvmName("readNullableParam")
+fun <T> RoutingContext.readParam(param: EndpointParam<T?>): T? {
+    val str = call.request.queryParameters[param.key] ?: return null
+    return param.read(str)
+}
+
 fun <T> RoutingContext.readParam(param: EndpointParam<T>) =
     readParamOrNull(param) ?: throw MissingParameterException(param.key)
 
