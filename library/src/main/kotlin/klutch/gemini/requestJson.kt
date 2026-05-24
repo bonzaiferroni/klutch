@@ -9,7 +9,7 @@ import kabinet.gemini.GeminiPart
 import kabinet.gemini.GeminiRequest
 import kabinet.gemini.GeminiResponse
 import kabinet.gemini.GenerationConfig
-import kampfire.utils.toSnakeCase
+import kampfire.utils.pascalToSnakeCase
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -56,7 +56,7 @@ fun objectToJson(descriptor: SerialDescriptor) = buildJsonObject {
     put("type", "OBJECT")
     put("properties", buildJsonObject {
         descriptor.elementDescriptors.forEachIndexed { index, childDescriptor ->
-            put(descriptor.getElementName(index).toSnakeCase(), mapTypeToJson(childDescriptor))
+            put(descriptor.getElementName(index).pascalToSnakeCase(), mapTypeToJson(childDescriptor))
         }
     })
 }
