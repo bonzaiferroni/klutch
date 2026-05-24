@@ -7,7 +7,6 @@ import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.inList
-import java.util.UUID
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
