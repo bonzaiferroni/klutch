@@ -106,6 +106,15 @@ inline fun <reified Returned, E : GetByIdEndpoint<String, Returned>> Route.getAp
     apiResponse { block(DataRequest(id, endpoint)) }
 }
 
+@JvmName("getBySlugApi")
+inline fun <reified Returned, E : GetByIdEndpoint<Slug, Returned>> Route.getApi(
+    endpoint: E,
+    noinline block: suspend RoutingContext.(DataRequest<Slug, Returned, E>) -> ApiResponse<Returned>?
+) = get(endpoint.serverIdTemplate) {
+    val id = call.getIdOrThrow { it }.toSlug()
+    apiResponse { block(DataRequest(id, endpoint)) }
+}
+
 inline fun <reified Returned, E : QueryEndpoint<Sent, Returned>, Sent> Route.getApi(
     endpoint: E,
     noinline factory: (ParameterMap) -> Sent,

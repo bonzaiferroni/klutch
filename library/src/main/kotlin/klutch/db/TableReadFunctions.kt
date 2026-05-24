@@ -8,8 +8,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 fun <T : ColumnSet> T.read(
     columns: List<Column<*>> = this.columns,
     block: (T) -> Op<Boolean>
-) = this.select(columns)
-    .where { block(this@read) }
+) = this.select(columns).where { block(this@read) }
 
 fun <T : ColumnSet> T.readSingleOrNull(
     columns: List<Column<*>> = this.columns,
@@ -28,9 +27,7 @@ fun <T : ColumnSet> T.readSingle(
 fun <T : ColumnSet> T.readFirstOrNull(
     columns: List<Column<*>> = this.columns,
     block: (T) -> Op<Boolean>
-) = this.select(columns)
-    .where { block(this@readFirstOrNull) }
-    .firstOrNull()
+) = this.select(columns).where { block(this@readFirstOrNull) }.firstOrNull()
 
 fun <T : ColumnSet> T.readFirst(
     columns: List<Column<*>> = this.columns,
