@@ -14,4 +14,6 @@ import kotlin.uuid.Uuid
 fun ExpressionWithColumnType<EntityID<Uuid>>.eq(tableId: TableId<Uuid>) = this.eq(tableId.value)
 
 fun ExpressionWithColumnType<String>.eq(slug: Slug) = this.eq(slug.string)
+@JvmName("nullableSlugEq")
+fun ExpressionWithColumnType<String?>.eq(slug: Slug) = this.eq(slug.string)
 
