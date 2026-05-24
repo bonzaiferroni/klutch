@@ -5,7 +5,6 @@ import kampfire.model.BasicUserId
 import kampfire.model.UserRole
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.dao.id.UuidTable
-import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.datetime.timestamp
 
@@ -36,12 +35,12 @@ fun ResultRow.toUser() = BasicUser(
 )
 
 // Updaters
-fun UpdateBuilder<*>.writeFull(user: BasicUser) {
+fun UpdateBuilder<*>.createRecord(user: BasicUser) {
     this[BasicUserTable.id] = user.userId.value
-    writeUpdate(user)
+    updateRecord(user)
 }
 
-fun UpdateBuilder<*>.writeUpdate(user: BasicUser) {
+fun UpdateBuilder<*>.updateRecord(user: BasicUser) {
     this[BasicUserTable.name] = user.name
     this[BasicUserTable.username] = user.username
     this[BasicUserTable.hashedPassword] = user.hashedPassword

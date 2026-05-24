@@ -10,7 +10,7 @@ import klutch.db.DbService
 import klutch.db.readFirstOrNull
 import klutch.db.tables.BasicUserTable
 import klutch.db.tables.UserAspect
-import klutch.db.tables.writeFull
+import klutch.db.tables.createRecord
 import klutch.utils.eq
 import klutch.utils.eqIgnoreCase
 import klutch.utils.serverLog
@@ -73,7 +73,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
         )
 
         BasicUserTable.insertAndGetId {
-            it.writeFull(user)
+            it.createRecord(user)
         }.value
     }
 
