@@ -22,7 +22,9 @@ fun <ID: Comparable<ID>, V> JdbcTransaction.createSyncValueTrigger(config: SyncV
         RETURNS TRIGGER AS ${'$'}${'$'}
         BEGIN
             IF NEW.${config.fkColumn.name} IS NULL THEN
-                NEW.${config.syncedColumn.name} := NULL;
+                IF TG_OP = 'UPDATE' AND OLD.${config.fkColumn.name} IS NOT NULL THEN
+                    NEW.${config.syncedColumn.name} := NULL;
+                END IF;
                 RETURN NEW;
             END IF;
         
