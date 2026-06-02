@@ -8,7 +8,6 @@ import kampfire.model.LoginRequest
 import kampfire.model.Token
 import kampfire.utils.deobfuscate
 import klutch.db.services.RefreshTokenService
-import klutch.db.tables.RefreshTokenTable
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.SecretKeyFactory

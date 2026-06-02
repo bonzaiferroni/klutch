@@ -7,7 +7,6 @@ import kampfire.api.toSlug
 import klutch.db.mapFirst
 import klutch.utils.eq
 import org.jetbrains.exposed.v1.core.Column
-import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.core.or
