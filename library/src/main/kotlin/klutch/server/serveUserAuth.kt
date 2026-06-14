@@ -6,24 +6,23 @@ import io.ktor.server.routing.*
 import io.ktor.util.date.GMTDate
 import kampfire.api.UserApi
 import kabinet.console.globalConsole
+import kampfire.api.Username
 import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.Ok
 import kampfire.model.SignUpResult
-import kampfire.model.Token
 import kampfire.model.responseOf
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.db.services.AuthService
 import klutch.db.services.RefreshTokenService
-import klutch.db.tables.RefreshTokenTable
 
 private val console = globalConsole.getHandle("serveUsers")
 
 fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
     dao: AuthDao<User, Id>,
     authGate: (Boolean, Route.() -> Unit) -> Unit,
-    getUsername: (RoutingCall) -> String,
+    getUsername: (RoutingCall) -> Username,
     getUserId: (RoutingCall) -> Id
 ) {
     val refreshTokenService = server.get<RefreshTokenService>()
@@ -95,7 +94,7 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
 
         getApi(UserApi.Private) {
             val username = getUsername(call)
-            responseOf(dao.readPrivateInfo(username))
+            responseOf(dao.readPrivateInfo(username.value))
         }
     }
 }

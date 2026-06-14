@@ -1,5 +1,6 @@
 package klutch.db.services
 
+import kampfire.api.Username
 import kampfire.model.BasicUser
 import kampfire.model.BasicUserInfo
 import kampfire.model.EditUserRequest
@@ -41,7 +42,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
             ?: throw IllegalArgumentException("User not found")
     }
 
-    override suspend fun readIdByUsername(username: String) = dbQuery {
+    override suspend fun readIdByUsername(username: Username) = dbQuery {
         BasicUserTable.select(BasicUserTable.id)
             .where { BasicUserTable.username.eq(username) }
             .firstOrNull()?.getOrNull(BasicUserTable.id)?.value?.let { BasicUserId(it)}
@@ -96,7 +97,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
 
     suspend fun updateUser(user: BasicUserInfo, userId: BasicUserId) = dbQuery {
         BasicUserTable.update({ BasicUserTable.id.eq(userId)}) {
-            it[this.username] = user.username
+            it[this.username] = user.username.value
             it[this.avatarUrl] = user.avatarUrl
         } == 1
     }

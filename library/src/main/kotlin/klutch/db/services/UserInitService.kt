@@ -4,6 +4,7 @@ import kabinet.console.globalConsole
 import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
 import kabinet.utils.Environment
+import kampfire.api.toUsername
 import kampfire.model.AuthUser
 import kampfire.model.UserSeed
 
@@ -15,7 +16,7 @@ class UserInitService<User: AuthUser, Id: AuthId>(
 ) {
     suspend fun initUsers() {
         val service = AuthService(dao)
-        val username = env.read(ADMIN_USERNAME_KEY)
+        val username = env.read(ADMIN_USERNAME_KEY).toUsername()
         val id = dao.readIdByUsername(username)
         if (id != null) return
         console.log("Initializing admin user: $username")

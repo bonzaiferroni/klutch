@@ -1,11 +1,11 @@
 package klutch.db.services
 
+import kampfire.utils.validEmail
+import kampfire.utils.validPassword
+import kampfire.utils.validUsernameChars
+import kampfire.utils.validUsernameLength
 import kampfire.model.UserRole
 import kampfire.model.SignUpRequest
-import kabinet.utils.validEmail
-import kabinet.utils.validPassword
-import kabinet.utils.validUsernameChars
-import kabinet.utils.validUsernameLength
 import kampfire.model.AuthUser
 import kampfire.model.UserSeed
 import klutch.server.generateSalt

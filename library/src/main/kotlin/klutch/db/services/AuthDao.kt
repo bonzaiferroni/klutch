@@ -1,6 +1,7 @@
 package klutch.db.services
 
 import kampfire.api.TableId
+import kampfire.api.Username
 import kampfire.model.AuthUser
 import kampfire.model.PrivateInfo
 import kampfire.model.UserSeed
@@ -10,7 +11,7 @@ import kotlin.uuid.Uuid
 interface AuthDao<User: AuthUser, Id: AuthId> {
 
     suspend fun createUser(seed: UserSeed): Uuid
-    suspend fun readIdByUsername(username: String): Id?
+    suspend fun readIdByUsername(username: Username): Id?
     suspend fun readByUsernameOrEmail(identity: String): User?
     suspend fun readPrivateInfo(identity: String): PrivateInfo?
     suspend fun readSaltExists(salt: String): Boolean

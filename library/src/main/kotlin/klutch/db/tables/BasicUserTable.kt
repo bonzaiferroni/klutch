@@ -1,5 +1,6 @@
 package klutch.db.tables
 
+import kampfire.api.toUsername
 import kampfire.model.BasicUser
 import kampfire.model.BasicUserId
 import kampfire.model.UserRole
@@ -24,7 +25,7 @@ object BasicUserTable : UuidTable("user") {
 fun ResultRow.toUser() = BasicUser(
     userId = BasicUserId(this[BasicUserTable.id].value),
     name = this[BasicUserTable.name],
-    username = this[BasicUserTable.username],
+    username = this[BasicUserTable.username].toUsername(),
     hashedPassword = this[BasicUserTable.hashedPassword],
     salt = this[BasicUserTable.salt],
     email = this[BasicUserTable.email],
@@ -42,7 +43,7 @@ fun UpdateBuilder<*>.createRecord(user: BasicUser) {
 
 fun UpdateBuilder<*>.updateRecord(user: BasicUser) {
     this[BasicUserTable.name] = user.name
-    this[BasicUserTable.username] = user.username
+    this[BasicUserTable.username] = user.username.value
     this[BasicUserTable.hashedPassword] = user.hashedPassword
     this[BasicUserTable.salt] = user.salt
     this[BasicUserTable.email] = user.email
