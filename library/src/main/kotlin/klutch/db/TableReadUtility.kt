@@ -56,6 +56,12 @@ fun <T : ColumnSet> T.count(
     .where { block(this@count) }
     .count().toInt()
 
+fun <T: ColumnSet> T.any(
+    block: (T) -> Op<Boolean>
+) = this.selectAll()
+    .where { block(this@any) }
+    .count().toInt() > 0
+
 fun <Id : Comparable<Id>, T : IdTable<Id>> T.readById(
     id: Id,
     columns: List<Column<*>> = this.columns,

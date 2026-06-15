@@ -12,7 +12,10 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 // fun ExpressionWithColumnType<EntityID<Uuid>>.eq(value: Uuid) = this.eq(value)
+@JvmName("eqTableId")
 fun ExpressionWithColumnType<EntityID<Uuid>>.eq(tableId: TableId<Uuid>) = this.eq(tableId.value)
+@JvmName("nullableEqTableId")
+fun ExpressionWithColumnType<EntityID<Uuid>?>.eq(tableId: TableId<Uuid>) = this.eq(tableId.value)
 
 @JvmName("slugEq")
 fun ExpressionWithColumnType<String>.eq(slug: Slug) = this.eq(slug.value)
