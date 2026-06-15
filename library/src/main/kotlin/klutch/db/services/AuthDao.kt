@@ -10,7 +10,7 @@ import kotlin.uuid.Uuid
 
 interface AuthDao<User: AuthUser, Id: AuthId> {
 
-    suspend fun createUser(seed: UserSeed): Uuid
+    suspend fun createUser(seed: UserSeed): AuthId
     suspend fun readIdByUsername(username: Username): Id?
     suspend fun readByUsernameOrEmail(identity: String): User?
     suspend fun readPrivateInfo(identity: String): PrivateInfo?

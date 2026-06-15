@@ -7,6 +7,7 @@ import kampfire.model.AuthUser
 import kampfire.model.LoginRequest
 import kampfire.model.Token
 import kampfire.utils.deobfuscate
+import klutch.db.services.AuthId
 import klutch.db.services.RefreshTokenService
 import java.security.SecureRandom
 import java.util.*
@@ -58,6 +59,12 @@ class Authorizer(
         return authInfo
     }
 
+    suspend fun authorizeNewAccount(userId: AuthId, stayLoggedIn: Boolean): Auth {
+        val jwt = jwtService.createAccessToken(userId.value)
+        val refreshToken = createRefreshToken(userId, stayLoggedIn)
+        return Auth(jwt, refreshToken)
+    }
+
     suspend fun testPassword(
         claimedUser: AuthUser,
         givenPassword: String,
@@ -92,7 +99,7 @@ class Authorizer(
     }
 
     private suspend fun createRefreshToken(
-        userId: TableId<Uuid>,
+        userId: AuthId,
         stayLoggedIn: Boolean,
     ): Token {
         return refreshTokenService.createToken(userId, generateTokenString(), stayLoggedIn)

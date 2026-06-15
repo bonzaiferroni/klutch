@@ -12,6 +12,7 @@ import kampfire.model.AuthUser
 import kampfire.model.Ok
 import kampfire.model.SignUpResult
 import kampfire.model.responseOf
+import kampfire.model.toResponse
 import klutch.db.services.AuthDao
 import klutch.db.services.AuthId
 import klutch.db.services.AuthService
@@ -29,16 +30,22 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
     val jwtService = server.get<JwtService>()
     val authorizer = Authorizer(refreshTokenService, jwtService, dao::readByUsernameOrEmail)
     val authService = AuthService(dao)
+    val usernameGenerator = UsernameGenerator()
 
     postApi(UserApi.Create) {
-        val result = try {
-            authService.createUser(it.data)
-            SignUpResult(true, "User created.")
+        try {
+            val authId = authService.createUser(it.data)
+            val auth = authorizer.authorizeNewAccount(authId, it.data.stayLoggedIn)
+            call.appendCookies(auth)
+            true
         } catch (e: IllegalArgumentException) {
             console.logError("serveUsers.createUser fail: ${e.message}")
-            SignUpResult(false, e.message.toString())
-        }
-        Ok(result)
+            false
+        }.toResponse()
+    }
+
+    getApi(UserApi.GenerateUsername) {
+        Ok(usernameGenerator.generate())
     }
 
     post(UserApi.Refresh.path) {
@@ -50,17 +57,17 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
         call.respond(HttpStatusCode.OK)
     }
 
-    postEndpoint(UserApi.Login) {
+    postApi(UserApi.Login) {
         try {
             console.log("logging in")
             val auth = authorizer.authorize(it.data)
             call.appendCookies(auth)
-            call.respond(HttpStatusCode.OK)
+            true
         } catch (e: InvalidLoginException) {
             console.log("Invalid login: ${it.data.usernameOrEmail}")
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
-            null
-        }
+            false
+        }.toResponse()
     }
 
     authGate(true) {

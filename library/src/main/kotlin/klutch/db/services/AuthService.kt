@@ -17,24 +17,25 @@ class AuthService<User: AuthUser, Id: AuthId>(
     private val dao: AuthDao<User, Id>,
 ) {
     suspend fun createUser(
-        info: SignUpRequest,
+        request: SignUpRequest,
         roles: Set<UserRole> = setOf(UserRole.User),
-    ) {
-        serverLog.logInfo("Creating user: ${info.username}")
-        validateUsername(info)
-        validateEmail(info)
-        validatePassword(info)
+    ): AuthId {
+        serverLog.logInfo("Creating user: ${request.username}")
+        validateUsername(request)
+        validateEmail(request)
+        validatePassword(request)
 
         val salt = generateUniqueSalt()
-        val hashedPassword = hashPassword(info.password, salt)
+        val hashedPassword = hashPassword(request.password, salt)
         val seed = UserSeed(
-            request = info,
+            request = request,
             salt = salt.toBase64(),
             hashedPassword = hashedPassword,
-            roles = roles
+            roles = roles,
+            accountType = request.accountType
         )
 
-        dao.createUser(seed)
+        return dao.createUser(seed)
     }
 
     private suspend fun validateUsername(info: SignUpRequest) {

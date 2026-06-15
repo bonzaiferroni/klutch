@@ -6,7 +6,6 @@ import kampfire.model.UserRole
 import kabinet.utils.Environment
 import kampfire.api.toUsername
 import kampfire.model.AuthUser
-import kampfire.model.UserSeed
 
 private val console = globalConsole.getHandle(UserInitService::class)
 
@@ -23,7 +22,7 @@ class UserInitService<User: AuthUser, Id: AuthId>(
         val email = env.read(ADMIN_EMAIL_KEY)
         val password = env.read(ADMIN_PASSWORD_KEY)
         service.createUser(
-            info = SignUpRequest(
+            request = SignUpRequest(
                 username = username,
                 password = password,
                 email = email,

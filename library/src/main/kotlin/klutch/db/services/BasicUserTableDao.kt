@@ -75,7 +75,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
 
         BasicUserTable.insertAndGetId {
             it.createRecord(user)
-        }.value
+        }.let { BasicUserId(it.value) }
     }
 
     suspend fun updateUser(username: String, info: EditUserRequest) = dbQuery {
