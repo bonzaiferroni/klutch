@@ -48,6 +48,10 @@ fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
         Ok(usernameGenerator.generate())
     }
 
+    postApi(UserApi.CheckUsername) {
+        Ok(dao.readByUsernameOrEmail(it.data.value) == null)
+    }
+
     post(UserApi.Refresh.path) {
         console.log("refreshing")
         val refreshToken = call.request.cookies["refresh_token"]
