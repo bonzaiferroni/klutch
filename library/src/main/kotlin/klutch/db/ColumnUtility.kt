@@ -10,6 +10,6 @@ import org.jetbrains.exposed.v1.core.inList
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
-fun Column<LocalDateTime>.defaultNow() = default(Clock.System.now().toLocalDateTimeUtc())
+// fun Column<LocalDateTime>.defaultNow() = default(Clock.System.now().toLocalDateTimeUtc())
 
-fun Column<EntityID<Uuid>>.inList(idList: List<TableId<Uuid>>) = this.inList(idList.map { it.value })
+// fun Column<EntityID<Uuid>>.inList(idList: List<TableId<Uuid>>) = this.inList(idList.map { it.value })
