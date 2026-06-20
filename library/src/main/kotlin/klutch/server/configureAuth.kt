@@ -47,7 +47,7 @@ fun Application.configureAuth(server: ServerContext, principalOf: suspend (Uuid)
             }
             challenge { _, _ ->
                 serverLog.logDebug("Security: JWT authentication failed")
-                // call.respond(HttpStatusCode.Unauthorized)
+                call.respond(HttpStatusCode.Unauthorized)
             }
         }
     }
