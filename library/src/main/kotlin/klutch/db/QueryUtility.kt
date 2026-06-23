@@ -3,6 +3,7 @@ package klutch.db
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.QueryBuilder
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.statements.StatementType
 import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
@@ -18,6 +19,10 @@ fun <T> Query.mapFirstOrNull(transform: (ResultRow) -> T?) = firstOrNull()?.let 
 fun <T> Query.mapFirst(transform: (ResultRow) -> T) = transform(first())
 
 fun <T1, T2> Query.mapFirst(column: Column<T1>, transform: (T1) -> T2) = transform(first()[column])
+
+fun Table.analyze() {
+    TransactionManager.current().exec("ANALYZE ${nameInDatabaseCase()}")
+}
 
 fun Query.explainAnalyze(): Query {
     val sql = prepareSQL(QueryBuilder(false))
