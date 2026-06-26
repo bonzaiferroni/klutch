@@ -11,7 +11,6 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import kabinet.utils.Environment
-import kampfire.api.StringId
 import kampfire.model.Token
 import klutch.utils.serverLog
 import java.security.SecureRandom
@@ -19,9 +18,9 @@ import java.util.Base64
 import java.util.Date
 import kotlin.uuid.Uuid
 
-fun Application.configureAuth(server: ServerContext, principalOf: suspend (Uuid) -> Any?) {
-    val env = server.get<Environment>()
-    val config = server.get<TokenConfig>()
+fun Application.configureAuth(scope: ProviderScope, principalOf: suspend (Uuid) -> Any?) {
+    val env = scope.provide<Environment>()
+    val config = scope.provide<TokenConfig>()
     val secret = env.read(APP_SECRET_KEY)
 
     authentication {

@@ -10,7 +10,6 @@ import kampfire.api.Username
 import kampfire.model.Auth
 import kampfire.model.AuthUser
 import kampfire.model.Ok
-import kampfire.model.SignUpResult
 import kampfire.model.responseOf
 import kampfire.model.toResponse
 import klutch.db.services.AuthDao
@@ -20,14 +19,14 @@ import klutch.db.services.RefreshTokenService
 
 private val console = globalConsole.getHandle("serveUsers")
 
-fun <User: AuthUser, Id: AuthId> ApiContext.serveUserAuth(
+fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
+    refreshTokenService: RefreshTokenService,
+    jwtService: JwtService,
     dao: AuthDao<User, Id>,
     authGate: (Boolean, Route.() -> Unit) -> Unit,
     getUsername: (RoutingCall) -> Username,
     getUserId: (RoutingCall) -> Id
 ) {
-    val refreshTokenService = server.get<RefreshTokenService>()
-    val jwtService = server.get<JwtService>()
     val authorizer = Authorizer(refreshTokenService, jwtService, dao::readByUsernameOrEmail)
     val authService = AuthService(dao)
     val usernameGenerator = UsernameGenerator()
