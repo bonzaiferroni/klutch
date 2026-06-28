@@ -1,5 +1,6 @@
 package klutch.db.services
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kabinet.console.globalConsole
 import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
@@ -7,7 +8,7 @@ import kabinet.utils.Environment
 import kampfire.api.toUsername
 import kampfire.model.AuthUser
 
-private val console = globalConsole.getHandle(UserInitService::class)
+private val console = KotlinLogging.logger(UserInitService::class.simpleName!!)
 
 class UserInitService<User: AuthUser, Id: AuthId>(
     private val env: Environment,
@@ -18,7 +19,7 @@ class UserInitService<User: AuthUser, Id: AuthId>(
         val username = env.read(ADMIN_USERNAME_KEY).toUsername()
         val id = dao.readIdByUsername(username)
         if (id != null) return
-        console.log("Initializing admin user: $username")
+        console.info { "Initializing admin user: $username" }
         val email = env.read(ADMIN_EMAIL_KEY)
         val password = env.read(ADMIN_PASSWORD_KEY)
         service.createUser(

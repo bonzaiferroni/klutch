@@ -12,7 +12,7 @@ class LogbackFilter : Filter<ILoggingEvent>() {
         val throwable = event.throwableProxy ?: return FilterReply.NEUTRAL
         val className = throwable.className
         return if (deniedClassnames.contains(className)) {
-            console.logWarning("$className ${throwable.message}")
+            // console.logWarning("$className ${throwable.message}")
             FilterReply.DENY
         }
         else

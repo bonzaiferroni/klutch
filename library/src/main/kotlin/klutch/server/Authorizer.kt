@@ -1,5 +1,6 @@
 package klutch.server
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kabinet.console.globalConsole
 import kampfire.api.TableId
 import kampfire.model.Auth
@@ -16,7 +17,7 @@ import javax.crypto.spec.PBEKeySpec
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
-private val console = globalConsole.getHandle("authorize")
+private val console = KotlinLogging.logger("authorize")
 
 class Authorizer(
     private val refreshTokenService: RefreshTokenService,
@@ -30,17 +31,17 @@ class Authorizer(
 
         val claimedUser = readByUsernameOrEmail(loginRequest.usernameOrEmail)
         if (claimedUser == null) {
-            console.logInfo("authorize: Invalid username from ${loginRequest.usernameOrEmail}")
+            console.info { "authorize: Invalid username from ${loginRequest.usernameOrEmail}" }
             throw InvalidLoginException("Invalid username")
         }
         loginRequest.password?.let {
             val givenPassword = it.deobfuscate()
             val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn)
             if (authInfo == null) {
-                console.logInfo("authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}")
+                console.info { "authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}" }
                 throw InvalidLoginException("Invalid password")
             }
-            console.logInfo("authorize: password login by ${loginRequest.usernameOrEmail}")
+            console.info { "authorize: password login by ${loginRequest.usernameOrEmail}" }
             return authInfo
         }
 
@@ -52,10 +53,10 @@ class Authorizer(
     ): Auth {
         val authInfo = testToken(refreshToken)
         if (authInfo == null) {
-            console.logInfo("authorize: Invalid token attempt")
+            console.info { "authorize: Invalid token attempt"}
             throw InvalidLoginException("Invalid token")
         }
-        console.logDebug("authorize: token login")
+        console.debug { "authorize: token login" }
         return authInfo
     }
 

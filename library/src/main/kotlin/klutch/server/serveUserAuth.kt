@@ -1,5 +1,6 @@
 package klutch.server
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,7 +18,7 @@ import klutch.db.services.AuthId
 import klutch.db.services.AuthService
 import klutch.db.services.RefreshTokenService
 
-private val console = globalConsole.getHandle("serveUsers")
+private val console = KotlinLogging.logger("serveUsers")
 
 fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     refreshTokenService: RefreshTokenService,
@@ -38,7 +39,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
             call.appendCookies(auth)
             true
         } catch (e: IllegalArgumentException) {
-            console.logError("serveUsers.createUser fail: ${e.message}")
+            console.error(e) { "serveUsers.createUser fail: ${e.message}" }
             false
         }.toResponse()
     }
@@ -52,7 +53,7 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
     }
 
     post(UserApi.Refresh.path) {
-        console.log("refreshing")
+        console.info { "refreshing token" }
         val refreshToken = call.request.cookies["refresh_token"]
             ?: return@post call.respond(HttpStatusCode.Unauthorized)
         val auth = authorizer.authorize(refreshToken)
@@ -62,12 +63,12 @@ fun <User: AuthUser, Id: AuthId> Routing.serveUserAuth(
 
     postApi(UserApi.Login) {
         try {
-            console.log("logging in")
+            console.info { "logging in" }
             val auth = authorizer.authorize(it.data)
             call.appendCookies(auth)
             true
         } catch (e: InvalidLoginException) {
-            console.log("Invalid login: ${it.data.usernameOrEmail}")
+            console.error(e) { "Invalid login: ${it.data.usernameOrEmail}" }
             call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid login attempt")
             false
         }.toResponse()
