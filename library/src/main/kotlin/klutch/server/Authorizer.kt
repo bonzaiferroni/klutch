@@ -1,109 +1,163 @@
 package klutch.server
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kabinet.console.globalConsole
 import kampfire.api.TableId
-import kampfire.model.Auth
-import kampfire.model.AuthUser
+import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
+import kampfire.model.Ok
+import kampfire.model.Problem
+import kampfire.model.Outcome
+import kampfire.model.Session
+import kampfire.model.SignUpRequest
 import kampfire.model.Token
+import kampfire.model.UserRecord
+import kampfire.model.UserRole
+import kampfire.model.UserSeed
 import kampfire.utils.deobfuscate
+import kampfire.utils.validEmail
+import kampfire.utils.validPassword
+import kampfire.utils.validUsernameChars
+import kampfire.utils.validUsernameLength
 import klutch.db.services.AuthId
-import klutch.db.services.RefreshTokenService
+import klutch.db.services.SessionService
+import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.*
+import java.util.Base64
+import java.util.UUID
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.uuid.Uuid
 
-private val console = KotlinLogging.logger("authorize")
+private val log = KotlinLogging.logger("authorize")
 
 class Authorizer(
-    private val refreshTokenService: RefreshTokenService,
-    private val jwtService: JwtService,
-    private val readByUsernameOrEmail: suspend (String) -> AuthUser?,
+    val service: SessionService
 ) {
-
     suspend fun authorize(
         loginRequest: LoginRequest,
-    ): Auth {
+    ): Outcome<Session> {
 
-        val claimedUser = readByUsernameOrEmail(loginRequest.usernameOrEmail)
+        val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
         if (claimedUser == null) {
-            console.info { "authorize: Invalid username from ${loginRequest.usernameOrEmail}" }
-            throw InvalidLoginException("Invalid username")
+            log.debug { "authorize: Invalid username" }
+            return Problem("Invalid username")
         }
         loginRequest.password?.let {
             val givenPassword = it.deobfuscate()
-            val authInfo = testPassword(claimedUser, givenPassword, loginRequest.stayLoggedIn)
-            if (authInfo == null) {
-                console.info { "authorize: Invalid password attempt from ${loginRequest.usernameOrEmail}" }
-                throw InvalidLoginException("Invalid password")
+            val session = testPassword(claimedUser, givenPassword, loginRequest.isTemp)
+            if (session == null) {
+                log.debug { "authorize: Invalid password attempt" }
+                return Problem("Invalid password")
             }
-            console.info { "authorize: password login by ${loginRequest.usernameOrEmail}" }
-            return authInfo
+            log.debug { "authorize: password login" }
+            return Ok(session)
         }
 
-        throw InvalidLoginException("Missing password and token")
+        return Problem("Missing password and token")
     }
 
-    suspend fun authorize(
-        refreshToken: String,
-    ): Auth {
-        val authInfo = testToken(refreshToken)
-        if (authInfo == null) {
-            console.info { "authorize: Invalid token attempt"}
-            throw InvalidLoginException("Invalid token")
-        }
-        console.debug { "authorize: token login" }
-        return authInfo
-    }
-
-    suspend fun authorizeNewAccount(userId: AuthId, stayLoggedIn: Boolean): Auth {
-        val jwt = jwtService.createAccessToken(userId.value)
-        val refreshToken = createRefreshToken(userId, stayLoggedIn)
-        return Auth(jwt, refreshToken)
+    suspend fun authorizeNewAccount(userId: AuthId, stayLoggedIn: Boolean): Session {
+        return createSession(userId, stayLoggedIn)
     }
 
     suspend fun testPassword(
-        claimedUser: AuthUser,
+        claimedUser: UserRecord,
         givenPassword: String,
         stayLoggedIn: Boolean,
-    ): Auth? {
+    ): Session? {
         val byteArray = claimedUser.salt.base64ToByteArray()
         val hashedPassword = hashPassword(givenPassword, byteArray)
         if (hashedPassword != claimedUser.hashedPassword) {
             return null
         }
 
-        val sessionToken = createRefreshToken(claimedUser.userId, stayLoggedIn)
-        val jwt = jwtService.createAccessToken(claimedUser.userId.value)
-        return Auth(jwt, sessionToken)
+        return createSession(claimedUser.userId, stayLoggedIn)
     }
 
-    suspend fun testToken(refreshToken: String): Auth? {
-        val cachedToken = refreshTokenService.readToken(refreshToken)
-            ?: return null
-        if (cachedToken.isExpired) {
-            refreshTokenService.deleteToken(refreshToken)
-            return null
+//    suspend fun testToken(refreshToken: String): AuthLegacy? {
+//        val cachedToken = tokenService.readToken(refreshToken)
+//            ?: return null
+//        if (cachedToken.isExpired) {
+//            tokenService.deleteToken(refreshToken)
+//            return null
+//        }
+//        val returnedToken = if (cachedToken.needsRotating) {
+//            tokenService.deleteToken(refreshToken)
+//            createSession(cachedToken.userId, true)
+//        } else {
+//            TokenInfo(refreshToken, (cachedToken.expiresAt - Clock.System.now()).inWholeSeconds.toInt())
+//        }
+//        val jwt = jwtService.createAccessToken(cachedToken.userId.value)
+//        return AuthLegacy(jwt, returnedToken)
+//    }
+
+    suspend fun createUser(
+        request: SignUpRequest,
+        roles: Set<UserRole> = setOf(UserRole.User),
+    ): Outcome<TableId<Uuid>> {
+        log.info { "Creating user" }
+
+        val problem = getUsernameProblem(request) ?: getEmailProblem(request) ?: getPasswordProblem(request)
+        if (problem != null) return problem.also {
+            log.debug { "Create user problem: ${it.message}" }
         }
-        val returnedToken = if (cachedToken.needsRotating) {
-            refreshTokenService.deleteToken(refreshToken)
-            createRefreshToken(cachedToken.userId, true)
-        } else {
-            Token(refreshToken, (cachedToken.expiresAt - Clock.System.now()).inWholeSeconds.toInt())
-        }
-        val jwt = jwtService.createAccessToken(cachedToken.userId.value)
-        return Auth(jwt, returnedToken)
+
+        val salt = generateUniqueSalt()
+        val hashedPassword = hashPassword(request.password, salt)
+        val seed = UserSeed(
+            request = request,
+            salt = salt.toBase64(),
+            hashedPassword = hashedPassword,
+            roles = roles,
+            accountType = request.accountType
+        )
+
+        return Ok(service.createUserRecord(seed))
     }
 
-    private suspend fun createRefreshToken(
-        userId: AuthId,
-        stayLoggedIn: Boolean,
-    ): Token {
-        return refreshTokenService.createToken(userId, generateTokenString(), stayLoggedIn)
+    private suspend fun createSession(
+        userId: TableId<Uuid>,
+        isTemp: Boolean,
+    ): Session {
+        val token = generateSessionToken()
+        val hash = hashToken(token)
+        val ttl = when(isTemp) {
+            true -> TOKEN_TEMP_TTL
+            false -> TOKEN_DEFAULT_TTL
+        }
+        service.createSessionRecord(userId, hash, isTemp, ttl)
+        return Session(token, ttl.inWholeSeconds.toInt())
+    }
+
+    private suspend fun getUsernameProblem(info: SignUpRequest): Problem? {
+        if (!info.username.validUsernameLength) return Problem("Username should be least 3 characters.")
+        if (!info.username.validUsernameChars) return Problem("Username has invalid characters.")
+        val id = service.readIdByUsername(info.username)
+        if (id != null) return Problem("Username already exists.")
+        return null
+    }
+
+    private suspend fun getEmailProblem(info: SignUpRequest): Problem? {
+        val email = info.email ?: return null // email is optional
+        if (!info.email.validEmail) return Problem("Invalid email.")
+        val user = service.readByUsernameOrEmail(email)
+        if (user != null) return Problem("Email already exists.")
+        return null
+    }
+
+    private fun getPasswordProblem(info: SignUpRequest): Problem? {
+        if (!info.password.validPassword) return Problem("Password is too weak.")
+        return null
+    }
+
+    private suspend fun generateUniqueSalt(): ByteArray {
+        while (true) {
+            val salt = generateSalt()
+            val saltExists = service.readSaltExists(salt.toBase64())
+            if (!saltExists) return salt
+        }
     }
 }
 
@@ -134,3 +188,23 @@ private fun String.base64ToByteArray(): ByteArray {
 }
 
 class InvalidLoginException(reason: String) : Exception(reason)
+
+fun generateSessionToken(): Token {
+    val bytes = ByteArray(32)
+    SecureRandom().nextBytes(bytes)
+    return Token(bytes.toBase64Url())
+}
+
+fun ByteArray.toBase64Url(): String =
+    Base64.getUrlEncoder().withoutPadding().encodeToString(this)
+
+fun ByteArray.toHex(): String =
+    joinToString("") { "%02x".format(it) }
+
+fun hashToken(token: Token): HashedToken = MessageDigest.getInstance("SHA-256")
+    .digest(token.value.toByteArray())
+    .toHex().let { HashedToken(it) }
+
+val TOKEN_DEFAULT_TTL = 30.days
+val TOKEN_TEMP_TTL = 6.hours
+const val SESSION_COOKIE_NAME = "session_token"

@@ -2,6 +2,7 @@ package klutch.server
 
 import kampfire.api.toUsername
 
+@Deprecated("use SessionService function")
 class UsernameGenerator {
 
     fun generate() = "${getAdjective()}${getNoun()}".toUsername()
