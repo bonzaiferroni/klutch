@@ -7,12 +7,12 @@ import org.jetbrains.exposed.v1.core.ResultRow
 
 interface SlugTable {
     val slug: Column<String>
-    val pastSlug: Column<String?>
+    val pastSlug: Column<String?>? get() = null
 }
 
-fun ResultRow.toSlugRecord(slugColumn: Column<String>, pastSlugColumn: Column<String?>) = SlugRecord(
+fun ResultRow.toSlugRecord(slugColumn: Column<String>, pastSlugColumn: Column<String?>?) = SlugRecord(
     slug = this[slugColumn].toSlug(),
-    pastSlug = this[pastSlugColumn]?.toSlug(),
+    pastSlug = pastSlugColumn?.let { this[it]?.toSlug()  },
 )
 
 data class SlugRecord(val slug: Slug, val pastSlug: Slug? = null)

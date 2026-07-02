@@ -10,23 +10,28 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.core.orIfNotNull
 import org.jetbrains.exposed.v1.jdbc.select
 import java.text.Normalizer
 import kotlin.random.Random
 import kotlin.uuid.Uuid
 
 fun <T> T.readSlugRecord(recordId: TableId<Uuid>) where T: IdTable<Uuid>, T: SlugTable =
-    select(slug, pastSlug).where { id.eq(recordId) }.mapFirst { it.toSlugRecord(slug, pastSlug) }
+    selectSlugColumns().where { id.eq(recordId) }.mapFirst { it.toSlugRecord(slug, pastSlug) }
 
 fun <T> T.readSlug(recordId: TableId<Uuid>) where T: IdTable<Uuid>, T: SlugTable =
     select(slug).where { id.eq(recordId) }.mapFirst(slug) { it.toSlug() }
 
 fun <T> T.isSlugAvailable(value: Slug): Boolean where T: Table, T: SlugTable =
-    select(slug).where { slug.eq(value) or pastSlug.eq(value) }.limit(1).none()
+    select(slug).where { slug.eq(value) orIfNotNull pastSlug?.eq(value) }.limit(1).none()
 
 fun <T1, T2> T1.readColumn(value: Slug, column: Column<T2>): T2 where T1: Table, T1: SlugTable =
     select(column).where { slug.eq(value) }.limit(1).mapFirst { it[column] }
 
+private fun <T> T.selectSlugColumns() where T: IdTable<Uuid>, T: SlugTable = when (val pastSlug = pastSlug) {
+    null -> select(slug)
+    else -> select(slug, pastSlug)
+}
 
 @JvmName("nextSlugOfNullable")
 fun <Id: TableId<Uuid>, T> T.nextSlugOf(
