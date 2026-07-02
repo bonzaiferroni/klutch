@@ -26,6 +26,7 @@ import java.util.Base64
 import java.util.UUID
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.uuid.Uuid
@@ -127,8 +128,9 @@ class Authorizer(
             true -> TOKEN_TEMP_TTL
             false -> TOKEN_DEFAULT_TTL
         }
-        service.createSessionRecord(userId, hash, isTemp, ttl)
-        return Session(token, ttl.inWholeSeconds.toInt())
+        val expiresAt = Clock.System.now() + ttl
+        service.createSessionRecord(userId, hash, ttl, expiresAt)
+        return Session(token, ttl.inWholeSeconds.toInt(), expiresAt)
     }
 
     private suspend fun getUsernameProblem(info: SignUpRequest): Problem? {

@@ -4,14 +4,17 @@ import kampfire.api.TableUuid
 import kampfire.api.Username
 import kampfire.model.HashedToken
 import kampfire.model.PrivateInfo
-import kampfire.model.SessionPrincipal
+import kampfire.model.Session
+import kampfire.model.SessionIdentity
+import kampfire.model.Token
 import kampfire.model.UserRecord
 import kampfire.model.UserSeed
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 interface SessionService {
-    suspend fun createSessionRecord(userId: TableUuid, token: HashedToken, isTemp: Boolean, ttl: Duration): Boolean
-    suspend fun deleteSession(token: HashedToken): Int
+    suspend fun createSessionRecord(userId: TableUuid, token: HashedToken, ttl: Duration, expiresAt: Instant): Boolean
+    suspend fun deleteSession(token: Token): Int
     suspend fun deleteSessions(userId: TableUuid): Int
 
     suspend fun createUserRecord(seed: UserSeed): TableUuid
@@ -21,5 +24,6 @@ interface SessionService {
     suspend fun readSaltExists(salt: String): Boolean
 
     suspend fun generateUsername(): Username
-    suspend fun readSessionPrincipal(token: HashedToken): SessionPrincipal?
+    suspend fun readSessionIdentity(token: Token): SessionIdentity?
+    suspend fun extendSession(session: Session): Session
 }

@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.ktor.server.websockets)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.status.pages)
 
     implementation(libs.logback.classic)
 
