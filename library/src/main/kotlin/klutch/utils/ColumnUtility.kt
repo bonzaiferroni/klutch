@@ -18,19 +18,24 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 // fun ExpressionWithColumnType<EntityID<Uuid>>.eq(value: Uuid) = this.eq(value)
-@JvmName("eqTableId")
+@JvmName("eqTableUuid")
 fun ExpressionWithColumnType<EntityID<Uuid>>.eq(tableId: TableId<Uuid>) = this.eq(tableId.value)
-@JvmName("nullableEqTableId")
+@JvmName("eqTableUuidNullable")
 fun ExpressionWithColumnType<EntityID<Uuid>?>.eq(tableId: TableId<Uuid>) = this.eq(tableId.value)
 
-@JvmName("slugEq")
+@JvmName("eqTableLong")
+fun ExpressionWithColumnType<EntityID<Long>>.eq(tableId: TableId<Long>) = this.eq(tableId.value)
+@JvmName("eqTableLongNullable")
+fun ExpressionWithColumnType<EntityID<Long>?>.eq(tableId: TableId<Long>) = this.eq(tableId.value)
+
+@JvmName("eqSlug")
 fun ExpressionWithColumnType<String>.eq(slug: Slug) = this.eq(slug.value)
-@JvmName("nullableSlugEq")
+@JvmName("eqSlugNullable")
 fun ExpressionWithColumnType<String?>.eq(slug: Slug) = this.eq(slug.value)
 
-@JvmName("usernameEq")
+@JvmName("eqUsername")
 fun ExpressionWithColumnType<String>.eq(username: Username) = this.eq(username.value)
-@JvmName("nullableUsernameEq")
+@JvmName("eqUsernameNullable")
 fun ExpressionWithColumnType<String?>.eq(username: Username) = this.eq(username.value)
 
 fun Column<LocalDateTime>.defaultNow() = with(table) { default(Clock.System.now().toLocalDateTimeUtc()) }
