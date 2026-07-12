@@ -7,6 +7,7 @@ import kampfire.api.Slug
 import kampfire.api.TableId
 import kampfire.api.Username
 import kampfire.api.toMarkdown
+import kampfire.model.CallerId
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
@@ -37,6 +38,11 @@ fun ExpressionWithColumnType<String?>.eq(slug: Slug) = this.eq(slug.value)
 fun ExpressionWithColumnType<String>.eq(username: Username) = this.eq(username.value)
 @JvmName("eqUsernameNullable")
 fun ExpressionWithColumnType<String?>.eq(username: Username) = this.eq(username.value)
+
+// @JvmName("eqCallerId")
+// fun ExpressionWithColumnType<EntityID<Uuid>>.eq(callerId: CallerId) = this.eq(callerId.value)
+// @JvmName("eqCallerIdNullable")
+// fun ExpressionWithColumnType<EntityID<Uuid>?>.eq(callerId: CallerId) = this.eq(callerId.value)
 
 fun Column<LocalDateTime>.defaultNow() = with(table) { default(Clock.System.now().toLocalDateTimeUtc()) }
 
