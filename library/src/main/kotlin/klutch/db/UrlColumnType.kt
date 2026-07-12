@@ -1,7 +1,6 @@
 package klutch.db
 
-import kampfire.model.ScaledImage
-import kampfire.model.ScaledImageArray
+import kampfire.model.ImageVariants
 import kampfire.model.Url
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.Column
@@ -17,5 +16,5 @@ object UrlColumnType : ColumnType<Url>() {
 
 fun Table.url(name: String): Column<Url> = registerColumn(name, UrlColumnType)
 
-fun Table.scaledImages(name: String): Column<ScaledImageArray> =
-    jsonb<ScaledImageArray>(name, Json.Default)
+fun Table.scaledImages(name: String): Column<ImageVariants> =
+    jsonb<ImageVariants>(name, Json.Default)
