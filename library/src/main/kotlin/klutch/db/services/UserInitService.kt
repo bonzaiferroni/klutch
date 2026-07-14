@@ -4,7 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
 import kabinet.utils.Environment
+import kampfire.api.Password
+import kampfire.api.toEmail
 import kampfire.api.toUsername
+import kampfire.model.AccountType
 import klutch.server.Authorizer
 import klutch.server.ProviderScope
 import klutch.server.provide
@@ -19,13 +22,15 @@ suspend fun initUsers(provider: ProviderScope) {
     val id = session.readIdByUsername(username)
     if (id != null) return
     console.info { "Initializing admin user: $username" }
-    val email = env.read(ADMIN_EMAIL_KEY)
-    val password = env.read(ADMIN_PASSWORD_KEY)
+    val email = env.read(ADMIN_EMAIL_KEY).toEmail()
+    val password = Password(env.read(ADMIN_PASSWORD_KEY))
     authorizer.createUser(
         request = SignUpRequest(
             username = username,
             password = password,
             email = email,
+            accountType = AccountType.Registered,
+            stayLoggedIn = true,
         ),
         roles = setOf(UserRole.User, UserRole.Admin)
     )

@@ -1,7 +1,14 @@
 package klutch.server
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kampfire.api.HashedPassword
+import kampfire.api.Password
 import kampfire.api.TableId
+import kampfire.api.Username
+import kampfire.api.aboveMinScore
+import kampfire.api.toValidOutcome
+import kampfire.api.validUsernameChars
+import kampfire.api.validUsernameLength
 import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
 import kampfire.model.Ok
@@ -13,11 +20,8 @@ import kampfire.model.Token
 import kampfire.model.UserRecord
 import kampfire.model.UserRole
 import kampfire.model.UserSeed
+import kampfire.model.toOutcome
 import kampfire.utils.deobfuscate
-import kampfire.utils.validEmail
-import kampfire.utils.validPassword
-import kampfire.utils.validUsernameChars
-import kampfire.utils.validUsernameLength
 import klutch.db.services.AuthId
 import klutch.db.services.SessionService
 import java.security.MessageDigest
@@ -40,7 +44,7 @@ class Authorizer(
         loginRequest: LoginRequest,
     ): Outcome<Session> {
 
-        val claimedUser = service.readByUsernameOrEmail(loginRequest.usernameOrEmail)
+        val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity)
         if (claimedUser == null) {
             log.debug { "authorize: Invalid username" }
             return Problem("Invalid username")
@@ -65,7 +69,7 @@ class Authorizer(
 
     suspend fun testPassword(
         claimedUser: UserRecord,
-        givenPassword: String,
+        givenPassword: Password,
         stayLoggedIn: Boolean,
     ): Session? {
         val byteArray = claimedUser.salt.base64ToByteArray()
@@ -134,8 +138,8 @@ class Authorizer(
     }
 
     private suspend fun getUsernameProblem(info: SignUpRequest): Problem? {
-        if (!info.username.validUsernameLength) return Problem("Username should be least 3 characters.")
-        if (!info.username.validUsernameChars) return Problem("Username has invalid characters.")
+        val outcome = info.username.toValidOutcome()
+        if (outcome is Problem) return outcome
         val id = service.readIdByUsername(info.username)
         if (id != null) return Problem("Username already exists.")
         return null
@@ -143,14 +147,16 @@ class Authorizer(
 
     private suspend fun getEmailProblem(info: SignUpRequest): Problem? {
         val email = info.email ?: return null // email is optional
-        if (!info.email.validEmail) return Problem("Invalid email.")
+        val outcome = email.toValidOutcome()
+        if (outcome is Problem) return outcome
         val user = service.readByUsernameOrEmail(email)
         if (user != null) return Problem("Email already exists.")
         return null
     }
 
     private fun getPasswordProblem(info: SignUpRequest): Problem? {
-        if (!info.password.validPassword) return Problem("Password is too weak.")
+        val outcome = info.password.toValidOutcome()
+        if (outcome is Problem) return outcome
         return null
     }
 
@@ -163,15 +169,13 @@ class Authorizer(
     }
 }
 
-private fun generateTokenString() = UUID.randomUUID().toString()
-
-fun hashPassword(password: String, salt: ByteArray): String {
+fun hashPassword(password: Password, salt: ByteArray): HashedPassword {
     val iterations = 65536
     val keyLength = 256
-    val spec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)
+    val spec = PBEKeySpec(password.value.toCharArray(), salt, iterations, keyLength)
     val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
     val hash = factory.generateSecret(spec).encoded
-    return Base64.getEncoder().encodeToString(hash)
+    return HashedPassword(Base64.getEncoder().encodeToString(hash))
 }
 
 fun generateSalt(): ByteArray {

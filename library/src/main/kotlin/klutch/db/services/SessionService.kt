@@ -1,5 +1,6 @@
 package klutch.db.services
 
+import kampfire.api.LoginIdentity
 import kampfire.api.TableUuid
 import kampfire.api.Username
 import kampfire.model.HashedToken
@@ -19,9 +20,10 @@ interface SessionService {
 
     suspend fun createUserRecord(seed: UserSeed): TableUuid
     suspend fun readIdByUsername(username: Username): TableUuid?
-    suspend fun readByUsernameOrEmail(identity: String): UserRecord?
+    suspend fun readByUsernameOrEmail(identity: LoginIdentity): UserRecord?
     suspend fun readPrivateInfo(username: Username): PrivateInfo?
     suspend fun readSaltExists(salt: String): Boolean
+    suspend fun checkUsernameExists(username: Username): Boolean
 
     suspend fun generateUsername(): Username
     suspend fun readSessionIdentity(token: Token): SessionIdentity?

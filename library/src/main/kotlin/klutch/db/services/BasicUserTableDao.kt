@@ -1,6 +1,7 @@
 package klutch.db.services
 
 import kampfire.api.Username
+import kampfire.api.toEmail
 import kampfire.model.BasicUser
 import kampfire.model.BasicUserInfo
 import kampfire.model.EditUserRequest
@@ -38,7 +39,7 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
         BasicUserTable.select(BasicUserTable.name, BasicUserTable.email)
             .where { eqIdentity(identity) }
             .firstOrNull()
-            ?.let { PrivateInfo(it[BasicUserTable.name], it[BasicUserTable.email]) }
+            ?.let { PrivateInfo(it[BasicUserTable.name], it[BasicUserTable.email]?.toEmail()) }
             ?: throw IllegalArgumentException("User not found")
     }
 
