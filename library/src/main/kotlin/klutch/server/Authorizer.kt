@@ -106,7 +106,7 @@ class Authorizer(
 
         val problem = getUsernameProblem(request) ?: getEmailProblem(request) ?: getPasswordProblem(request)
         if (problem != null) return problem.also {
-            log.debug { "Create user problem: ${it.message}" }
+            log.info { "Create user problem: ${it.message}" }
         }
 
         val salt = generateUniqueSalt()
