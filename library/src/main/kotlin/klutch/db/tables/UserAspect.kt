@@ -12,7 +12,6 @@ object UserAspect: Aspect<UserAspect, BasicUser>(
     val name = add(BasicUserTable.name)
     val username = add(BasicUserTable.username)
     val hashedPassword = add(BasicUserTable.hashedPassword)
-    val salt = add(BasicUserTable.salt)
     val email = add(BasicUserTable.email)
     val roles = add(BasicUserTable.roles)
     val avatarUrl = add(BasicUserTable.avatarUrl)

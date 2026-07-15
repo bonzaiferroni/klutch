@@ -22,7 +22,6 @@ interface SessionService {
     suspend fun readIdByUsername(username: Username): TableUuid?
     suspend fun readByUsernameOrEmail(identity: LoginIdentity): UserRecord?
     suspend fun readPrivateInfo(username: Username): PrivateInfo?
-    suspend fun readSaltExists(salt: String): Boolean
     suspend fun checkUsernameExists(username: Username): Boolean
 
     suspend fun generateUsername(): Username

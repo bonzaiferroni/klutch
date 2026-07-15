@@ -15,7 +15,6 @@ object BasicUserTable : UuidTable("user") {
     val name = text("name").nullable()
     val username = text("username")
     val hashedPassword = text("hashed_password")
-    val salt = text("salt")
     val email = text("email").nullable()
     val roles = array<String>("roles")
     val avatarUrl = text("avatar_url").nullable()
@@ -29,7 +28,6 @@ fun ResultRow.toUser() = BasicUser(
     name = this[BasicUserTable.name],
     username = this[BasicUserTable.username].toUsername(),
     hashedPassword = HashedPassword(this[BasicUserTable.hashedPassword]),
-    salt = this[BasicUserTable.salt],
     email = this[BasicUserTable.email]?.toEmail(),
     roles = this[BasicUserTable.roles].map { UserRole.valueOf(it) }.toSet(),
     avatarUrl = this[BasicUserTable.avatarUrl],
@@ -47,7 +45,6 @@ fun UpdateBuilder<*>.updateRecord(user: BasicUser) {
     this[BasicUserTable.name] = user.name
     this[BasicUserTable.username] = user.username.value
     this[BasicUserTable.hashedPassword] = user.hashedPassword.value
-    this[BasicUserTable.salt] = user.salt
     this[BasicUserTable.email] = user.email?.value
     this[BasicUserTable.roles] = user.roles.map { it.name }
     this[BasicUserTable.avatarUrl] = user.avatarUrl

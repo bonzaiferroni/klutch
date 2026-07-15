@@ -1,11 +1,13 @@
 package klutch.server
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kampfire.api.HashedPassword
 import kampfire.api.Password
 import kampfire.api.TableId
 import kampfire.api.Username
 import kampfire.api.aboveMinScore
+import kampfire.api.toLoginIdentity
 import kampfire.api.toValidOutcome
 import kampfire.api.validUsernameChars
 import kampfire.api.validUsernameLength
@@ -22,6 +24,7 @@ import kampfire.model.UserRole
 import kampfire.model.UserSeed
 import kampfire.model.toOutcome
 import kampfire.utils.deobfuscate
+import kampfire.utils.printTimedValue
 import klutch.db.services.AuthId
 import klutch.db.services.SessionService
 import java.security.MessageDigest
@@ -33,6 +36,7 @@ import javax.crypto.spec.PBEKeySpec
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.measureTimedValue
 import kotlin.uuid.Uuid
 
 private val log = KotlinLogging.logger("authorize")
@@ -44,7 +48,7 @@ class Authorizer(
         loginRequest: LoginRequest,
     ): Outcome<Session> {
 
-        val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity)
+        val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity.toLoginIdentity())
         if (claimedUser == null) {
             log.debug { "authorize: Invalid username" }
             return Problem("Invalid username")
@@ -72,14 +76,16 @@ class Authorizer(
         givenPassword: Password,
         stayLoggedIn: Boolean,
     ): Session? {
-        val byteArray = claimedUser.salt.base64ToByteArray()
-        val hashedPassword = hashPassword(givenPassword, byteArray)
-        if (hashedPassword != claimedUser.hashedPassword) {
+        if (!verifyPassword(givenPassword, claimedUser.hashedPassword)) {
+            log.info { "Invalid password attempt" }
             return null
         }
 
         return createSession(claimedUser.userId, stayLoggedIn)
     }
+
+    fun verifyPassword(password: Password, stored: HashedPassword): Boolean =
+        BCrypt.verifyer().verify(password.value.toCharArray(), stored.value.toCharArray()).verified
 
 //    suspend fun testToken(refreshToken: String): AuthLegacy? {
 //        val cachedToken = tokenService.readToken(refreshToken)
@@ -109,11 +115,9 @@ class Authorizer(
             log.info { "Create user problem: ${it.message}" }
         }
 
-        val salt = generateUniqueSalt()
-        val hashedPassword = hashPassword(request.password, salt)
+        val hashedPassword = hashPassword(request.password)
         val seed = UserSeed(
             request = request,
-            salt = salt.toBase64(),
             hashedPassword = hashedPassword,
             roles = roles,
             accountType = request.accountType
@@ -159,23 +163,20 @@ class Authorizer(
         if (outcome is Problem) return outcome
         return null
     }
-
-    private suspend fun generateUniqueSalt(): ByteArray {
-        while (true) {
-            val salt = generateSalt()
-            val saltExists = service.readSaltExists(salt.toBase64())
-            if (!saltExists) return salt
-        }
-    }
 }
 
-fun hashPassword(password: Password, salt: ByteArray): HashedPassword {
-    val iterations = 65536
-    val keyLength = 256
-    val spec = PBEKeySpec(password.value.toCharArray(), salt, iterations, keyLength)
-    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-    val hash = factory.generateSecret(spec).encoded
-    return HashedPassword(Base64.getEncoder().encodeToString(hash))
+// fun hashPassword(password: Password, salt: ByteArray): HashedPassword {
+//     val iterations = 65536
+//     val keyLength = 256
+//     val spec = PBEKeySpec(password.value.toCharArray(), salt, iterations, keyLength)
+//     val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+//     val hash = factory.generateSecret(spec).encoded
+//     return HashedPassword(Base64.getEncoder().encodeToString(hash))
+// }
+
+fun hashPassword(password: Password): HashedPassword {
+    val hash = BCrypt.withDefaults().hashToString(10, password.value.toCharArray())
+    return HashedPassword(hash)
 }
 
 fun generateSalt(): ByteArray {

@@ -14,7 +14,6 @@ interface AuthDao<User: AuthUser, Id: AuthId> {
     suspend fun readIdByUsername(username: Username): Id?
     suspend fun readByUsernameOrEmail(identity: String): User?
     suspend fun readPrivateInfo(identity: String): PrivateInfo?
-    suspend fun readSaltExists(salt: String): Boolean
     // suspend fun readUserInfo(identity: String): BasicUserInfo
     // suspend fun updateUser(user: BasicUserInfo, userId: UserId): Boolean
 }

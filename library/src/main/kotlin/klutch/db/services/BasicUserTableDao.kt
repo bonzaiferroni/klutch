@@ -66,7 +66,6 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
             name = null,
             username = seed.request.username,
             hashedPassword = seed.hashedPassword,
-            salt = seed.salt,
             email = seed.request.email,
             roles = seed.roles.toSet(),
             avatarUrl = null,
@@ -105,13 +104,6 @@ class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
 
     suspend fun checkUsername(username: String) = dbQuery {
         BasicUserTable.readFirstOrNull { BasicUserTable.username.eqIgnoreCase(username) } == null
-    }
-
-    override suspend fun readSaltExists(salt: String) = dbQuery {
-        BasicUserTable
-            .select(BasicUserTable.salt)
-            .where { BasicUserTable.salt.eq(salt) }
-            .firstOrNull() != null
     }
 }
 

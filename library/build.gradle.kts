@@ -50,6 +50,7 @@ dependencies {
 
     api("com.fleeksoft.ksoup:ksoup:0.2.5")
     implementation("black.ninia:jep:4.2.2")
+    implementation("at.favre.lib:bcrypt:0.10.2")
 
     implementation(project(":kabinet"))
     implementation(project(":koala"))
