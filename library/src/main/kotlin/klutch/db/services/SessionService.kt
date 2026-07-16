@@ -3,6 +3,7 @@ package klutch.db.services
 import kampfire.api.LoginIdentity
 import kampfire.api.TableUuid
 import kampfire.api.Username
+import kampfire.model.CallerId
 import kampfire.model.HashedToken
 import kampfire.model.PrivateInfo
 import kampfire.model.Session
@@ -23,8 +24,10 @@ interface SessionService {
     suspend fun readByUsernameOrEmail(identity: LoginIdentity): UserRecord?
     suspend fun readPrivateInfo(username: Username): PrivateInfo?
     suspend fun checkUsernameExists(username: Username): Boolean
+    suspend fun checkGuest(token: Token): Username?
 
     suspend fun generateUsername(): Username
     suspend fun readSessionIdentity(token: Token): SessionIdentity?
     suspend fun extendSession(session: Session): Session
+    suspend fun refreshActivity(callerId: CallerId)
 }

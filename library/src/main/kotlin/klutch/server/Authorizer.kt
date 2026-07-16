@@ -2,15 +2,14 @@ package klutch.server
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kampfire.api.Email
 import kampfire.api.HashedPassword
 import kampfire.api.Password
 import kampfire.api.TableId
 import kampfire.api.Username
-import kampfire.api.aboveMinScore
 import kampfire.api.toLoginIdentity
 import kampfire.api.toValidOutcome
-import kampfire.api.validUsernameChars
-import kampfire.api.validUsernameLength
+import kampfire.model.AccountType
 import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
 import kampfire.model.Ok
@@ -22,21 +21,15 @@ import kampfire.model.Token
 import kampfire.model.UserRecord
 import kampfire.model.UserRole
 import kampfire.model.UserSeed
-import kampfire.model.toOutcome
 import kampfire.utils.deobfuscate
-import kampfire.utils.printTimedValue
 import klutch.db.services.AuthId
 import klutch.db.services.SessionService
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
-import java.util.UUID
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.PBEKeySpec
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.measureTimedValue
 import kotlin.uuid.Uuid
 
 private val log = KotlinLogging.logger("authorize")
@@ -46,111 +39,144 @@ class Authorizer(
 ) {
     suspend fun authorize(
         loginRequest: LoginRequest,
+        guestToken: Token?,
     ): Outcome<Session> {
-
         val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity.toLoginIdentity())
-        if (claimedUser == null) {
-            log.debug { "authorize: Invalid username" }
-            return Problem("Invalid username")
-        }
-        loginRequest.password?.let {
-            val givenPassword = it.deobfuscate()
-            val session = testPassword(claimedUser, givenPassword, loginRequest.isTemp)
-            if (session == null) {
-                log.debug { "authorize: Invalid password attempt" }
-                return Problem("Invalid password")
-            }
-            log.debug { "authorize: password login" }
-            return Ok(session)
-        }
+            ?: return Problem("Invalid username")
 
-        return Problem("Missing password and token")
+        return when (val password = loginRequest.password?.deobfuscate()) {
+            null -> when (guestToken) {
+                null -> Problem("Missing password and token")
+                else -> authorizeGuest(claimedUser, guestToken, loginRequest.isTemp)
+            }
+            else -> authorizePassword(claimedUser, password, loginRequest.isTemp)
+        }
     }
 
     suspend fun authorizeNewAccount(userId: AuthId, stayLoggedIn: Boolean): Session {
         return createSession(userId, stayLoggedIn)
     }
 
-    suspend fun testPassword(
+    suspend fun authorizeGuest(
+        claimedUser: UserRecord,
+        token: Token,
+        stayLoggedIn: Boolean,
+    ): Outcome<Session> {
+        val userToken = claimedUser.guestToken
+        val invalidAccount = claimedUser.accountType != AccountType.Guest
+                || claimedUser.activeAt < Clock.System.now() - GUEST_ACTIVITY_PERIOD
+                || userToken == null
+        if (invalidAccount) return Problem("Invalid account")
+
+        val hashedToken = hashToken(token)
+        if (hashedToken != userToken) return Problem("Invalid account")
+
+        return Ok(createSession(claimedUser.userId, stayLoggedIn)).also {
+            log.debug { "authorize: guest login"}
+        }
+    }
+
+    suspend fun authorizePassword(
         claimedUser: UserRecord,
         givenPassword: Password,
         stayLoggedIn: Boolean,
-    ): Session? {
-        if (!verifyPassword(givenPassword, claimedUser.hashedPassword)) {
-            log.info { "Invalid password attempt" }
-            return null
+    ): Outcome<Session> {
+        val userPassword = claimedUser.hashedPassword ?: return Problem("Invalid password").also {
+            log.info { "User has no password" }
         }
 
-        return createSession(claimedUser.userId, stayLoggedIn)
+        if (!verifyPassword(givenPassword, userPassword)) {
+            log.info { "Invalid password attempt" }
+            return Problem("Invalid password")
+        }
+
+        return Ok(createSession(claimedUser.userId, stayLoggedIn)).also {
+            log.debug { "authorize: password login" }
+        }
     }
 
-    fun verifyPassword(password: Password, stored: HashedPassword): Boolean =
-        BCrypt.verifyer().verify(password.value.toCharArray(), stored.value.toCharArray()).verified
+    suspend fun checkGuest(token: Token): Outcome<Username?> {
+        return Ok(service.checkGuest(token))
+    }
 
-//    suspend fun testToken(refreshToken: String): AuthLegacy? {
-//        val cachedToken = tokenService.readToken(refreshToken)
-//            ?: return null
-//        if (cachedToken.isExpired) {
-//            tokenService.deleteToken(refreshToken)
-//            return null
-//        }
-//        val returnedToken = if (cachedToken.needsRotating) {
-//            tokenService.deleteToken(refreshToken)
-//            createSession(cachedToken.userId, true)
-//        } else {
-//            TokenInfo(refreshToken, (cachedToken.expiresAt - Clock.System.now()).inWholeSeconds.toInt())
-//        }
-//        val jwt = jwtService.createAccessToken(cachedToken.userId.value)
-//        return AuthLegacy(jwt, returnedToken)
-//    }
+    // suspend fun createUser(request: SignUpRequest): Outcome<TableId<Uuid>> {
+    //     return when (request.accountType) {
+    //         AccountType.Guest -> createGuestUser(request)
+    //         AccountType.Registered -> createRegisteredUser(request)
+    //     }
+    // }
 
-    suspend fun createUser(
-        request: SignUpRequest,
-        roles: Set<UserRole> = setOf(UserRole.User),
-    ): Outcome<TableId<Uuid>> {
-        log.info { "Creating user" }
-
-        val problem = getUsernameProblem(request) ?: getEmailProblem(request) ?: getPasswordProblem(request)
+    suspend fun createGuestUser(request: SignUpRequest, token: Token): Outcome<TableId<Uuid>> {
+        val problem = getUsernameProblem(request.username)
         if (problem != null) return problem.also {
             log.info { "Create user problem: ${it.message}" }
         }
 
-        val hashedPassword = hashPassword(request.password)
+        val hashedToken = hashToken(token)
         val seed = UserSeed(
             request = request,
-            hashedPassword = hashedPassword,
-            roles = roles,
-            accountType = request.accountType
+            hashedPassword = null,
+            roles = setOf(UserRole.User),
+            accountType = AccountType.Guest,
+            guestToken = hashedToken,
         )
 
         return Ok(service.createUserRecord(seed))
     }
 
+    suspend fun createRegisteredUser(
+        request: SignUpRequest,
+        roles: Set<UserRole>
+    ): Outcome<TableId<Uuid>> {
+        log.info { "Creating user" }
+        val password = requireNotNull(request.password) { "Password was null" }
+
+        val problem = getUsernameProblem(request.username) ?: getEmailProblem(request.email) ?: getPasswordProblem(password)
+        if (problem != null) return problem.also {
+            log.info { "Create user problem: ${it.message}" }
+        }
+
+        val hashedPassword = hashPassword(password)
+        val seed = UserSeed(
+            request = request,
+            hashedPassword = hashedPassword,
+            roles = roles,
+            accountType = AccountType.Registered,
+            guestToken = null,
+        )
+
+        return Ok(service.createUserRecord(seed))
+    }
+
+    private fun verifyPassword(password: Password, stored: HashedPassword): Boolean =
+        BCrypt.verifyer().verify(password.value.toCharArray(), stored.value.toCharArray()).verified
+
     private suspend fun createSession(
         userId: TableId<Uuid>,
         isTemp: Boolean,
     ): Session {
-        val token = generateSessionToken()
+        val token = generateToken()
         val hash = hashToken(token)
         val ttl = when(isTemp) {
             true -> TOKEN_TEMP_TTL
             false -> TOKEN_DEFAULT_TTL
         }
+        val now = Clock.System.now()
         val expiresAt = Clock.System.now() + ttl
         service.createSessionRecord(userId, hash, ttl, expiresAt)
-        return Session(token, ttl.inWholeSeconds.toInt(), expiresAt)
+        return Session(token, ttl.inWholeSeconds.toInt(), now, expiresAt)
     }
 
-    private suspend fun getUsernameProblem(info: SignUpRequest): Problem? {
-        val outcome = info.username.toValidOutcome()
+    private suspend fun getUsernameProblem(username: Username): Problem? {
+        val outcome = username.toValidOutcome()
         if (outcome is Problem) return outcome
-        val id = service.readIdByUsername(info.username)
+        val id = service.readIdByUsername(username)
         if (id != null) return Problem("Username already exists.")
         return null
     }
 
-    private suspend fun getEmailProblem(info: SignUpRequest): Problem? {
-        val email = info.email ?: return null // email is optional
+    private suspend fun getEmailProblem(email: Email?): Problem? {
+        val email = email ?: return null // email is optional
         val outcome = email.toValidOutcome()
         if (outcome is Problem) return outcome
         val user = service.readByUsernameOrEmail(email)
@@ -158,8 +184,8 @@ class Authorizer(
         return null
     }
 
-    private fun getPasswordProblem(info: SignUpRequest): Problem? {
-        val outcome = info.password.toValidOutcome()
+    private fun getPasswordProblem(password: Password): Problem? {
+        val outcome = password.toValidOutcome()
         if (outcome is Problem) return outcome
         return null
     }
@@ -196,7 +222,7 @@ private fun String.base64ToByteArray(): ByteArray {
 
 class InvalidLoginException(reason: String) : Exception(reason)
 
-fun generateSessionToken(): Token {
+fun generateToken(): Token {
     val bytes = ByteArray(32)
     SecureRandom().nextBytes(bytes)
     return Token(bytes.toBase64Url())
@@ -214,4 +240,7 @@ fun hashToken(token: Token): HashedToken = MessageDigest.getInstance("SHA-256")
 
 val TOKEN_DEFAULT_TTL = 30.days
 val TOKEN_TEMP_TTL = 6.hours
+val GUEST_TOKEN_TTL = 400.days // does not reflect activity period policy
+val GUEST_ACTIVITY_PERIOD = 30.days
 const val SESSION_COOKIE_NAME = "session_token"
+const val GUEST_COOKIE_NAME = "guest_token"

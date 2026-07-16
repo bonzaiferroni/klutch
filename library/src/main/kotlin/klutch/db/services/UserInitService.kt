@@ -24,7 +24,7 @@ suspend fun initUsers(provider: ProviderScope) {
     console.info { "Initializing admin user: $username" }
     val email = env.read(ADMIN_EMAIL_KEY).toEmail()
     val password = Password(env.read(ADMIN_PASSWORD_KEY))
-    authorizer.createUser(
+    authorizer.createRegisteredUser(
         request = SignUpRequest(
             username = username,
             password = password,
