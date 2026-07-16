@@ -10,6 +10,7 @@ import kampfire.api.Username
 import kampfire.api.toLoginIdentity
 import kampfire.api.toValidOutcome
 import kampfire.model.AccountType
+import kampfire.model.CallerId
 import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
 import kampfire.model.Ok
@@ -146,6 +147,20 @@ class Authorizer(
         )
 
         return Ok(service.createUserRecord(seed))
+    }
+
+    suspend fun upgradeAccount(callerId: CallerId, password: Password, email: Email?): Outcome<Boolean> {
+        val problem = getEmailProblem(email) ?: getPasswordProblem(password)
+        if (problem != null) return problem.also {
+            log.info { "Upgrade account problem: ${it.message}" }
+        }
+
+        val hashedPassword = hashPassword(password)
+        val isSuccess = service.upgradeAccount(callerId, hashedPassword, email)
+        return when (isSuccess) {
+            true -> Ok(true)
+            else -> Problem("Something went wrong.")
+        }
     }
 
     private fun verifyPassword(password: Password, stored: HashedPassword): Boolean =

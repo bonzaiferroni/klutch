@@ -1,6 +1,9 @@
 package klutch.db.services
 
+import kampfire.api.Email
+import kampfire.api.HashedPassword
 import kampfire.api.LoginIdentity
+import kampfire.api.Password
 import kampfire.api.TableUuid
 import kampfire.api.Username
 import kampfire.model.CallerId
@@ -20,6 +23,7 @@ interface SessionService {
     suspend fun deleteSessions(userId: TableUuid): Int
 
     suspend fun createUserRecord(seed: UserSeed): TableUuid
+    suspend fun upgradeAccount(callerId: CallerId, hashedPassword: HashedPassword, email: Email?): Boolean
     suspend fun readIdByUsername(username: Username): TableUuid?
     suspend fun readByUsernameOrEmail(identity: LoginIdentity): UserRecord?
     suspend fun readPrivateInfo(username: Username): PrivateInfo?
