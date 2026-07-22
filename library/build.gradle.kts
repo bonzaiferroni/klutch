@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
 
     implementation(libs.logback.classic)
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("com.pgvector:pgvector:0.1.6")

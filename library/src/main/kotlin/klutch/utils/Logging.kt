@@ -1,7 +1,9 @@
 package klutch.utils
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.reflect.KClass
 
 val dbLog = Log(LoggerFactory.getLogger("db"))
 val serverLog = Log(LoggerFactory.getLogger("server"))
@@ -29,3 +31,5 @@ class Log(
         logger.trace(message)
     }
 }
+
+fun KotlinLogging.logger(type: KClass<*>) = logger(type::simpleName.name)
