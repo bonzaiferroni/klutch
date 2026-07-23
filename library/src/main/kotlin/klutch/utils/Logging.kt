@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 val dbLog = Log(LoggerFactory.getLogger("db"))
 val serverLog = Log(LoggerFactory.getLogger("server"))
@@ -33,3 +34,4 @@ class Log(
 }
 
 fun KotlinLogging.logger(type: KClass<*>) = logger(type::simpleName.name)
+fun KotlinLogging.logger(function: KFunction<*>) = logger(function.name)
