@@ -1,5 +1,8 @@
 package klutch.db
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.utils.io.CancellationException
+import klutch.utils.logger
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.core.StdOutSqlLogger
 import org.jetbrains.exposed.v1.core.Transaction
@@ -23,3 +26,5 @@ abstract class DbService(
             block()
         }
 }
+
+private val log = KotlinLogging.logger(DbService::class)
