@@ -3,7 +3,7 @@ package klutch.server
 import at.favre.lib.crypto.bcrypt.BCrypt
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kampfire.api.Email
-import kampfire.api.HashedPassword
+import kampfire.api.PasswordHash
 import kampfire.api.Password
 import kampfire.api.TableId
 import kampfire.api.Username
@@ -42,8 +42,10 @@ class Authorizer(
         loginRequest: LoginRequest,
         guestToken: Token?,
     ): Outcome<Session> {
-        val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity.toLoginIdentity())
-            ?: return Problem("Invalid username")
+        val claimedUser = service.readByUsernameOrEmail(loginRequest.loginIdentity.toLoginIdentity()) ?: run {
+            dummyVerify(fixedPassword)
+            return Problem("Invalid password")
+        }
 
         return when (val password = loginRequest.password?.deobfuscate()) {
             null -> when (guestToken) {
@@ -82,8 +84,14 @@ class Authorizer(
         givenPassword: Password,
         stayLoggedIn: Boolean,
     ): Outcome<Session> {
-        val userPassword = claimedUser.hashedPassword ?: return Problem("Invalid password").also {
-            log.info { "User has no password" }
+        val userPassword = claimedUser.passwordHash ?: run {
+            dummyVerify(givenPassword)
+            if (claimedUser.disabledPasswordHash != null) {
+                log.info { "login attempt on locked account: ${claimedUser.userId}" }
+                return Problem("This account was locked. Check your email for a link to set a new password.")
+            }
+            log.info { "User has no password: ${claimedUser.accountType}" }
+            return Problem("Invalid password")
         }
 
         if (!verifyPassword(givenPassword, userPassword)) {
@@ -95,6 +103,11 @@ class Authorizer(
             log.debug { "authorize: password login" }
         }
     }
+
+    private val fixedPassword = Password(Uuid.random().toString())
+    private val fixedPasswordHash = hashPassword(Password(Uuid.random().toString()))
+
+    fun dummyVerify(password: Password) = verifyPassword(password, fixedPasswordHash)
 
     suspend fun checkGuest(token: Token): Outcome<Username?> {
         return Ok(service.checkGuest(token))
@@ -116,7 +129,7 @@ class Authorizer(
         val hashedToken = hashToken(token)
         val seed = UserSeed(
             request = request,
-            hashedPassword = null,
+            passwordHash = null,
             roles = setOf(UserRole.User),
             accountType = AccountType.Guest,
             guestToken = hashedToken,
@@ -140,7 +153,7 @@ class Authorizer(
         val hashedPassword = hashPassword(password)
         val seed = UserSeed(
             request = request,
-            hashedPassword = hashedPassword,
+            passwordHash = hashedPassword,
             roles = roles,
             accountType = AccountType.Registered,
             guestToken = null,
@@ -163,9 +176,6 @@ class Authorizer(
         }
     }
 
-    private fun verifyPassword(password: Password, stored: HashedPassword): Boolean =
-        BCrypt.verifyer().verify(password.value.toCharArray(), stored.value.toCharArray()).verified
-
     private suspend fun createSession(
         userId: TableId<Uuid>,
         isTemp: Boolean,
@@ -178,7 +188,7 @@ class Authorizer(
         }
         val now = Clock.System.now()
         val expiresAt = Clock.System.now() + ttl
-        service.createSessionRecord(userId, hash, ttl, expiresAt)
+        service.createSession(userId, hash, ttl, expiresAt)
         return Session(token, ttl.inWholeSeconds.toInt(), now, expiresAt)
     }
 
@@ -215,10 +225,13 @@ class Authorizer(
 //     return HashedPassword(Base64.getEncoder().encodeToString(hash))
 // }
 
-fun hashPassword(password: Password): HashedPassword {
+fun hashPassword(password: Password): PasswordHash {
     val hash = BCrypt.withDefaults().hashToString(10, password.value.toCharArray())
-    return HashedPassword(hash)
+    return PasswordHash(hash)
 }
+
+fun verifyPassword(password: Password, stored: PasswordHash): Boolean =
+    BCrypt.verifyer().verify(password.value.toCharArray(), stored.value.toCharArray()).verified
 
 fun generateSalt(): ByteArray {
     val random = SecureRandom()

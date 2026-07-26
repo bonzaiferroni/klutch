@@ -1,14 +1,5 @@
 package klutch.db.tables
 
-import kampfire.api.HashedPassword
-import kampfire.api.toEmail
-import kampfire.api.toUsername
-import kampfire.model.UserRole
-import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.dao.id.UuidTable
-import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
-import org.jetbrains.exposed.v1.datetime.timestamp
-
 // object BasicUserTable : UuidTable("user") {
 //     val name = text("name").nullable()
 //     val username = text("username")
