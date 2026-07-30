@@ -5,20 +5,20 @@ import kampfire.api.PasswordHash
 import kampfire.api.LoginIdentity
 import kampfire.api.TableUuid
 import kampfire.api.Username
-import kampfire.model.CallerId
 import kampfire.model.HashedToken
 import kampfire.model.PrivateInfo
-import kampfire.model.Session
-import kampfire.model.SessionIdentity
 import kampfire.model.Token
 import kampfire.model.UserRecord
 import kampfire.model.UserSeed
+import klutch.db.model.CallerId
+import klutch.db.model.Session
 import klutch.db.model.SessionId
+import klutch.db.model.SessionIdentity
 import kotlin.time.Duration
 import kotlin.time.Instant
 
 interface SessionService {
-    suspend fun createSession(userId: TableUuid, token: HashedToken, ttl: Duration, expiresAt: Instant): Boolean
+    suspend fun createSession(userId: TableUuid, token: HashedToken, ttl: Duration, expiresAt: Instant): SessionId
     suspend fun deleteSession(token: Token): Int
     suspend fun deleteSessions(userId: TableUuid, sparedSessionId: SessionId?): Int
 

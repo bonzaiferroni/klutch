@@ -6,23 +6,24 @@ import kampfire.api.Email
 import kampfire.api.PasswordHash
 import kampfire.api.Password
 import kampfire.api.TableId
+import kampfire.api.TableUuid
 import kampfire.api.Username
+import kampfire.api.deobfuscatePassword
 import kampfire.api.toLoginIdentity
 import kampfire.api.toValidOutcome
 import kampfire.model.AccountType
-import kampfire.model.CallerId
 import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
 import kampfire.model.Ok
 import kampfire.model.Problem
 import kampfire.model.Outcome
-import kampfire.model.Session
 import kampfire.model.SignUpRequest
 import kampfire.model.Token
 import kampfire.model.UserRecord
 import kampfire.model.UserRole
 import kampfire.model.UserSeed
-import kampfire.utils.deobfuscate
+import klutch.db.model.CallerId
+import klutch.db.model.Session
 import klutch.db.services.AuthId
 import klutch.db.services.SessionService
 import java.security.MessageDigest
@@ -47,7 +48,7 @@ class Authorizer(
             return Problem("Invalid password")
         }
 
-        return when (val password = loginRequest.password?.deobfuscate()) {
+        return when (val password = loginRequest.password?.deobfuscatePassword()) {
             null -> when (guestToken) {
                 null -> Problem("Missing password and token")
                 else -> authorizeGuest(claimedUser, guestToken, loginRequest.isTemp)
@@ -141,9 +142,9 @@ class Authorizer(
     suspend fun createRegisteredUser(
         request: SignUpRequest,
         roles: Set<UserRole>
-    ): Outcome<TableId<Uuid>> {
+    ): Outcome<TableUuid> {
         log.info { "Creating user" }
-        val password = requireNotNull(request.password) { "Password was null" }
+        val password = requireNotNull(request.password) { "Password was null" }.deobfuscatePassword()
 
         val problem = getUsernameProblem(request.username) ?: getEmailProblem(request.email) ?: getPasswordProblem(password)
         if (problem != null) return problem.also {
@@ -188,8 +189,8 @@ class Authorizer(
         }
         val now = Clock.System.now()
         val expiresAt = Clock.System.now() + ttl
-        service.createSession(userId, hash, ttl, expiresAt)
-        return Session(token, ttl.inWholeSeconds.toInt(), now, expiresAt)
+        val sessionId = service.createSession(userId, hash, ttl, expiresAt)
+        return Session(sessionId, token, ttl.inWholeSeconds.toInt(), now, expiresAt)
     }
 
     private suspend fun getUsernameProblem(username: Username): Problem? {

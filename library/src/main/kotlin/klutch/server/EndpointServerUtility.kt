@@ -16,40 +16,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.serializer
 
-fun <Returned, E : GetEndpoint<Returned>> Route.getEndpoint(
-    endpoint: E,
-    block: suspend RoutingContext.(E) -> Returned?
-) = get(endpoint.path) {
-    standardResponse { block(endpoint) }
-}
-
-fun <Returned, E : GetByIdEndpoint<String, Returned>> Route.getEndpoint(
-    endpoint: E,
-    block: suspend RoutingContext.(DataRequest<String, Returned, E>) -> Returned?
-) = get(endpoint.serverIdTemplate) {
-    val id = call.getStringIdOrThrow()
-    standardResponse { block(DataRequest(id, endpoint)) }
-}
-
-fun <Returned, E : GetByIdEndpoint<IdType, Returned>, IdType> Route.getEndpoint(
-    endpoint: E,
-    convertId: (String) -> IdType,
-    block: suspend RoutingContext.(DataRequest<IdType, Returned, E>) -> Returned?
-) = get(endpoint.serverIdTemplate) {
-    val id = call.getIdOrThrow(convertId)
-    standardResponse { block(DataRequest(id, endpoint)) }
-}
-
-@Deprecated("use GetByIdEndpoint")
-fun <Returned, IdType: TableId<*>, E : GetByTableIdEndpoint<IdType, Returned>> Route.getEndpoint(
-    endpoint: E,
-    convertId: (String) -> IdType,
-    block: suspend RoutingContext.(IdType, E) -> Returned?
-) = get(endpoint.serverIdTemplate) {
-    val id = call.getIdOrThrow(convertId)
-    standardResponse { block(id, endpoint) }
-}
-
 inline fun <Returned, reified Sent : Any, E : PostEndpoint<Sent, Returned>> Route.postEndpoint(
     endpoint: E,
     noinline block: suspend RoutingContext.(DataRequest<Sent, Returned, E>) -> Returned?

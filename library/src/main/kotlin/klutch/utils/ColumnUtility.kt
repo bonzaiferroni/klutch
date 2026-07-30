@@ -7,7 +7,6 @@ import kampfire.api.Slug
 import kampfire.api.TableId
 import kampfire.api.Username
 import kampfire.api.toMarkdown
-import kampfire.model.CallerId
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnType

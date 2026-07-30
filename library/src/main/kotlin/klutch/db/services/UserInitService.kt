@@ -5,6 +5,7 @@ import kampfire.model.SignUpRequest
 import kampfire.model.UserRole
 import kabinet.utils.Environment
 import kampfire.api.Password
+import kampfire.api.obfuscatePassword
 import kampfire.api.toEmail
 import kampfire.api.toUsername
 import kampfire.model.AccountType
@@ -27,7 +28,7 @@ suspend fun initUsers(provider: ProviderScope) {
     authorizer.createRegisteredUser(
         request = SignUpRequest(
             username = username,
-            password = password,
+            password = password.obfuscatePassword(),
             email = email,
             accountType = AccountType.Registered,
             stayLoggedIn = true,

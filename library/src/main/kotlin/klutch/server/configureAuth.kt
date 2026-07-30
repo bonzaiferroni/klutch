@@ -20,9 +20,9 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.util.date.GMTDate
 import kampfire.api.UserApi
-import kampfire.model.Session
-import kampfire.model.SessionIdentity
 import kampfire.model.Token
+import klutch.db.model.Session
+import klutch.db.model.SessionIdentity
 import klutch.db.services.SessionService
 import kotlinx.coroutines.launch
 
