@@ -2,7 +2,7 @@ package klutch.server
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kampfire.api.Email
+import kampfire.api.EmailAddress
 import kampfire.api.PasswordHash
 import kampfire.api.Password
 import kampfire.api.TableId
@@ -163,7 +163,7 @@ class Authorizer(
         return Ok(service.createUserRecord(seed))
     }
 
-    suspend fun upgradeAccount(callerId: CallerId, password: Password, email: Email?): Outcome<Boolean> {
+    suspend fun upgradeAccount(callerId: CallerId, password: Password, email: EmailAddress?): Outcome<Boolean> {
         val problem = getEmailProblem(email) ?: getPasswordProblem(password)
         if (problem != null) return problem.also {
             log.info { "Upgrade account problem: ${it.message}" }
@@ -201,7 +201,7 @@ class Authorizer(
         return null
     }
 
-    private suspend fun getEmailProblem(email: Email?): Problem? {
+    private suspend fun getEmailProblem(email: EmailAddress?): Problem? {
         val email = email ?: return null // email is optional
         val outcome = email.toValidOutcome()
         if (outcome is Problem) return outcome

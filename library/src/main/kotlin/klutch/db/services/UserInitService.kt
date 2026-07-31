@@ -6,7 +6,7 @@ import kampfire.model.UserRole
 import kabinet.utils.Environment
 import kampfire.api.Password
 import kampfire.api.obfuscatePassword
-import kampfire.api.toEmail
+import kampfire.api.toEmailAddress
 import kampfire.api.toUsername
 import kampfire.model.AccountType
 import klutch.server.Authorizer
@@ -23,7 +23,7 @@ suspend fun initUsers(provider: ProviderScope) {
     val id = session.readIdByUsername(username)
     if (id != null) return
     console.info { "Initializing admin user: $username" }
-    val email = env.read(ADMIN_EMAIL_KEY).toEmail()
+    val email = env.read(ADMIN_EMAIL_KEY).toEmailAddress()
     val password = Password(env.read(ADMIN_PASSWORD_KEY))
     authorizer.createRegisteredUser(
         request = SignUpRequest(

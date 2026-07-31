@@ -1,24 +1,5 @@
 package klutch.db.services
 
-import kampfire.api.Username
-import kampfire.api.toEmail
-import kampfire.model.EditUserRequest
-import kampfire.model.PrivateInfo
-import kampfire.model.UserSeed
-import klutch.db.DbService
-import klutch.db.readFirstOrNull
-import klutch.utils.eq
-import klutch.utils.eqIgnoreCase
-import klutch.utils.serverLog
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.lowerCase
-import org.jetbrains.exposed.v1.core.or
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
-import org.jetbrains.exposed.v1.jdbc.insertAndGetId
-import org.jetbrains.exposed.v1.jdbc.select
-import org.jetbrains.exposed.v1.jdbc.update
-import kotlin.time.Clock
-
 // class BasicUserTableDao: AuthDao<BasicUser, BasicUserId>, DbService() {
 //     private fun readByUsername(username: String): BasicUser? =
 //         UserAspect.readFirst { BasicUserTable.username.lowerCase() eq username.lowercase() }
