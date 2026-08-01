@@ -12,6 +12,7 @@ import kampfire.api.deobfuscatePassword
 import kampfire.api.toLoginIdentity
 import kampfire.api.toValidOutcome
 import kampfire.model.AccountType
+import kampfire.model.AuthProblem
 import kampfire.model.HashedToken
 import kampfire.model.LoginRequest
 import kampfire.model.Ok
@@ -89,15 +90,15 @@ class Authorizer(
             dummyVerify(givenPassword)
             if (claimedUser.disabledPasswordHash != null) {
                 log.info { "login attempt on locked account: ${claimedUser.userId}" }
-                return Problem("This account was locked. Check your email for a link to set a new password.")
+                return AuthProblem.AccountLocked
             }
             log.info { "User has no password: ${claimedUser.accountType}" }
-            return Problem("Invalid password")
+            return AuthProblem.InvalidPassword
         }
 
         if (!verifyPassword(givenPassword, userPassword)) {
             log.info { "Invalid password attempt" }
-            return Problem("Invalid password")
+            return AuthProblem.InvalidPassword
         }
 
         return Ok(createSession(claimedUser.userId, stayLoggedIn)).also {
