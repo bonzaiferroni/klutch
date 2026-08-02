@@ -35,7 +35,9 @@ data class Identity(
     val username: Username,
     val roles: Set<UserRole>,
     val accountType: AccountType,
-)
+) {
+    val isAdmin get() = roles.contains(UserRole.Admin)
+}
 
 @JvmInline
 value class CallerId(override val value: Uuid): TableId<Uuid>
