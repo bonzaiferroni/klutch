@@ -1,6 +1,8 @@
 package klutch.db
 
 import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ColumnSet
+import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.QueryBuilder
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
@@ -36,3 +38,8 @@ fun Query.explainAnalyze(): Query {
     }
     return this
 }
+
+fun <T : ColumnSet> Query.whereWith(
+    columnSet: T,
+    block: T.() -> Op<Boolean>
+): Query = where(columnSet.block())
