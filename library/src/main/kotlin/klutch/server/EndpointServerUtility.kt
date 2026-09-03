@@ -9,8 +9,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.util.toMap
 import kampfire.api.*
+import kampfire.model.HttpProblem
 import kampfire.model.Outcome
 import kampfire.model.OutcomeSerializer
+import kampfire.model.Problem
 import kampfire.utils.ParameterMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
@@ -131,12 +133,17 @@ suspend fun <T> RoutingContext.standardResponse(block: suspend () -> T?) {
 suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> Outcome<T>?) {
     if (call.response.isCommitted) return
     try {
-        val value = block()
-        if (value != null) {
-            val json = Cbor.encodeToByteArray(OutcomeSerializer(serializer<T>()), value)
-            call.respond(HttpStatusCode.OK, json)
-        } else if (!call.response.isCommitted) {
-            call.respond(HttpStatusCode.NotFound)
+        when (val value = block()) {
+            null, HttpProblem.NotFound -> if (!call.response.isCommitted) call.respond(HttpStatusCode.NotFound)
+            HttpProblem.Conflict -> call.respond(HttpStatusCode.Conflict)
+            HttpProblem.NotAuthorized -> call.respond(HttpStatusCode.Forbidden)
+            HttpProblem.TooManyRequests -> call.respond(HttpStatusCode.TooManyRequests)
+            HttpProblem.InternalServerError -> call.respond(HttpStatusCode.InternalServerError)
+            HttpProblem.BadRequest -> call.respond(HttpStatusCode.BadRequest)
+            else -> {
+                val json = Cbor.encodeToByteArray(OutcomeSerializer(serializer<T>()), value)
+                call.respond(HttpStatusCode.OK, json)
+            }
         }
     } catch (e: MissingParameterException) {
         call.respond(HttpStatusCode.BadRequest, "Missing required parameter: ${e.param}")
