@@ -45,7 +45,7 @@ fun ExpressionWithColumnType<String?>.eq(username: Username) = this.eq(username.
 
 fun Column<LocalDateTime>.defaultNow() = with(table) { default(Clock.System.now().toLocalDateTimeUtc()) }
 
-fun Column<EntityID<Uuid>>.inList(idList: List<TableId<Uuid>>) = this.inList(idList.map { it.value })
+fun Column<EntityID<Uuid>>.inList(idList: Iterable<TableId<Uuid>>) = this.inList(idList.map { it.value })
 
 fun Column<String>.transformMarkdown() = with(table) { transform(wrap = { it.toMarkdown() }, unwrap = { it.value }) }
 //fun <T: TableId<Uuid>> Column<EntityID<Uuid>>.transformId(toValue: (EntityID<Uuid>) -> T) = transform(
