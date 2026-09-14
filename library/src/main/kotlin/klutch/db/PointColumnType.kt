@@ -45,21 +45,21 @@ object PointColumnType : ColumnType<PGpoint>() {
     }
 }
 
-fun Column<PGpoint>.lng(): Expression<Double> =
+fun <T : PGpoint?> Column<T>.lng(): Expression<Double> =
     object : Expression<Double>() {
         override fun toQueryBuilder(queryBuilder: QueryBuilder) {
             queryBuilder.append("("); queryBuilder.append(this@lng); queryBuilder.append(")[0]::float8")
         }
     }
 
-fun Column<PGpoint>.lat(): Expression<Double> =
+fun <T : PGpoint?> Column<T>.lat(): Expression<Double> =
     object : Expression<Double>() {
         override fun toQueryBuilder(queryBuilder: QueryBuilder) {
             queryBuilder.append("("); queryBuilder.append(this@lat); queryBuilder.append(")[1]::float8")
         }
     }
 
-fun Column<PGpoint>.isNearEq(point: GeoPoint, errorMarginMeters: Double = 100.0): Op<Boolean> {
+fun <T : PGpoint?> Column<T>.isNearEq(point: GeoPoint, errorMarginMeters: Double = 100.0): Op<Boolean> {
     val lat = point.lat
 
     val degLat = errorMarginMeters / METERS_PER_DEG_LAT
@@ -72,7 +72,7 @@ fun Column<PGpoint>.isNearEq(point: GeoPoint, errorMarginMeters: Double = 100.0)
     return dist lessEq QueryParameter(radiusDegrees, DoubleColumnType())
 }
 
-fun Column<PGpoint>.inBounds(bounds: GeoBounds): Op<Boolean> {
+fun <T : PGpoint?> Column<T>.inBounds(bounds: GeoBounds): Op<Boolean> {
     val x = lng()
     val y = lat()
 
