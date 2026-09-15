@@ -1,7 +1,7 @@
 package klutch.db
 
 import kampfire.model.Distance
-import kampfire.model.GeoBounds
+import kampfire.model.GeoRect
 import kampfire.model.GeoPoint
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ColumnType
@@ -14,8 +14,8 @@ import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.doubleParam
 import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.isNotNull
 import org.jetbrains.exposed.v1.core.lessEq
-import org.jetbrains.exposed.v1.core.statements.api.PreparedStatementApi
 import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.postgresql.geometric.PGpoint
@@ -72,7 +72,7 @@ fun <T : PGpoint?> Column<T>.isNearEq(point: GeoPoint, errorMarginMeters: Double
     return dist lessEq QueryParameter(radiusDegrees, DoubleColumnType())
 }
 
-fun <T : PGpoint?> Column<T>.inBounds(bounds: GeoBounds): Op<Boolean> {
+fun <T : PGpoint?> Column<T>.inRect(bounds: GeoRect): Op<Boolean> {
     val x = lng()
     val y = lat()
 
@@ -81,7 +81,7 @@ fun <T : PGpoint?> Column<T>.inBounds(bounds: GeoBounds): Op<Boolean> {
     val minLat = minOf(bounds.sw.lat, bounds.ne.lat)
     val maxLat = maxOf(bounds.sw.lat, bounds.ne.lat)
 
-    return (x greaterEq doubleParam(minLng)) and (x lessEq doubleParam(maxLng)) and
+    return isNotNull() and (x greaterEq doubleParam(minLng)) and (x lessEq doubleParam(maxLng)) and
             (y greaterEq doubleParam(minLat)) and (y lessEq doubleParam(maxLat))
 }
 
