@@ -15,17 +15,20 @@ data class CounterTrigger(
 
 fun JdbcTransaction.createCounterTrigger(config: CounterTrigger) {
     val funcName = "${config.childTable.tableName}_${config.counterColumn.name}"
-    val filterStart = config.countFilter?.let { "IF ($it) THEN" } ?: ""
+    val fk = config.childFkColumn.name
+    // countFilter is written against NEW; the OLD form is for rows leaving the count
+    val newFilterStart = config.countFilter?.let { "IF ($it) THEN" } ?: ""
+    val oldFilterStart = config.countFilter?.let { "IF (${it.replace("NEW.", "OLD.")}) THEN" } ?: ""
     val filterEnd = config.countFilter?.let { "END IF;" } ?: ""
 
     exec("""
         CREATE OR REPLACE FUNCTION ${funcName}_increment()
         RETURNS TRIGGER AS ${'$'}${'$'}
         BEGIN
-            $filterStart
+            $newFilterStart
             UPDATE ${config.parentTable.tableName}
             SET ${config.counterColumn.name} = ${config.counterColumn.name} + 1
-            WHERE ${config.parentTable.id.name} = NEW.${config.childFkColumn.name};
+            WHERE ${config.parentTable.id.name} = NEW.$fk;
             $filterEnd
             RETURN NEW;
         END;
@@ -36,12 +39,31 @@ fun JdbcTransaction.createCounterTrigger(config: CounterTrigger) {
         CREATE OR REPLACE FUNCTION ${funcName}_decrement()
         RETURNS TRIGGER AS ${'$'}${'$'}
         BEGIN
-            $filterStart
+            $oldFilterStart
             UPDATE ${config.parentTable.tableName}
             SET ${config.counterColumn.name} = ${config.counterColumn.name} - 1
-            WHERE ${config.parentTable.id.name} = OLD.${config.childFkColumn.name};
+            WHERE ${config.parentTable.id.name} = OLD.$fk;
             $filterEnd
             RETURN OLD;
+        END;
+        ${'$'}${'$'} LANGUAGE plpgsql;
+    """.trimIndent())
+
+    exec("""
+        CREATE OR REPLACE FUNCTION ${funcName}_move()
+        RETURNS TRIGGER AS ${'$'}${'$'}
+        BEGIN
+            $oldFilterStart
+            UPDATE ${config.parentTable.tableName}
+            SET ${config.counterColumn.name} = ${config.counterColumn.name} - 1
+            WHERE ${config.parentTable.id.name} = OLD.$fk;
+            $filterEnd
+            $newFilterStart
+            UPDATE ${config.parentTable.tableName}
+            SET ${config.counterColumn.name} = ${config.counterColumn.name} + 1
+            WHERE ${config.parentTable.id.name} = NEW.$fk;
+            $filterEnd
+            RETURN NEW;
         END;
         ${'$'}${'$'} LANGUAGE plpgsql;
     """.trimIndent())
@@ -56,5 +78,12 @@ fun JdbcTransaction.createCounterTrigger(config: CounterTrigger) {
         CREATE OR REPLACE TRIGGER trg_${funcName}_delete
         AFTER DELETE ON ${config.childTable.tableName}
         FOR EACH ROW EXECUTE FUNCTION ${funcName}_decrement();
+    """.trimIndent())
+
+    exec("""
+        CREATE OR REPLACE TRIGGER trg_${funcName}_move
+        AFTER UPDATE OF $fk ON ${config.childTable.tableName}
+        FOR EACH ROW WHEN (OLD.$fk IS DISTINCT FROM NEW.$fk)
+        EXECUTE FUNCTION ${funcName}_move();
     """.trimIndent())
 }
