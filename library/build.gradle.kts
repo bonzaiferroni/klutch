@@ -49,7 +49,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:11.7.0")
     implementation("org.flywaydb:flyway-database-postgresql:11.7.0")
 
-    api("com.fleeksoft.ksoup:ksoup:0.2.5")
+    api(libs.fleeksoft.ksoup)
     implementation("black.ninia:jep:4.2.2")
     implementation("at.favre.lib:bcrypt:0.10.2")
 

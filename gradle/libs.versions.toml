@@ -1,4 +1,6 @@
 [versions]
+kotlinLogging = "8.0.01"
+ksoup = "0.2.6"
 agp = "8.9.1"
 android-compileSdk = "35"
 android-minSdk = "24"
@@ -40,6 +42,8 @@ material3Android = "1.2.1"
 composeIcons = "1.1.1"
 
 [libraries]
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlinLogging" }
+fleeksoft-ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedVersion" }
