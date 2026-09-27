@@ -140,6 +140,7 @@ suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> O
             HttpProblem.TooManyRequests -> call.respond(HttpStatusCode.TooManyRequests)
             HttpProblem.InternalServerError -> call.respond(HttpStatusCode.InternalServerError)
             HttpProblem.BadRequest -> call.respond(HttpStatusCode.BadRequest)
+            HttpProblem.NotImplemented -> call.respond(HttpStatusCode.NotImplemented)
             else -> {
                 val json = Cbor.encodeToByteArray(OutcomeSerializer(serializer<T>()), value)
                 call.respond(HttpStatusCode.OK, json)
