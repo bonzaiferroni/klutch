@@ -13,6 +13,7 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.bearer
+import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.path
@@ -36,7 +37,7 @@ fun Application.configureAuth(
             authHeader { call ->
                 call.request.cookies[SESSION_COOKIE_NAME]?.let {
                     HttpAuthHeader.Single("Bearer", it)
-                }
+                } ?: call.request.parseAuthorizationHeader()
             }
             authenticate { credential ->
                 val token = Token(credential.token)
