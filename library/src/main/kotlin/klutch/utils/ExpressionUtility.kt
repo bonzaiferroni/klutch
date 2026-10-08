@@ -3,6 +3,7 @@ package klutch.utils
 import kabinet.utils.toLocalDateTimeUtc
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnType
+import org.jetbrains.exposed.v1.core.IntegerColumnType
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.QueryBuilder
 import org.jetbrains.exposed.v1.core.VarCharColumnType
@@ -62,6 +63,17 @@ fun ExpressionWithColumnType<List<String>>.anyEqIgnoreCase(str: String): Op<Bool
             append(") = ANY(SELECT LOWER(unnest(")
             append(this@anyEqIgnoreCase)
             append(")))")
+        }
+    }
+
+/** Whether this array holds [value], written as `@>` so a GIN index on the array serves it. */
+fun ExpressionWithColumnType<List<Int>?>.arrayContains(value: Int): Op<Boolean> =
+    object : Op<Boolean>() {
+        override fun toQueryBuilder(queryBuilder: QueryBuilder) = queryBuilder {
+            append(this@arrayContains)
+            append(" @> ARRAY[")
+            registerArgument(IntegerColumnType(), value)
+            append("]")
         }
     }
 
