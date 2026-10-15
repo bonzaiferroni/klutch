@@ -153,18 +153,18 @@ suspend inline fun <reified T> RoutingContext.apiResponse(block: suspend () -> O
     }
 }
 
-fun <T> RoutingContext.readParamOrNull(param: EndpointParam<T>): T? {
+fun <T> RoutingContext.readParamOrNull(param: QueryParam<T>): T? {
     val str = call.request.queryParameters[param.key] ?: return null
     return param.read(str)
 }
 
 @JvmName("readNullableParam")
-fun <T> RoutingContext.readParam(param: EndpointParam<T?>): T? {
+fun <T> RoutingContext.readParam(param: QueryParam<T?>): T? {
     val str = call.request.queryParameters[param.key] ?: return null
     return param.read(str)
 }
 
-fun <T> RoutingContext.readParam(param: EndpointParam<T>) =
+fun <T> RoutingContext.readParam(param: QueryParam<T>) =
     readParamOrNull(param) ?: throw MissingParameterException(param.key)
 
 class MissingParameterException(val param: String) : Exception("Missing required parameter: $param")
