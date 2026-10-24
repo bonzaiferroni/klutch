@@ -59,13 +59,13 @@ class Authorizer(
     }
 
     suspend fun authorizeNewAccount(userId: AuthId, stayLoggedIn: Boolean): Session {
-        return createSession(userId, stayLoggedIn)
+        return createSession(userId, isTemp = !stayLoggedIn)
     }
 
     suspend fun authorizeGuest(
         claimedUser: UserRecord,
         token: Token,
-        stayLoggedIn: Boolean,
+        isTemp: Boolean,
     ): Outcome<Session> {
         val userToken = claimedUser.guestToken
         val invalidAccount = claimedUser.accountType != AccountType.Guest
@@ -76,7 +76,7 @@ class Authorizer(
         val hashedToken = hashToken(token)
         if (hashedToken != userToken) return Problem("Invalid account")
 
-        return Ok(createSession(claimedUser.userId, stayLoggedIn)).also {
+        return Ok(createSession(claimedUser.userId, isTemp)).also {
             log.debug { "authorize: guest login"}
         }
     }
@@ -84,7 +84,7 @@ class Authorizer(
     suspend fun authorizePassword(
         claimedUser: UserRecord,
         givenPassword: Password,
-        stayLoggedIn: Boolean,
+        isTemp: Boolean,
     ): Outcome<Session> {
         val userPassword = claimedUser.passwordHash ?: run {
             dummyVerify(givenPassword)
@@ -101,7 +101,7 @@ class Authorizer(
             return AuthProblem.InvalidPassword
         }
 
-        return Ok(createSession(claimedUser.userId, stayLoggedIn)).also {
+        return Ok(createSession(claimedUser.userId, isTemp)).also {
             log.debug { "authorize: password login" }
         }
     }
